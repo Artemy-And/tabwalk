@@ -22,6 +22,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export type ScanStatus = 'queued' | 'running' | 'done' | 'failed';
+
+export const POLL_INTERVAL_MS = 3000;
+
+export function isScanActive(status: ScanStatus | null | undefined): boolean {
+  return status === 'queued' || status === 'running';
+}
+
 export type IssueKind = 'violation' | 'incomplete';
 export type Impact = 'critical' | 'serious' | 'moderate' | 'minor' | null;
 
@@ -33,6 +40,23 @@ export interface SiteRow {
   lastScanId: string | null;
   lastScanStatus: ScanStatus | null;
   lastScanAt: string | null;
+  lastDoneScanId: string | null;
+  summary: ScanSummary | null;
+  trend: number[];
+}
+
+export interface Site {
+  id: string;
+  name: string;
+  url: string;
+  createdAt: string;
+}
+
+export interface ScanSummary {
+  uniqueProblems: number;
+  critical: number;
+  serious: number;
+  incomplete: number;
 }
 
 export interface Scan {
@@ -47,15 +71,13 @@ export interface Scan {
   createdAt: string;
 }
 
+export type ScanRow = Scan & ScanSummary;
+
 export interface ScanDetail extends Scan {
+  site: Pick<Site, 'id' | 'name' | 'url'> | null;
   pages: number;
-  summary: {
-    violations: number;
-    incomplete: number;
-    critical: number;
-    serious: number;
-    uniqueProblems: number;
-  };
+  summary: ScanSummary;
+  comparison: { previousScanId: string; new: number; fixed: number } | null;
 }
 
 export interface IssueGroup {
@@ -72,15 +94,18 @@ export interface IssueGroup {
   sampleHtml: string;
   sampleTarget: string;
   sampleSummary: string | null;
+  isNew?: boolean;
 }
 
 export const api = {
   listSites: () => request<SiteRow[]>('/sites'),
   createSite: (body: { name: string; url: string }) =>
-    request<SiteRow>('/sites', { method: 'POST', body: JSON.stringify(body) }),
+    request<Site>('/sites', { method: 'POST', body: JSON.stringify(body) }),
+  getSite: (id: string) => request<Site>(`/sites/${id}`),
   deleteSite: (id: string) => request<undefined>(`/sites/${id}`, { method: 'DELETE' }),
-  listScans: (siteId: string) => request<Scan[]>(`/sites/${siteId}/scans`),
+  listScans: (siteId: string) => request<ScanRow[]>(`/sites/${siteId}/scans`),
   startScan: (siteId: string) => request<Scan>(`/sites/${siteId}/scans`, { method: 'POST' }),
   getScan: (id: string) => request<ScanDetail>(`/scans/${id}`),
   listIssues: (scanId: string) => request<IssueGroup[]>(`/scans/${scanId}/issues`),
+  listFixed: (scanId: string) => request<IssueGroup[]>(`/scans/${scanId}/fixed`),
 };

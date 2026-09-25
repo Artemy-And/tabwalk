@@ -1,24 +1,49 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactElement, ReactNode } from 'react';
 import { useId } from 'react';
 import { useI18n } from '../i18n/context';
 import type { Impact, IssueKind, ScanStatus } from '../lib/api';
+
+type ButtonVariant = 'primary' | 'secondary' | 'danger';
+
+const BUTTON_BASE =
+  'inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg px-[18px] ' +
+  'text-[15px] font-semibold no-underline disabled:cursor-not-allowed disabled:opacity-50';
+
+const BUTTON_STYLES: Record<ButtonVariant, string> = {
+  primary: 'bg-accent text-on-accent hover:bg-accent-hover hover:text-on-accent',
+  secondary: 'border border-line-strong bg-surface text-ink hover:bg-surface-alt hover:text-ink',
+  danger: 'border border-critical bg-surface text-critical hover:bg-surface-alt',
+};
 
 export function Button({
   variant = 'primary',
   className = '',
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'ghost' | 'danger' }) {
-  const base =
-    'inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium ' +
-    'disabled:opacity-50 disabled:cursor-not-allowed';
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant }) {
+  return (
+    <button
+      type="button"
+      className={`${BUTTON_BASE} ${BUTTON_STYLES[variant]} ${className}`}
+      {...props}
+    />
+  );
+}
 
-  const styles: Record<string, string> = {
-    primary: 'bg-accent text-canvas hover:opacity-90',
-    ghost: 'border border-line text-ink hover:bg-canvas',
-    danger: 'border border-critical text-critical hover:bg-canvas',
-  };
-
-  return <button type="button" className={`${base} ${styles[variant]} ${className}`} {...props} />;
+export function PlusIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M8 3v10M3 8h10" />
+    </svg>
+  );
 }
 
 export function Field({
@@ -34,30 +59,33 @@ export function Field({
   const describedBy = [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(' ');
 
   return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-sm font-medium text-ink">
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-sm font-semibold text-ink">
         {label}
       </label>
       <input
         id={id}
         aria-describedby={describedBy || undefined}
         aria-invalid={error ? true : undefined}
-        className="rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
+        className="h-11 rounded-lg border border-line-strong bg-surface px-3 text-[15px] text-ink"
         {...props}
       />
       {hint && (
-        <span id={hintId} className="text-xs text-muted">
+        <span id={hintId} className="text-[13px] text-muted">
           {hint}
         </span>
       )}
       {error && (
-        <span id={errorId} className="text-xs text-critical">
+        <span id={errorId} className="text-[13px] text-critical">
           {error}
         </span>
       )}
     </div>
   );
 }
+
+const BADGE =
+  'inline-flex items-center gap-1.5 rounded border px-[9px] py-[3px] text-[13px] font-semibold';
 
 const IMPACT_COLOR: Record<NonNullable<Impact>, string> = {
   critical: 'text-critical border-critical',
@@ -66,33 +94,52 @@ const IMPACT_COLOR: Record<NonNullable<Impact>, string> = {
   minor: 'text-minor border-minor',
 };
 
+export function Badge({ tone, children }: { tone: NonNullable<Impact>; children: ReactNode }) {
+  return <span className={`${BADGE} ${IMPACT_COLOR[tone]}`}>{children}</span>;
+}
+
+function ReviewIcon() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      aria-hidden="true"
+    >
+      <circle cx="6" cy="6" r="4.5" />
+      <path d="M6 4v2.5M6 8.2v.1" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function ImpactBadge({ impact, kind }: { impact: Impact; kind: IssueKind }) {
   const { t } = useI18n();
 
   if (kind === 'incomplete') {
     return (
-      <span className="inline-block rounded border border-review px-2 py-0.5 text-xs text-review">
+      <span className={`${BADGE} border-review text-review`}>
+        <ReviewIcon />
         {t.impact.needsReview}
       </span>
     );
   }
 
   const key = impact ?? 'minor';
-  return (
-    <span className={`inline-block rounded border px-2 py-0.5 text-xs ${IMPACT_COLOR[key]}`}>
-      {t.impact[key]}
-    </span>
-  );
+  return <Badge tone={key}>{t.impact[key]}</Badge>;
 }
 
 export function StatusBadge({ status }: { status: ScanStatus }) {
   const { t } = useI18n();
-  return <span className="text-sm text-muted">{t.status[status]}</span>;
+  const color = status === 'failed' ? 'text-critical' : 'text-muted';
+  return <span className={`text-[15px] ${color}`}>{t.status[status]}</span>;
 }
 
 export function LiveStatus({ children }: { children: ReactNode }) {
   return (
-    <p aria-live="polite" className="text-sm text-muted">
+    <p aria-live="polite" className="text-[15px] text-muted">
       {children}
     </p>
   );
@@ -100,6 +147,140 @@ export function LiveStatus({ children }: { children: ReactNode }) {
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`rounded-lg border border-line bg-surface p-4 ${className}`}>{children}</div>
+    <div className={`relative rounded-xl border border-line bg-surface ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+export function PageHeader({
+  title,
+  subtitle,
+  actions,
+}: {
+  title: string;
+  subtitle?: ReactNode;
+  actions?: ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-end gap-4">
+      <div className="min-w-0 grow">
+        <h1 className="mb-1 font-display text-[38px] leading-tight font-normal tracking-[-0.01em] break-words">
+          {title}
+        </h1>
+        {subtitle && <p className="text-[15px] text-muted">{subtitle}</p>}
+      </div>
+      {actions && <div className="flex flex-wrap gap-3">{actions}</div>}
+    </div>
+  );
+}
+
+export function Breadcrumbs({ items, current }: { items: ReactElement[]; current: string }) {
+  const { t } = useI18n();
+  return (
+    <nav aria-label={t.layout.breadcrumb} className="text-sm text-muted">
+      <ol className="flex flex-wrap items-center">
+        {items.map((item, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: the trail order is fixed
+          <li key={i} className="flex items-center">
+            {item}
+            <span aria-hidden="true" className="px-1.5">
+              /
+            </span>
+          </li>
+        ))}
+        <li aria-current="page">{current}</li>
+      </ol>
+    </nav>
+  );
+}
+
+export function StatCard({
+  value,
+  label,
+  tone = 'default',
+}: {
+  value: number;
+  label: string;
+  tone?: 'default' | 'critical' | 'review';
+}) {
+  const review = tone === 'review';
+  const valueColor = tone === 'critical' ? 'text-critical' : review ? 'text-review' : 'text-ink';
+  return (
+    <div
+      className={`rounded-xl border px-5 py-[18px] ${
+        review ? 'border-review-line bg-review-soft' : 'border-line bg-surface'
+      }`}
+    >
+      <p className={`text-[34px] leading-tight font-bold tabular-nums ${valueColor}`}>{value}</p>
+      <p className={`mt-0.5 text-sm ${review ? 'font-semibold text-review' : 'text-muted'}`}>
+        {label}
+      </p>
+    </div>
+  );
+}
+
+export function TrendBars({ values, label }: { values: number[]; label: string }) {
+  const width = 120;
+  const height = 34;
+  const slots = 8;
+  const gap = 3;
+  const barWidth = (width - gap * (slots - 1)) / slots;
+  const max = Math.max(...values, 1);
+  const last = values.length - 1;
+  const first = values[0] ?? 0;
+  const latest = values[last] ?? 0;
+  const lastColor = latest > first ? 'fill-critical' : latest < first ? 'fill-good' : 'fill-minor';
+
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      role="img"
+      aria-label={label}
+    >
+      {values.map((v, i) => {
+        const h = Math.max(3, Math.round((v / max) * height));
+        const x = (slots - values.length + i) * (barWidth + gap);
+        return (
+          <rect
+            // biome-ignore lint/suspicious/noArrayIndexKey: bars are positional
+            key={i}
+            x={x}
+            y={height - h}
+            width={barWidth}
+            height={h}
+            rx="3"
+            className={i === last ? lastColor : 'fill-trend'}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+export function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`h-9 rounded-full border px-3.5 text-sm ${
+        active
+          ? 'border-accent bg-accent font-semibold text-on-accent'
+          : 'border-line-strong bg-surface text-ink hover:bg-surface-alt'
+      }`}
+    >
+      {children}
+    </button>
   );
 }

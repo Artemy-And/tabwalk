@@ -1,47 +1,86 @@
 @import 'tailwindcss';
+@import '@fontsource/instrument-serif/latin-400.css';
+@import '@fontsource/instrument-serif/latin-ext-400.css';
+@import '@fontsource-variable/libre-franklin/wght.css';
+@import '@fontsource-variable/jetbrains-mono/wght.css';
 
 @theme {
-  --color-ink: #10192a;
-  --color-muted: #55617a;
-  --color-line: #d7dde7;
+  --font-sans: 'Libre Franklin Variable', system-ui, sans-serif;
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+  --color-ink: #14181f;
+  --color-muted: #59616e;
+  --color-line: #e0ddd6;
+  --color-line-soft: #efede8;
+  --color-line-strong: #c9c5bc;
   --color-surface: #ffffff;
-  --color-canvas: #f6f8fb;
+  --color-surface-alt: #fbfaf8;
+  --color-canvas: #f6f5f1;
   --color-accent: #0b4f6c;
+  --color-accent-hover: #08394e;
+  --color-on-accent: #ffffff;
   --color-focus: #0b3a52;
 
-  --color-critical: #a11916;
-  --color-serious: #9a4a00;
-  --color-moderate: #6b5400;
-  --color-minor: #3d4a5c;
-  --color-review: #1f4f8f;
+  --color-critical: #a8201a;
+  --color-serious: #8a4a12;
+  --color-moderate: #63541a;
+  --color-minor: #4a525f;
+  --color-review: #1c4e8a;
+  --color-review-soft: #eef4f8;
+  --color-review-row: #fafbfd;
+  --color-review-line: #c9d9e1;
+  --color-good: #1e6b44;
+  --color-trend: #c9d9e1;
 }
 
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-ink: #e9eef7;
-    --color-muted: #9aa8bf;
-    --color-line: #2a3549;
-    --color-surface: #141c2b;
-    --color-canvas: #0d131f;
-    --color-accent: #7dd3fc;
-    --color-focus: #9ee6ff;
+@layer base {
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-ink: #ecebe6;
+      --color-muted: #a8adb6;
+      --color-line: #34383f;
+      --color-line-soft: #2a2d33;
+      --color-line-strong: #4a4f58;
+      --color-surface: #1c1e22;
+      --color-surface-alt: #212328;
+      --color-canvas: #141518;
+      --color-accent: #7cc4e4;
+      --color-accent-hover: #a6d8ee;
+      --color-on-accent: #0d1a20;
+      --color-focus: #a6d8ee;
 
-    --color-critical: #ff9d96;
-    --color-serious: #ffbc70;
-    --color-moderate: #e8d071;
-    --color-minor: #b3c0d4;
-    --color-review: #8fc2ff;
+      --color-critical: #ff9b92;
+      --color-serious: #f2b27a;
+      --color-moderate: #ddc86e;
+      --color-minor: #b9bfc9;
+      --color-review: #9cc3f5;
+      --color-review-soft: #1b2634;
+      --color-review-row: #1d2129;
+      --color-review-line: #2f4257;
+      --color-good: #82cf9f;
+      --color-trend: #3a4a57;
+    }
   }
-}
 
-:root {
-  color-scheme: light dark;
-}
+  :root {
+    color-scheme: light dark;
+  }
 
-body {
-  background: var(--color-canvas);
-  color: var(--color-ink);
-  font-family: ui-sans-serif, system-ui, 'Segoe UI', Roboto, Arial, sans-serif;
+  body {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+
+  a:hover {
+    color: var(--color-accent-hover);
+  }
 }
 
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {

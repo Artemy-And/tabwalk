@@ -6,7 +6,7 @@ export function RootLayout() {
   const { t } = useI18n();
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <a
         href="#main"
         className="visually-hidden focus:not-sr-only absolute left-2 top-2 z-50 rounded bg-surface px-3 py-2 text-ink"
@@ -15,22 +15,27 @@ export function RootLayout() {
       </a>
 
       <header className="border-b border-line bg-surface">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <Link to="/" className="text-base font-semibold text-ink">
+        <div className="mx-auto flex min-h-[68px] max-w-[1280px] flex-wrap items-center gap-x-10 gap-y-2 px-4 py-2 sm:px-10">
+          <Link
+            to="/"
+            className="font-display text-[27px] tracking-[-0.01em] text-ink no-underline hover:text-ink"
+          >
             Skiplink
           </Link>
-          <div className="flex items-center gap-4">
-            <nav aria-label={t.layout.mainNav}>
-              <Link to="/" className="text-sm text-accent underline">
-                {t.layout.sites}
-              </Link>
-            </nav>
-            <LanguageSwitcher />
-          </div>
+          <nav aria-label={t.layout.mainNav} className="flex grow gap-1">
+            <Link
+              to="/"
+              activeOptions={{ exact: true }}
+              className="border-b-2 border-accent px-3.5 py-2.5 text-[15px] font-semibold text-accent no-underline"
+            >
+              {t.layout.sites}
+            </Link>
+          </nav>
+          <LanguageSwitcher />
         </div>
       </header>
 
-      <main id="main" className="mx-auto max-w-5xl px-4 py-6">
+      <main id="main" className="mx-auto w-full max-w-[1280px] grow px-4 py-8 sm:px-10">
         <Outlet />
       </main>
     </div>
