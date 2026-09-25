@@ -3,7 +3,7 @@ description: Crawl a site, check every page with axe-core and fail the job on ac
 author: Artemy Andruschak
 
 branding:
-  icon: eye
+  icon: log-in
   color: blue
 
 inputs:

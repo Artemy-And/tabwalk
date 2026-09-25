@@ -1,4 +1,9 @@
-# Tabwalk
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/tabwalk-logo-on-dark.png">
+    <img src="docs/brand/tabwalk-logo.png" alt="Tabwalk" width="320">
+  </picture>
+</h1>
 
 **See what's actually broken. Weekly. On your own server.**
 
