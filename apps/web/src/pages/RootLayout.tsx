@@ -20,7 +20,7 @@ export function RootLayout() {
             to="/"
             className="font-display text-[27px] tracking-[-0.01em] text-ink no-underline hover:text-ink"
           >
-            Skiplink
+            Tabwalk
           </Link>
           <nav aria-label={t.layout.mainNav} className="flex grow gap-1">
             <Link

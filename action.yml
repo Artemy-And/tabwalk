@@ -1,4 +1,4 @@
-name: Skiplink accessibility check
+name: Tabwalk accessibility check
 description: Crawl a site, check every page with axe-core and fail the job on accessibility problems
 author: Artemy Andruschak
 
@@ -18,7 +18,7 @@ inputs:
     default: critical
   report:
     description: Where to write the JSON report, relative to the workspace
-    default: skiplink-report.json
+    default: tabwalk-report.json
 
 runs:
   using: docker

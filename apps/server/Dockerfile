@@ -7,10 +7,10 @@ RUN corepack enable
 COPY package.json pnpm-workspace.yaml ./
 COPY apps/server/package.json apps/server/
 
-RUN pnpm install --filter @skiplink/server... --frozen-lockfile=false
+RUN pnpm install --filter @tabwalk/server... --frozen-lockfile=false
 
 COPY apps/server apps/server
-RUN pnpm --filter @skiplink/server build
+RUN pnpm --filter @tabwalk/server build
 
 
 FROM node:22-slim AS runtime
@@ -24,8 +24,8 @@ RUN corepack enable
 COPY package.json pnpm-workspace.yaml ./
 COPY apps/server/package.json apps/server/
 
-RUN pnpm install --filter @skiplink/server... --prod --frozen-lockfile=false \
-  && pnpm --filter @skiplink/server exec playwright install --with-deps chromium \
+RUN pnpm install --filter @tabwalk/server... --prod --frozen-lockfile=false \
+  && pnpm --filter @tabwalk/server exec playwright install --with-deps chromium \
   && pnpm store prune
 
 COPY --from=build /app/apps/server/dist apps/server/dist

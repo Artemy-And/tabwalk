@@ -1,5 +1,5 @@
 {
-  "name": "skiplink",
+  "name": "tabwalk",
   "private": true,
   "license": "AGPL-3.0-only",
   "type": "module",
@@ -13,8 +13,8 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "biome check . && pnpm -r lint",
     "lint:fix": "biome check --write . && pnpm -r lint:fix",
-    "db:generate": "pnpm --filter @skiplink/server db:generate",
-    "db:migrate": "pnpm --filter @skiplink/server db:migrate"
+    "db:generate": "pnpm --filter @tabwalk/server db:generate",
+    "db:migrate": "pnpm --filter @tabwalk/server db:migrate"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.0",

@@ -8,7 +8,7 @@ import {
   MESSAGES,
 } from './context';
 
-const STORAGE_KEY = 'skiplink.locale';
+const STORAGE_KEY = 'tabwalk.locale';
 
 function readStoredLocale(): Locale {
   try {

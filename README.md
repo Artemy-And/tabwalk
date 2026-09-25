@@ -1,32 +1,33 @@
-# Skiplink
+# Tabwalk
 
 **See what's actually broken. Weekly. On your own server.**
 
-Self-hosted accessibility monitoring. Skiplink crawls your site, checks every
+Self-hosted accessibility monitoring. Tabwalk crawls your site, checks every
 page with axe-core, collapses repeated problems into one row, and shows you a
 report you can hand to a client.
 
 One command to install. No Redis — the job queue lives in the same Postgres.
 
-> Skiplink collects evidence. It is not a legal opinion and it does not make
+> Tabwalk collects evidence. It is not a legal opinion and it does not make
 > your site compliant. Automated checks catch less than half of WCAG problems;
 > the rest needs a human. We show you which parts those are.
 
-Named after the skip link — the "skip to content" link at the top of a page
-required by WCAG 2.4.1. Skiplink's own interface has one, of course.
+Named after the tab walk — pressing Tab through a page to see whether every
+control can be reached and used without a mouse. It is the first thing an
+accessibility tester does by hand.
 
 ## Quick start
 
 ```bash
-git clone https://github.com/Artemy-And/skiplink.git
-cd skiplink
+git clone https://github.com/Artemy-And/tabwalk.git
+cd tabwalk
 cp .env.example .env      # Windows: copy .env.example .env
 docker compose up -d
 ```
 
 Open http://localhost:8080, add a site, press **Run a scan**.
 
-To pin a version instead of `latest`, set `SKIPLINK_VERSION=0.1.0` in `.env`.
+To pin a version instead of `latest`, set `TABWALK_VERSION=0.1.0` in `.env`.
 
 ## GitHub Action
 
@@ -37,10 +38,10 @@ name: Accessibility
 on: [pull_request]
 
 jobs:
-  skiplink:
+  tabwalk:
     runs-on: ubuntu-latest
     steps:
-      - uses: Artemy-And/skiplink@v0.1.0
+      - uses: Artemy-And/tabwalk@v0.1.0
         with:
           url: https://staging.example.com
           fail-on: serious
@@ -48,7 +49,7 @@ jobs:
         if: always()
         with:
           name: accessibility-report
-          path: skiplink-report.json
+          path: tabwalk-report.json
 ```
 
 | Input | Default | Meaning |
@@ -56,14 +57,14 @@ jobs:
 | `url` | — | Site to check; pages come from its sitemap or home page links |
 | `max-pages` | 50 | Page cap |
 | `fail-on` | `critical` | Lowest impact that fails the job: `critical`, `serious`, `moderate`, `minor` or `none` |
-| `report` | `skiplink-report.json` | JSON report path in the workspace |
+| `report` | `tabwalk-report.json` | JSON report path in the workspace |
 
 The job summary lists every problem; results that need a human are listed too
 but never fail the job. The same check runs locally:
 
 ```bash
 docker run --rm -v "$PWD:/out" -w /out --user root \
-  --entrypoint node ghcr.io/artemy-and/skiplink-server \
+  --entrypoint node ghcr.io/artemy-and/tabwalk-server \
   /app/apps/server/dist/ci.js https://example.com --fail-on serious
 ```
 
@@ -83,16 +84,16 @@ Requires Node.js 22+, pnpm and a running Postgres.
 
 ```bash
 pnpm install
-pnpm --filter @skiplink/server exec playwright install chromium
+pnpm --filter @tabwalk/server exec playwright install chromium
 
 cp .env.example .env
 # point DATABASE_URL at localhost instead of db
 
 pnpm db:migrate
 
-pnpm --filter @skiplink/server dev          # API on :3000
-pnpm --filter @skiplink/server dev:worker   # scan worker
-pnpm --filter @skiplink/web dev             # UI on :5173
+pnpm --filter @tabwalk/server dev          # API on :3000
+pnpm --filter @tabwalk/server dev:worker   # scan worker
+pnpm --filter @tabwalk/web dev             # UI on :5173
 ```
 
 ## Try the scanner without a database
@@ -167,18 +168,18 @@ All of it lives in `.env`:
 | `PAGE_TIMEOUT_MS` | 30000 | Per-page load timeout |
 | `CHROMIUM_EXECUTABLE` | — | Your own Chromium, if the bundled one won't start |
 
-## Accessibility of Skiplink itself
+## Accessibility of Tabwalk itself
 
 An accessibility tool has to pass its own check. Two failures that a 2026 audit
 found to be common in dashboards are handled here deliberately:
 
 - **Focus ring.** Popular component libraries ship a default that fails the 3:1
-  contrast requirement. Skiplink defines its own in `index.css`, verified in
+  contrast requirement. Tabwalk defines its own in `index.css`, verified in
   both light and dark themes.
 - **Data table.** The most common dashboard failure: no `caption`, no
   `aria-sort`, sorting never announced. `IssuesTable.tsx` handles all three.
 
-Run Skiplink against its own dashboard before every release.
+Run Tabwalk against its own dashboard before every release.
 
 ## Roadmap
 
@@ -196,4 +197,4 @@ problems and never fail the GitHub Action.
 ## License
 
 [AGPL-3.0](LICENSE). Use it, self-host it and change it freely; if you offer a modified
-Skiplink to others over a network, publish your changes under the same license.
+Tabwalk to others over a network, publish your changes under the same license.

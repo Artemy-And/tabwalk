@@ -1,4 +1,4 @@
-name: skiplink
+name: tabwalk
 
 services:
   db:

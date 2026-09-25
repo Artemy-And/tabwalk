@@ -29,7 +29,7 @@ and exits with code 1 when a problem at or above --fail-on is found.
 Options:
   --max-pages <n>     pages to check, default 50
   --fail-on <level>   critical | serious | moderate | minor | none, default critical
-  --report <path>     JSON report file, default skiplink-report.json
+  --report <path>     JSON report file, default tabwalk-report.json
   --concurrency <n>   pages checked at once, default 3
   --timeout <ms>      page load timeout, default 30000
 `;
@@ -74,7 +74,7 @@ const { values, positionals } = parseArgs({
   options: {
     'max-pages': { type: 'string', default: '50' },
     'fail-on': { type: 'string', default: 'critical' },
-    report: { type: 'string', default: 'skiplink-report.json' },
+    report: { type: 'string', default: 'tabwalk-report.json' },
     concurrency: { type: 'string', default: '3' },
     timeout: { type: 'string', default: '30000' },
     help: { type: 'boolean', default: false },
@@ -237,7 +237,7 @@ if (checked === 0) {
 if (blocking.length > 0) {
   const message = `${blocking.length} accessibility problems at or above "${failOn}"`;
   console.log(
-    process.env.GITHUB_ACTIONS === 'true' ? `::error title=Skiplink::${message}` : message,
+    process.env.GITHUB_ACTIONS === 'true' ? `::error title=Tabwalk::${message}` : message,
   );
   process.exit(1);
 }

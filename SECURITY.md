@@ -23,5 +23,5 @@ In scope:
 - the scanner (for example SSRF through a scanned URL or a sitemap)
 - the published Docker images and `docker-compose.yml`
 
-Out of scope: findings in sites that Skiplink scans, and issues that need an
+Out of scope: findings in sites that Tabwalk scans, and issues that need an
 already compromised host.

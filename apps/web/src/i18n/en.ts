@@ -4,7 +4,7 @@ const plural = pluralizer('en');
 
 export const en = {
   meta: {
-    title: 'Skiplink — accessibility monitoring',
+    title: 'Tabwalk — accessibility monitoring',
   },
   language: {
     label: 'Language',
@@ -48,7 +48,7 @@ export const en = {
     trendEmpty: 'Not enough scans',
     disclaimer:
       'Automated checks catch part of what WCAG asks for. Everything a machine cannot judge is ' +
-      'marked “Needs review”. Skiplink never calls a site compliant.',
+      'marked “Needs review”. Tabwalk never calls a site compliant.',
   },
   site: {
     run: 'Run a scan',
