@@ -1,16 +1,22 @@
 import { createContext, useContext } from 'react';
+import { de } from './de';
 import { en, type Messages } from './en';
+import { es } from './es';
 import { ru } from './ru';
+import { zh } from './zh';
 
-export const LOCALES = ['en', 'ru'] as const;
+export const LOCALES = ['en', 'de', 'es', 'ru', 'zh'] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'en';
 
-export const MESSAGES: Record<Locale, Messages> = { en, ru };
+export const MESSAGES: Record<Locale, Messages> = { en, de, es, ru, zh };
 
 export const LOCALE_NAMES: Record<Locale, { short: string; native: string }> = {
   en: { short: 'EN', native: 'English' },
+  de: { short: 'DE', native: 'Deutsch' },
+  es: { short: 'ES', native: 'Español' },
   ru: { short: 'RU', native: 'Русский' },
+  zh: { short: '中文', native: '简体中文' },
 };
 
 export function isLocale(value: unknown): value is Locale {
