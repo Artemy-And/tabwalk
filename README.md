@@ -195,4 +195,5 @@ problems and never fail the GitHub Action.
 
 ## License
 
-[MIT](LICENSE)
+[AGPL-3.0](LICENSE). Use it, self-host it and change it freely; if you offer a modified
+Skiplink to others over a network, publish your changes under the same license.
