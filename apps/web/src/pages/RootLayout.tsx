@@ -1,5 +1,6 @@
 import { Link, Outlet } from '@tanstack/react-router';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { LogoMark } from '../components/Logo';
 import { useI18n } from '../i18n/context';
 
 export function RootLayout() {
@@ -15,18 +16,19 @@ export function RootLayout() {
       </a>
 
       <header className="border-b border-line bg-surface">
-        <div className="mx-auto flex min-h-[68px] max-w-[1280px] flex-wrap items-center gap-x-10 gap-y-2 px-4 py-2 sm:px-10">
+        <div className="mx-auto flex min-h-[68px] max-w-[1280px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 sm:gap-x-10 sm:px-10">
           <Link
             to="/"
-            className="font-display text-[27px] tracking-[-0.01em] text-ink no-underline hover:text-ink"
+            className="flex items-center gap-2 font-display text-[23px] sm:gap-2.5 sm:text-[27px] tracking-[-0.01em] text-ink no-underline hover:text-ink"
           >
+            <LogoMark size={32} className="size-7 sm:size-8" />
             Tabwalk
           </Link>
           <nav aria-label={t.layout.mainNav} className="flex grow gap-1">
             <Link
               to="/"
               activeOptions={{ exact: true }}
-              className="border-b-2 border-accent px-3.5 py-2.5 text-[15px] font-semibold text-accent no-underline"
+              className="border-b-2 border-accent px-2 py-2.5 sm:px-3.5 text-[15px] font-semibold text-accent no-underline"
             >
               {t.layout.sites}
             </Link>

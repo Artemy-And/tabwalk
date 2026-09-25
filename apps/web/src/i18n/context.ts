@@ -11,12 +11,12 @@ export const DEFAULT_LOCALE: Locale = 'en';
 
 export const MESSAGES: Record<Locale, Messages> = { en, de, es, ru, zh };
 
-export const LOCALE_NAMES: Record<Locale, { short: string; native: string }> = {
-  en: { short: 'EN', native: 'English' },
-  de: { short: 'DE', native: 'Deutsch' },
-  es: { short: 'ES', native: 'Español' },
-  ru: { short: 'RU', native: 'Русский' },
-  zh: { short: '中文', native: '简体中文' },
+export const LOCALE_NAMES: Record<Locale, string> = {
+  en: 'English',
+  de: 'Deutsch',
+  es: 'Español',
+  ru: 'Русский',
+  zh: '简体中文',
 };
 
 export function isLocale(value: unknown): value is Locale {
