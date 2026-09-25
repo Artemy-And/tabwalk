@@ -1,0 +1,76 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink: #10192a;
+  --color-muted: #55617a;
+  --color-line: #d7dde7;
+  --color-surface: #ffffff;
+  --color-canvas: #f6f8fb;
+  --color-accent: #0b4f6c;
+  --color-focus: #0b3a52;
+
+  --color-critical: #a11916;
+  --color-serious: #9a4a00;
+  --color-moderate: #6b5400;
+  --color-minor: #3d4a5c;
+  --color-review: #1f4f8f;
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-ink: #e9eef7;
+    --color-muted: #9aa8bf;
+    --color-line: #2a3549;
+    --color-surface: #141c2b;
+    --color-canvas: #0d131f;
+    --color-accent: #7dd3fc;
+    --color-focus: #9ee6ff;
+
+    --color-critical: #ff9d96;
+    --color-serious: #ffbc70;
+    --color-moderate: #e8d071;
+    --color-minor: #b3c0d4;
+    --color-review: #8fc2ff;
+  }
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: ui-sans-serif, system-ui, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+:where(a, button, input, select, textarea):focus:not(:focus-visible) {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@utility visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
