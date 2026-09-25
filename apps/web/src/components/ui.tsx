@@ -85,7 +85,7 @@ export function Field({
 }
 
 const BADGE =
-  'inline-flex items-center gap-1.5 rounded border px-[9px] py-[3px] text-[13px] font-semibold';
+  'inline-flex items-center gap-1.5 whitespace-nowrap rounded border px-[9px] py-[3px] text-[13px] font-semibold';
 
 const IMPACT_COLOR: Record<NonNullable<Impact>, string> = {
   critical: 'text-critical border-critical',

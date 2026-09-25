@@ -115,9 +115,7 @@ export async function discoverUrls(siteUrl: string, limit: number): Promise<stri
 
   const bySitemap = await fromSitemap(origin, limit);
   if (bySitemap.length > 0) {
-    const set = new Set(bySitemap);
-    set.add(start);
-    return [...set].slice(0, limit);
+    return [...new Set([start, ...bySitemap])].slice(0, limit);
   }
 
   return (await fromLinks(start, origin, limit)).slice(0, limit);

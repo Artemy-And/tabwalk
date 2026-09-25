@@ -310,7 +310,7 @@ app.get('/api/scans/:id/pages', zValidator('param', uuidParam), async (c) => {
       error: pages.error,
       problems: sql<number>`(
         select count(*) from issues i
-        where i.page_id = ${pages.id} and i.kind = 'violation'
+        where i.page_id = pages.id and i.kind = 'violation'
       )::int`,
     })
     .from(pages)
