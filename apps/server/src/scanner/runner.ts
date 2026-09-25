@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { type Browser, chromium } from 'playwright';
 import { db } from '../db/index.js';
 import { issues, pages, scans, sites } from '../db/schema.js';
@@ -106,7 +106,7 @@ export async function runScan(scanId: string): Promise<void> {
 
   await db
     .update(scans)
-    .set({ status: 'running', startedAt: new Date(), error: null })
+    .set({ status: 'running', startedAt: new Date(), error: null, pagesScanned: 0, pagesFailed: 0 })
     .where(eq(scans.id, scanId));
 
   let browser: Browser | null = null;
@@ -122,9 +122,18 @@ export async function runScan(scanId: string): Promise<void> {
       ...(env.CHROMIUM_EXECUTABLE ? { executablePath: env.CHROMIUM_EXECUTABLE } : {}),
     });
 
-    const outcomes = await mapWithConcurrency(urls, env.SCAN_CONCURRENCY, (url) =>
-      scanOnePage(browser as Browser, scanId, url),
-    );
+    const outcomes = await mapWithConcurrency(urls, env.SCAN_CONCURRENCY, async (url) => {
+      const ok = await scanOnePage(browser as Browser, scanId, url);
+      await db
+        .update(scans)
+        .set(
+          ok
+            ? { pagesScanned: sql`${scans.pagesScanned} + 1` }
+            : { pagesFailed: sql`${scans.pagesFailed} + 1` },
+        )
+        .where(eq(scans.id, scanId));
+      return ok;
+    });
 
     const ok = outcomes.filter(Boolean).length;
 
