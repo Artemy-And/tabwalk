@@ -1,48 +1,14 @@
 import { eq, sql } from 'drizzle-orm';
-import { type Browser, chromium } from 'playwright';
+import type { Browser } from 'playwright';
 import { db } from '../db/index.js';
 import { issues, pages, scans, sites } from '../db/schema.js';
 import { env } from '../env.js';
-import { axeChecker } from './checkers/axe.js';
+import { checkPage, launchBrowser, mapWithConcurrency } from './check.js';
 import { discoverUrls } from './crawl.js';
-import { fingerprint } from './fingerprint.js';
-import type { Checker } from './types.js';
-
-const CHECKERS: Checker[] = [axeChecker];
-
-async function mapWithConcurrency<T, R>(
-  items: T[],
-  limit: number,
-  fn: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let cursor = 0;
-
-  async function worker(): Promise<void> {
-    for (;;) {
-      const index = cursor++;
-      const item = items[index];
-      if (item === undefined) return;
-      results[index] = await fn(item);
-    }
-  }
-
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
-  return results;
-}
 
 async function scanOnePage(browser: Browser, scanId: string, url: string): Promise<boolean> {
-  const context = await browser.newContext({
-    userAgent: 'Skiplink/0.1 (+accessibility scanner)',
-    reducedMotion: 'reduce',
-  });
-  const page = await context.newPage();
-
   try {
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: env.PAGE_TIMEOUT_MS });
-    await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
-
-    const title = await page.title().catch(() => null);
+    const { title, findings } = await checkPage(browser, url, env.PAGE_TIMEOUT_MS);
 
     const [pageRow] = await db
       .insert(pages)
@@ -55,16 +21,14 @@ async function scanOnePage(browser: Browser, scanId: string, url: string): Promi
 
     if (!pageRow) throw new Error('Failed to store the page');
 
-    const rows = [];
-    for (const checker of CHECKERS) {
-      const findings = await checker.run(page);
-      for (const f of findings) {
-        rows.push({
+    if (findings.length > 0) {
+      await db.insert(issues).values(
+        findings.map((f) => ({
           scanId,
           pageId: pageRow.id,
-          fingerprint: fingerprint(f.ruleId, f.html),
+          fingerprint: f.fingerprint,
           kind: f.kind,
-          checker: checker.name,
+          checker: f.checker,
           ruleId: f.ruleId,
           impact: f.impact,
           help: f.help,
@@ -73,12 +37,8 @@ async function scanOnePage(browser: Browser, scanId: string, url: string): Promi
           target: f.target,
           html: f.html,
           failureSummary: f.failureSummary,
-        });
-      }
-    }
-
-    if (rows.length > 0) {
-      await db.insert(issues).values(rows);
+        })),
+      );
     }
 
     return true;
@@ -92,8 +52,6 @@ async function scanOnePage(browser: Browser, scanId: string, url: string): Promi
         set: { error: message, scannedAt: new Date() },
       });
     return false;
-  } finally {
-    await context.close().catch(() => {});
   }
 }
 
@@ -117,10 +75,7 @@ export async function runScan(scanId: string): Promise<void> {
 
     console.log(`[scan ${scanId}] ${site.url}: ${urls.length} pages to check`);
 
-    browser = await chromium.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-      ...(env.CHROMIUM_EXECUTABLE ? { executablePath: env.CHROMIUM_EXECUTABLE } : {}),
-    });
+    browser = await launchBrowser(env.CHROMIUM_EXECUTABLE);
 
     const outcomes = await mapWithConcurrency(urls, env.SCAN_CONCURRENCY, async (url) => {
       const ok = await scanOnePage(browser as Browser, scanId, url);

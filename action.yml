@@ -1,0 +1,33 @@
+name: Skiplink accessibility check
+description: Crawl a site, check every page with axe-core and fail the job on accessibility problems
+author: Artemy Andruschak
+
+branding:
+  icon: eye
+  color: blue
+
+inputs:
+  url:
+    description: Site to check. Pages come from sitemap.xml, or from links on this page
+    required: true
+  max-pages:
+    description: Maximum number of pages to check
+    default: '50'
+  fail-on:
+    description: Lowest impact that fails the job - critical, serious, moderate, minor or none
+    default: critical
+  report:
+    description: Where to write the JSON report, relative to the workspace
+    default: skiplink-report.json
+
+runs:
+  using: docker
+  image: action/Dockerfile
+  args:
+    - ${{ inputs.url }}
+    - --max-pages
+    - ${{ inputs.max-pages }}
+    - --fail-on
+    - ${{ inputs.fail-on }}
+    - --report
+    - ${{ inputs.report }}

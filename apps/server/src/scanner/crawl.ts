@@ -1,9 +1,9 @@
-const UA = 'Skiplink/0.1 (+accessibility scanner)';
+export const USER_AGENT = 'Skiplink/0.1 (+accessibility scanner)';
 
 async function fetchText(url: string, timeoutMs = 15_000): Promise<string | null> {
   try {
     const res = await fetch(url, {
-      headers: { 'user-agent': UA },
+      headers: { 'user-agent': USER_AGENT },
       signal: AbortSignal.timeout(timeoutMs),
       redirect: 'follow',
     });

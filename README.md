@@ -28,6 +28,43 @@ Open http://localhost:8080, add a site, press **Run a scan**.
 
 To pin a version instead of `latest`, set `SKIPLINK_VERSION=0.1.0` in `.env`.
 
+## GitHub Action
+
+Check a site on every push or pull request, without running the dashboard:
+
+```yaml
+name: Accessibility
+on: [pull_request]
+
+jobs:
+  skiplink:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Artemy-And/skiplink@v0.1.0
+        with:
+          url: https://staging.example.com
+          fail-on: serious
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-report
+          path: skiplink-report.json
+```
+
+| Input | Default | Meaning |
+|---|---|---|
+| `url` | — | Site to check; pages come from its sitemap or home page links |
+| `max-pages` | 50 | Page cap |
+| `fail-on` | `critical` | Lowest impact that fails the job: `critical`, `serious`, `moderate`, `minor` or `none` |
+| `report` | `skiplink-report.json` | JSON report path in the workspace |
+
+The job summary lists every problem; results that need a human are listed too
+but never fail the job. The same check runs locally:
+
+```bash
+docker run --rm -v "$PWD:/out" -w /out --user root   --entrypoint node ghcr.io/artemy-and/skiplink-server   /app/apps/server/dist/ci.js https://example.com --fail-on serious
+```
+
 ## Development with Docker
 
 Builds the images from source:
@@ -109,7 +146,9 @@ apps/server/src/
     crawl.ts            sitemap.xml, falling back to link discovery
     fingerprint.ts      collapses repeated findings
     checkers/axe.ts     the axe-core checker
+    check.ts            opens one page and runs every checker
     runner.ts           orchestrates one scan
+  ci.ts                 command-line check used by the GitHub Action
 apps/web/src/
   router.tsx            pages and routes
   components/           accessible UI primitives
