@@ -56,20 +56,29 @@ function SortButton({
 
 export function IssuesTable({
   issues,
-  fixed = false,
+  variant = 'current',
   emptyMessage,
 }: {
   issues: IssueGroup[];
-  fixed?: boolean;
+  variant?: 'current' | 'fixed' | 'recommendations';
   emptyMessage?: string;
 }) {
   const { t } = useI18n();
+  const captions = {
+    current: t.issues.caption,
+    fixed: t.issues.fixedCaption,
+    recommendations: t.issues.recommendationsCaption,
+  };
   const [sortKey, setSortKey] = useState<SortKey>('impact');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
 
   const sorted = useMemo(() => {
     const impactRank = (issue: IssueGroup) =>
-      issue.kind === 'incomplete' ? 4 : (IMPACT_ORDER[issue.impact ?? 'minor'] ?? 9);
+      issue.kind === 'incomplete'
+        ? 4
+        : issue.kind === 'recommendation'
+          ? 5
+          : (IMPACT_ORDER[issue.impact ?? 'minor'] ?? 9);
     const copy = [...issues];
     copy.sort((a, b) => {
       let diff = 0;
@@ -114,7 +123,7 @@ export function IssuesTable({
       <Card className="overflow-x-auto">
         <table className="w-full min-w-[720px] border-collapse text-left text-[15px]">
           <caption className="px-5 pt-4 pb-3 text-left text-sm text-muted">
-            {fixed ? t.issues.fixedCaption : t.issues.caption} {t.issues.rows(sorted.length)}
+            {captions[variant]} {t.issues.rows(sorted.length)}
           </caption>
           <thead>
             <tr className="border-y border-line bg-surface-alt">
@@ -150,7 +159,7 @@ export function IssuesTable({
                 <td className={TD}>
                   <p className="font-semibold">
                     {issue.help}
-                    {!fixed && issue.isNew && (
+                    {variant === 'current' && issue.isNew && (
                       <span className="ml-2 inline-block rounded bg-surface-alt px-1.5 py-px align-[2px] text-xs font-semibold text-accent ring-1 ring-line">
                         {t.issues.newTag}
                       </span>
@@ -159,7 +168,9 @@ export function IssuesTable({
                   <p className="mt-1 font-mono text-[13px] break-all text-muted">
                     {selectorOf(issue.sampleTarget)}
                   </p>
-                  {fixed && <p className="mt-1 text-sm text-good">{t.issues.fixedNote}</p>}
+                  {variant === 'fixed' && (
+                    <p className="mt-1 text-sm text-good">{t.issues.fixedNote}</p>
+                  )}
                   <details className="mt-1">
                     <summary className="cursor-pointer text-sm text-muted">
                       {t.issues.showMarkup}

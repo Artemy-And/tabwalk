@@ -62,7 +62,9 @@ The job summary lists every problem; results that need a human are listed too
 but never fail the job. The same check runs locally:
 
 ```bash
-docker run --rm -v "$PWD:/out" -w /out --user root   --entrypoint node ghcr.io/artemy-and/skiplink-server   /app/apps/server/dist/ci.js https://example.com --fail-on serious
+docker run --rm -v "$PWD:/out" -w /out --user root \
+  --entrypoint node ghcr.io/artemy-and/skiplink-server \
+  /app/apps/server/dist/ci.js https://example.com --fail-on serious
 ```
 
 ## Development with Docker
@@ -184,8 +186,12 @@ Phase 2 adds the AI layer: plain-language reports, the `incomplete` bucket
 turned into a manual-review checklist, alt-text judged by a vision model, and
 suggested code fixes (suggested — never applied automatically).
 
-Known MVP gaps: no authentication (a single organization), pages behind a login
-are not scanned, and only WCAG A/AA rules run — `best-practice` rules are off.
+Known MVP gaps: no authentication (a single organization) and pages behind a
+login are not scanned.
+
+Problems are WCAG 2.2 A/AA failures only. axe-core `best-practice` rules run
+too, but they are shown apart as recommendations: they are not counted as
+problems and never fail the GitHub Action.
 
 ## License
 

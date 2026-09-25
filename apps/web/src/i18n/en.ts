@@ -79,6 +79,8 @@ export const en = {
     uniqueProblems: (n: number) => plural(n, { one: 'unique problem', other: 'unique problems' }),
     criticalFindings: (n: number) => plural(n, { other: 'critical' }),
     needHuman: (n: number) => plural(n, { one: 'needs a human', other: 'need a human' }),
+    elements: (n: number) =>
+      `on ${n.toLocaleString('en')} ${plural(n, { one: 'element', other: 'elements' })}`,
     pages: (n: number) => plural(n, { one: 'page checked', other: 'pages checked' }),
     findingsHeading: 'Findings',
     loadingFindings: 'Loading findings…',
@@ -89,6 +91,7 @@ export const en = {
       review: 'Needs a human',
       new: 'New since last scan',
       fixed: 'Fixed',
+      recommendations: 'Recommendations',
     },
   },
   issues: {
@@ -96,6 +99,8 @@ export const en = {
     emptyFilter: 'Nothing matches this filter.',
     caption: 'Findings grouped by repeated markup, so one template mistake counts once.',
     fixedCaption: 'Found in the previous scan and gone in this one.',
+    recommendationsCaption:
+      'Good practice beyond WCAG. Not counted as problems and never fail a check.',
     rows: (n: number) => `${n} ${plural(n, { one: 'row', other: 'rows' })}.`,
     columns: {
       impact: 'Impact',
@@ -122,6 +127,7 @@ export const en = {
     moderate: 'Moderate',
     minor: 'Minor',
     needsReview: 'Needs review',
+    recommendation: 'Recommendation',
   },
   status: {
     queued: 'Queued',

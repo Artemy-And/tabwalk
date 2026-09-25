@@ -29,7 +29,7 @@ export function isScanActive(status: ScanStatus | null | undefined): boolean {
   return status === 'queued' || status === 'running';
 }
 
-export type IssueKind = 'violation' | 'incomplete';
+export type IssueKind = 'violation' | 'incomplete' | 'recommendation';
 export type Impact = 'critical' | 'serious' | 'moderate' | 'minor' | null;
 
 export interface SiteRow {
@@ -57,6 +57,8 @@ export interface ScanSummary {
   critical: number;
   serious: number;
   incomplete: number;
+  recommendations: number;
+  elements: number;
 }
 
 export interface Scan {

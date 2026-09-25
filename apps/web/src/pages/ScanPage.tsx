@@ -7,13 +7,14 @@ import { useI18n } from '../i18n/context';
 import { api, type IssueGroup, isScanActive, POLL_INTERVAL_MS } from '../lib/api';
 import { formatDate } from '../lib/format';
 
-type Filter = 'all' | 'critical' | 'review' | 'new' | 'fixed';
+type Filter = 'all' | 'critical' | 'review' | 'new' | 'fixed' | 'recommendations';
 
 const FILTERS: Record<Exclude<Filter, 'fixed'>, (issue: IssueGroup) => boolean> = {
-  all: () => true,
+  all: (issue) => issue.kind !== 'recommendation',
   critical: (issue) => issue.kind === 'violation' && issue.impact === 'critical',
   review: (issue) => issue.kind === 'incomplete',
   new: (issue) => issue.isNew === true,
+  recommendations: (issue) => issue.kind === 'recommendation',
 };
 
 export function ScanPage() {
@@ -45,10 +46,11 @@ export function ScanPage() {
   const counts = useMemo(() => {
     const list = issues.data ?? [];
     return {
-      all: list.length,
+      all: list.filter(FILTERS.all).length,
       critical: list.filter(FILTERS.critical).length,
       review: list.filter(FILTERS.review).length,
       new: list.filter(FILTERS.new).length,
+      recommendations: list.filter(FILTERS.recommendations).length,
     };
   }, [issues.data]);
 
@@ -101,6 +103,7 @@ export function ScanPage() {
           <StatCard
             value={s.summary.uniqueProblems}
             label={t.scan.uniqueProblems(s.summary.uniqueProblems)}
+            detail={t.scan.elements(s.summary.elements)}
           />
           <StatCard
             value={s.summary.critical}
@@ -150,6 +153,14 @@ export function ScanPage() {
                     </FilterChip>
                   </>
                 )}
+                {counts.recommendations > 0 && (
+                  <FilterChip
+                    active={filter === 'recommendations'}
+                    onClick={() => setFilter('recommendations')}
+                  >
+                    {t.scan.filters.recommendations} {counts.recommendations}
+                  </FilterChip>
+                )}
               </fieldset>
 
               {filter === 'fixed' && fixed.isLoading ? (
@@ -157,7 +168,13 @@ export function ScanPage() {
               ) : (
                 <IssuesTable
                   issues={visible}
-                  fixed={filter === 'fixed'}
+                  variant={
+                    filter === 'fixed'
+                      ? 'fixed'
+                      : filter === 'recommendations'
+                        ? 'recommendations'
+                        : 'current'
+                  }
                   emptyMessage={filter === 'all' ? undefined : t.issues.emptyFilter}
                 />
               )}

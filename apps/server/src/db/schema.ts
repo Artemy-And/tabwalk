@@ -65,7 +65,7 @@ export const pages = pgTable(
   (t) => [uniqueIndex('pages_scan_url_idx').on(t.scanId, t.url)],
 );
 
-export const issueKind = pgEnum('issue_kind', ['violation', 'incomplete']);
+export const issueKind = pgEnum('issue_kind', ['violation', 'incomplete', 'recommendation']);
 
 export const issues = pgTable(
   'issues',

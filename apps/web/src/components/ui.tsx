@@ -127,6 +127,14 @@ export function ImpactBadge({ impact, kind }: { impact: Impact; kind: IssueKind 
     );
   }
 
+  if (kind === 'recommendation') {
+    return (
+      <span className={`${BADGE} border-dashed border-line-strong text-muted`}>
+        {t.impact.recommendation}
+      </span>
+    );
+  }
+
   const key = impact ?? 'minor';
   return <Badge tone={key}>{t.impact[key]}</Badge>;
 }
@@ -198,10 +206,12 @@ export function Breadcrumbs({ items, current }: { items: ReactElement[]; current
 export function StatCard({
   value,
   label,
+  detail,
   tone = 'default',
 }: {
   value: number;
   label: string;
+  detail?: string;
   tone?: 'default' | 'critical' | 'review';
 }) {
   const review = tone === 'review';
@@ -216,6 +226,7 @@ export function StatCard({
       <p className={`mt-0.5 text-sm ${review ? 'font-semibold text-review' : 'text-muted'}`}>
         {label}
       </p>
+      {detail && <p className="mt-0.5 text-[13px] text-muted">{detail}</p>}
     </div>
   );
 }

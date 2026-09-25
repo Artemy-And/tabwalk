@@ -18,6 +18,7 @@ interface Group {
   target: string[];
   html: string;
   pages: string[];
+  elements: number;
 }
 
 const USAGE = `Usage: ci <url> [options]
@@ -59,7 +60,9 @@ function cell(text: string): string {
 function table(groups: Group[]): string {
   const rows = groups.map((g) => {
     const rule = g.helpUrl ? `[${g.ruleId}](${g.helpUrl})` : g.ruleId;
-    return `| ${g.kind === 'incomplete' ? 'needs review' : g.impact} | ${cell(g.help)} \`${cell(
+    const label =
+      g.kind === 'incomplete' ? 'needs review' : g.kind === 'recommendation' ? 'advice' : g.impact;
+    return `| ${label} | ${cell(g.help)} \`${cell(
       g.target.join(' '),
     )}\` | ${rule} | ${g.pages.length} |`;
   });
@@ -128,8 +131,10 @@ await mapWithConcurrency(urls, concurrency, async (url) => {
         target: f.target,
         html: f.html,
         pages: [],
+        elements: 0,
       };
       if (!group.pages.includes(url)) group.pages.push(url);
+      group.elements += 1;
       groups.set(key, group);
     }
   } catch (err) {
@@ -144,6 +149,7 @@ const sorted = [...groups.values()].sort(
 );
 const violations = sorted.filter((g) => g.kind === 'violation');
 const incomplete = sorted.filter((g) => g.kind === 'incomplete');
+const recommendations = sorted.filter((g) => g.kind === 'recommendation');
 const count = (impact: ImpactLevel) => violations.filter((g) => g.impact === impact).length;
 const blocking = failOn === 'none' ? [] : violations.filter((g) => rank(g.impact) <= rank(failOn));
 const checked = urls.length - failedPages.length;
@@ -155,6 +161,8 @@ const summary = {
   moderate: count('moderate'),
   minor: count('minor'),
   incomplete: incomplete.length,
+  recommendations: recommendations.length,
+  elements: violations.reduce((sum, g) => sum + g.elements, 0),
 };
 
 await writeFile(
@@ -170,6 +178,7 @@ await writeFile(
       summary,
       violations,
       incomplete,
+      recommendations,
     },
     null,
     2,
@@ -178,8 +187,8 @@ await writeFile(
 
 const headline =
   `${checked} pages checked · ${summary.uniqueProblems} unique problems ` +
-  `(${summary.critical} critical, ${summary.serious} serious) · ` +
-  `${summary.incomplete} need a human`;
+  `on ${summary.elements} elements (${summary.critical} critical, ${summary.serious} serious) · ` +
+  `${summary.incomplete} need a human · ${summary.recommendations} recommendations`;
 
 console.log(headline);
 for (const g of violations) {
@@ -197,6 +206,15 @@ if (process.env.GITHUB_STEP_SUMMARY) {
       `<details><summary>${incomplete.length} results need a human</summary>\n\n${table(
         incomplete,
       )}\n\n</details>`,
+    );
+  }
+  if (recommendations.length > 0) {
+    parts.push(
+      `<details><summary>${recommendations.length} recommendations beyond WCAG</summary>
+
+${table(recommendations)}
+
+</details>`,
     );
   }
   if (failedPages.length > 0) {

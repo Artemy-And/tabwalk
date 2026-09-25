@@ -1,5 +1,5 @@
 import { zValidator } from '@hono/zod-validator';
-import { and, desc, eq, getTableColumns, lt, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, lt, lte, ne, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
@@ -31,11 +31,21 @@ const summaryColumns = {
     filter (where ${issues.kind} = 'violation' and ${issues.impact} = 'serious')::int`,
   incomplete: sql<number>`count(distinct ${issues.fingerprint})
     filter (where ${issues.kind} = 'incomplete')::int`,
+  recommendations: sql<number>`count(distinct ${issues.fingerprint})
+    filter (where ${issues.kind} = 'recommendation')::int`,
+  elements: sql<number>`count(*) filter (where ${issues.kind} = 'violation')::int`,
 };
 
 type Summary = { [K in keyof typeof summaryColumns]: number };
 
-const EMPTY_SUMMARY: Summary = { uniqueProblems: 0, critical: 0, serious: 0, incomplete: 0 };
+const EMPTY_SUMMARY: Summary = {
+  uniqueProblems: 0,
+  critical: 0,
+  serious: 0,
+  incomplete: 0,
+  recommendations: 0,
+  elements: 0,
+};
 
 function groupedIssues(scanId: string) {
   return db
@@ -84,7 +94,7 @@ async function fingerprints(scanId: string): Promise<Set<string>> {
   const rows = await db
     .selectDistinct({ fingerprint: issues.fingerprint })
     .from(issues)
-    .where(eq(issues.scanId, scanId));
+    .where(and(eq(issues.scanId, scanId), ne(issues.kind, 'recommendation')));
   return new Set(rows.map((r) => r.fingerprint));
 }
 
@@ -164,6 +174,8 @@ app.get('/api/sites', async (c) => {
               critical: latest.critical,
               serious: latest.serious,
               incomplete: latest.incomplete,
+              recommendations: latest.recommendations,
+              elements: latest.elements,
             }
           : null,
         trend: done.map((scan) => scan.uniqueProblems).reverse(),
@@ -283,7 +295,10 @@ app.get('/api/scans/:id/issues', zValidator('param', uuidParam), async (c) => {
   const before = previous ? await fingerprints(previous.id) : null;
 
   return c.json(
-    rows.map((row) => ({ ...row, isNew: before ? !before.has(row.fingerprint) : false })),
+    rows.map((row) => ({
+      ...row,
+      isNew: before && row.kind !== 'recommendation' ? !before.has(row.fingerprint) : false,
+    })),
   );
 });
 
@@ -297,7 +312,9 @@ app.get('/api/scans/:id/fixed', zValidator('param', uuidParam), async (c) => {
   if (!previous) return c.json([]);
 
   const [current, rows] = await Promise.all([fingerprints(id), groupedIssues(previous.id)]);
-  return c.json(rows.filter((row) => !current.has(row.fingerprint)));
+  return c.json(
+    rows.filter((row) => row.kind !== 'recommendation' && !current.has(row.fingerprint)),
+  );
 });
 
 app.get('/api/scans/:id/pages', zValidator('param', uuidParam), async (c) => {

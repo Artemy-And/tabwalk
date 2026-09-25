@@ -19,6 +19,10 @@ type AxeResult = {
   nodes: AxeNode[];
 };
 
+function isWcag(rule: AxeResult): boolean {
+  return rule.tags.some((t) => TAGS.includes(t));
+}
+
 function toFindings(results: AxeResult[], kind: CheckFinding['kind']): CheckFinding[] {
   const out: CheckFinding[] = [];
 
@@ -45,11 +49,18 @@ export const axeChecker: Checker = {
   name: 'axe-core',
 
   async run(page: Page): Promise<CheckFinding[]> {
-    const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
+    const results = await new AxeBuilder({ page }).withTags([...TAGS, 'best-practice']).analyze();
+
+    const violations = results.violations as unknown as AxeResult[];
+    const incomplete = results.incomplete as unknown as AxeResult[];
 
     return [
-      ...toFindings(results.violations as unknown as AxeResult[], 'violation'),
-      ...toFindings(results.incomplete as unknown as AxeResult[], 'incomplete'),
+      ...toFindings(violations.filter(isWcag), 'violation'),
+      ...toFindings(incomplete.filter(isWcag), 'incomplete'),
+      ...toFindings(
+        violations.filter((rule) => !isWcag(rule)),
+        'recommendation',
+      ),
     ];
   },
 };

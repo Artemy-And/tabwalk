@@ -1,7 +1,7 @@
 import type { Page } from 'playwright';
 
 export interface CheckFinding {
-  kind: 'violation' | 'incomplete';
+  kind: 'violation' | 'incomplete' | 'recommendation';
   ruleId: string;
   impact: string | null;
   help: string;

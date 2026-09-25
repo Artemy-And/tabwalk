@@ -96,6 +96,8 @@ export const ru: Messages = {
       plural(n, { one: 'критическая', few: 'критические', other: 'критических' }),
     needHuman: (n) =>
       plural(n, { one: 'требует ручной проверки', other: 'требуют ручной проверки' }),
+    elements: (n) =>
+      `на ${n.toLocaleString('ru')} ${plural(n, { one: 'элементе', other: 'элементах' })}`,
     pages: (n) =>
       plural(n, {
         one: 'страница проверена',
@@ -111,6 +113,7 @@ export const ru: Messages = {
       review: 'Нужен человек',
       new: 'Новые с прошлой проверки',
       fixed: 'Исправлено',
+      recommendations: 'Рекомендации',
     },
   },
   issues: {
@@ -119,6 +122,8 @@ export const ru: Messages = {
     caption:
       'Проблемы сгруппированы по повторяющейся разметке, поэтому одна ошибка в шаблоне считается один раз.',
     fixedCaption: 'Были в прошлой проверке, в этой их нет.',
+    recommendationsCaption:
+      'Хорошие практики сверх WCAG. Не считаются проблемами и никогда не валят проверку.',
     rows: (n) => `${n} ${plural(n, { one: 'строка', few: 'строки', other: 'строк' })}.`,
     columns: {
       impact: 'Критичность',
@@ -145,6 +150,7 @@ export const ru: Messages = {
     moderate: 'Умеренная',
     minor: 'Незначительная',
     needsReview: 'Нужна проверка',
+    recommendation: 'Рекомендация',
   },
   status: {
     queued: 'В очереди',
