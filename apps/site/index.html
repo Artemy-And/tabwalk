@@ -34,7 +34,7 @@
     <header class="site-header">
       <div class="wrap">
         <a class="brand" href="/">
-          <svg class="mark" width="32" height="32" viewBox="0 0 512 512" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 512 512" aria-hidden="true">
             <rect class="mark-bg" width="512" height="512" rx="116" />
             <rect class="mark-line" x="82" y="132" width="348" height="248" rx="62" fill="none" stroke-width="34" />
             <path class="mark-line" d="M142 256h132" stroke-width="34" />
@@ -44,151 +44,161 @@
           Tabwalk
         </a>
         <nav class="site-nav" aria-label="Main">
-          <a href="#how">How it works</a>
+          <a href="#features">Features</a>
           <a href="#overlays">Why not an overlay</a>
-          <a href="https://github.com/Artemy-And/tabwalk">GitHub</a>
+          <a href="#install">Install</a>
+          <a href="#faq">FAQ</a>
         </nav>
+        <div class="header-actions">
+          <a class="button button-secondary button-small" href="https://github.com/Artemy-And/tabwalk">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z" /></svg>
+            Star on GitHub
+          </a>
+          <a class="button button-primary button-small" href="#install">Get started</a>
+        </div>
       </div>
     </header>
 
     <main id="main">
       <section class="hero" aria-labelledby="hero-title">
         <div class="wrap">
-          <div>
-            <p class="eyebrow">Free · open source · self-hosted</p>
-            <h1 id="hero-title">See what’s actually broken. On your own server.</h1>
-            <p class="lede">
-              Tabwalk crawls your site, checks every page against WCAG with axe-core and collapses
-              repeated problems into one row. What a machine cannot judge is shown too, not quietly
-              dropped.
-            </p>
-            <div class="actions">
-              <a class="button button-primary" href="https://github.com/Artemy-And/tabwalk">
-                Star on GitHub
-              </a>
-              <a class="button button-secondary" href="#how">How it works</a>
-            </div>
+          <a class="pill" href="https://github.com/Artemy-And/tabwalk/releases/tag/v0.1.0">
+            <span class="pill-tag">New</span>
+            Tabwalk 0.1.0 is out
+            <span aria-hidden="true">→</span>
+          </a>
+          <h1 id="hero-title">See what’s actually broken. On your own server.</h1>
+          <p class="lede">
+            Tabwalk crawls your site, checks every page against WCAG with axe-core and collapses
+            repeated problems into one row. What a machine cannot judge is shown too, not quietly
+            dropped.
+          </p>
+          <div class="actions">
+            <a class="button button-primary" href="https://github.com/Artemy-And/tabwalk">Star on GitHub</a>
+            <a class="button button-secondary" href="#install">Install in 5 minutes</a>
           </div>
 
-          <figure>
-            <div class="report" role="group" aria-label="Example report">
-              <div class="report-head">
-                <p class="report-site">Acme Store</p>
-                <p>Scan finished · 50 pages</p>
-              </div>
-              <div class="report-stats">
-                <div>
-                  <strong>17</strong>
-                  <span>unique problems on 1,564 elements</span>
+          <figure class="shot">
+            <div class="window" role="group" aria-label="Example report">
+              <div class="window-bar"><b>Tabwalk</b> Sites / Acme Store / Sep 25, 10:35</div>
+              <div class="window-body">
+                <h2>Acme Store</h2>
+                <div class="stats">
+                  <div class="stat"><strong>17</strong><span>unique problems on 1,564 elements</span></div>
+                  <div class="stat stat-critical"><strong>6</strong><span>critical</span></div>
+                  <div class="stat stat-review"><strong>28</strong><span>need a human</span></div>
+                  <div class="stat"><strong>50</strong><span>pages checked</span></div>
                 </div>
-                <div class="stat-critical">
-                  <strong>6</strong>
-                  <span>critical</span>
+                <div class="findings">
+                  <div class="finding"><span class="badge badge-critical">Critical</span><p>Buttons must have discernible text</p><code>.product-card button.add</code><span class="pages">38 pages</span></div>
+                  <div class="finding"><span class="badge badge-critical">Critical</span><p>Images must have alternative text</p><code>.gallery img</code><span class="pages">31 pages</span></div>
+                  <div class="finding"><span class="badge badge-serious">Serious</span><p>Elements must meet minimum color contrast ratio thresholds</p><code>.price--old</code><span class="pages">44 pages</span></div>
+                  <div class="finding"><span class="badge badge-review">Needs review</span><p>Links must be distinguishable without relying on color</p><code>main p &gt; a</code><span class="pages">23 pages</span></div>
                 </div>
-                <div class="stat-review">
-                  <strong>28</strong>
-                  <span>need a human</span>
-                </div>
-              </div>
-              <div class="finding">
-                <span class="badge badge-critical">Critical</span>
-                <p>Buttons must have discernible text</p>
-                <code>.product-card &gt; button.add</code>
-                <span class="pages">38 pages</span>
-              </div>
-              <div class="finding">
-                <span class="badge badge-critical">Critical</span>
-                <p>Images must have alternative text</p>
-                <code>.gallery img</code>
-                <span class="pages">31 pages</span>
-              </div>
-              <div class="finding">
-                <span class="badge badge-serious">Serious</span>
-                <p>Elements must meet minimum color contrast ratio thresholds</p>
-                <code>.price--old</code>
-                <span class="pages">44 pages</span>
-              </div>
-              <div class="finding needs-human">
-                <span class="badge badge-review">Needs review</span>
-                <p>Links must be distinguishable without relying on color</p>
-                <code>main p &gt; a</code>
-                <span class="pages">23 pages</span>
               </div>
             </div>
-            <figcaption class="report-caption">An example report for a made-up shop</figcaption>
+            <figcaption class="shot-caption">An example report for a made-up shop</figcaption>
           </figure>
         </div>
       </section>
 
-      <section id="overlays" class="section section-surface" aria-labelledby="overlays-title">
-        <div class="wrap honest">
-          <h2 id="overlays-title">No magic button. The magic button does not work.</h2>
-          <div>
-            <p>
-              In April 2025 the US Federal Trade Commission ordered an accessibility overlay vendor to
-              pay <strong>$1 million</strong> for claiming its widget made sites WCAG compliant.
-            </p>
-            <p>
-              In the first half of 2025, <strong>22.6% of ADA website lawsuits</strong> targeted sites
-              that already had an overlay installed.
-            </p>
-            <p>
-              Tabwalk changes nothing on your site and never calls it compliant. It shows what is
-              broken, where, and on how many pages — and keeps a dated record of every scan.
-            </p>
-            <p class="sources">
-              Sources:
-              <a href="https://www.ftc.gov/news-events/news/press-releases/2025/04/ftc-approves-final-order-requiring-accessibe-pay-1-million">FTC final order</a>,
-              <a href="https://www.accessibility.works/blog/accessibility-overlay-widgets-attract-lawsuits/">Accessibility.Works lawsuit data</a>.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" aria-labelledby="features-title">
+      <section id="features" class="section" aria-labelledby="features-title">
         <div class="wrap">
-          <h2 id="features-title">Built for the people who fix sites</h2>
-          <ul class="features">
-            <li>
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="22" height="14" rx="2" /><path d="M9 23h10M14 19v4" /></svg>
-              <h3>Runs on your server</h3>
-              <p>One <span class="inline-code">docker compose up</span>. No Redis, no account, and no page content leaves your network.</p>
-            </li>
-            <li>
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="20" height="5" rx="1.5" /><rect x="4" y="13" width="20" height="5" rx="1.5" /><path d="M8 22h12" /></svg>
+          <div class="section-head">
+            <h2 id="features-title">Built for the people who fix sites</h2>
+            <p>Every row in the report points at something you can change. Nothing pretends to be more than it is.</p>
+          </div>
+          <ul class="bento">
+            <li class="card">
               <h3>One mistake counts once</h3>
               <p>A broken button in a template used on 500 pages is one row with a page count, not 500 rows.</p>
+              <div class="art mini">
+                <div class="mini-row"><span>button.add has no name</span><span>38 pages</span></div>
+                <div class="mini-row"><span>.gallery img has no alt</span><span>31 pages</span></div>
+                <div class="mini-row"><span>Heading jumps from h1 to h4</span><span>17 pages</span></div>
+              </div>
             </li>
-            <li>
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="14" r="10" /><path d="M14 9.5v5M14 18.2v.1" /></svg>
+            <li class="card">
               <h3>Shows what machines miss</h3>
               <p>Results axe-core cannot decide are listed as “needs a human”, so you know exactly what to check by hand.</p>
+              <div class="art mini">
+                <div class="mini-row"><span><i class="dot dot-review"></i>Do these links make sense?</span><span>23</span></div>
+                <div class="mini-row"><span><i class="dot dot-review"></i>Contrast over an image</span><span>12</span></div>
+                <div class="mini-row"><span><i class="dot dot-review"></i>Are the captions right?</span><span>4</span></div>
+              </div>
             </li>
-            <li>
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20l6-6 4 4 8-9" /><path d="M17 9h6v6" /></svg>
+            <li class="card">
               <h3>Compares every scan</h3>
               <p>See what is new since the last scan, what got fixed, and how each site trends over time.</p>
+              <div class="art mini bars" aria-hidden="true">
+                <span class="h92"></span><span class="h86"></span><span class="h88"></span><span class="h72"></span><span class="h64"></span><span class="h56"></span><span class="h45"></span><span class="h36"></span>
+              </div>
             </li>
-            <li>
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 8l-5 6 5 6M19 8l5 6-5 6M16 5l-4 18" /></svg>
+            <li class="card">
+              <h3>Runs on your server</h3>
+              <p>One compose file. No Redis, no account, and no page content leaves your network.</p>
+              <div class="art mini term" aria-hidden="true">
+                <div>$ docker compose up -d</div>
+                <div class="ok">✓ db ✓ api ✓ worker ✓ web</div>
+                <div>→ http://localhost:8080</div>
+              </div>
+            </li>
+            <li class="card">
               <h3>Fails your CI, not your users</h3>
-              <p>A GitHub Action checks a staging site on every pull request and fails the job at the severity you choose.</p>
+              <p>A GitHub Action checks a staging site on every pull request and fails at the severity you choose.</p>
+              <div class="art mini">
+                <div class="mini-row"><span><i class="dot dot-good"></i>Tests</span><span>passed</span></div>
+                <div class="mini-row"><span><i class="dot dot-critical"></i>Tabwalk accessibility check</span><span>2 serious</span></div>
+                <div class="mini-row"><span><i class="dot dot-good"></i>Build</span><span>passed</span></div>
+              </div>
             </li>
-            <li>
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="14" r="10" /><path d="M4 14h20M14 4c2.8 2.8 4 6.2 4 10s-1.2 7.2-4 10c-2.8-2.8-4-6.2-4-10s1.2-7.2 4-10Z" /></svg>
+            <li class="card">
               <h3>Five languages</h3>
-              <p>English, German, Spanish, Russian and Chinese — the interface and the rule descriptions.</p>
+              <p>The interface and the rule descriptions, in the language your team and your clients read.</p>
+              <div class="art chips">
+                <span lang="en">English</span><span lang="de">Deutsch</span><span lang="es">Español</span><span lang="ru">Русский</span><span lang="zh">中文</span>
+              </div>
             </li>
           </ul>
         </div>
       </section>
 
-      <section id="how" class="section section-surface" aria-labelledby="how-title">
+      <section id="overlays" class="section" aria-labelledby="overlays-title">
         <div class="wrap">
-          <h2 id="how-title">Running in five minutes</h2>
-          <p class="section-intro">Docker is the only requirement. Open the dashboard, add a site, press “Run a scan”.</p>
+          <div class="section-head">
+            <h2 id="overlays-title">No magic button. The magic button does not work.</h2>
+            <p>Tabwalk changes nothing on your site and never calls it compliant. It shows what is broken, where, and on how many pages.</p>
+          </div>
+          <div class="facts">
+            <div class="fact fact-critical">
+              <strong>$1M</strong>
+              <p>FTC order against an overlay vendor that claimed its widget made sites WCAG compliant.</p>
+            </div>
+            <div class="fact fact-critical">
+              <strong>22.6%</strong>
+              <p>of ADA website lawsuits in the first half of 2025 targeted sites that already had an overlay.</p>
+            </div>
+            <div class="fact">
+              <strong>0</strong>
+              <p>changes Tabwalk makes to your site. It measures, keeps a dated record and leaves fixing to people.</p>
+            </div>
+          </div>
+          <p class="sources">
+            Sources:
+            <a href="https://www.ftc.gov/news-events/news/press-releases/2025/04/ftc-approves-final-order-requiring-accessibe-pay-1-million">FTC final order</a>,
+            <a href="https://www.accessibility.works/blog/accessibility-overlay-widgets-attract-lawsuits/">Accessibility.Works lawsuit data</a>.
+          </p>
+        </div>
+      </section>
+
+      <section id="install" class="section" aria-labelledby="install-title">
+        <div class="wrap">
+          <div class="section-head">
+            <h2 id="install-title">Running in five minutes</h2>
+            <p>Docker is the only requirement. Open the dashboard, add a site, press “Run a scan”.</p>
+          </div>
           <div class="steps">
-            <div>
+            <div class="step">
               <h3>On your server</h3>
               <p>The dashboard, the scanner and Postgres in one compose file.</p>
               <pre tabindex="0" role="region" aria-label="Install commands"><code>git clone https://github.com/Artemy-And/tabwalk.git
@@ -196,7 +206,7 @@ cd tabwalk
 cp .env.example .env
 docker compose up -d</code></pre>
             </div>
-            <div>
+            <div class="step">
               <h3>In your CI</h3>
               <p>Check a staging site on every pull request.</p>
               <pre tabindex="0" role="region" aria-label="GitHub Action example"><code>- uses: Artemy-And/tabwalk@v0.1.0
@@ -208,20 +218,42 @@ docker compose up -d</code></pre>
         </div>
       </section>
 
-      <section class="section" aria-labelledby="free-title">
+      <section id="faq" class="section" aria-labelledby="faq-title">
         <div class="wrap">
-          <div class="closing">
-            <h2 id="free-title">Free and open source. The self-hosted version always will be.</h2>
-            <p class="section-intro">
-              No account and no feature limits. Tabwalk is AGPL-3.0 and built in the open —
-              questions, ideas and pull requests are welcome. If it saves you time, a star on
-              GitHub helps other people find it.
-            </p>
-            <div class="actions">
-              <a class="button button-primary" href="https://github.com/Artemy-And/tabwalk">Star on GitHub</a>
-              <a class="button button-secondary" href="https://github.com/Artemy-And/tabwalk/discussions">Ask a question</a>
-            </div>
+          <div class="section-head">
+            <h2 id="faq-title">Questions and answers</h2>
           </div>
+          <div class="faq">
+            <details>
+              <summary>Is it really free?</summary>
+              <p>Yes. The self-hosted version is AGPL-3.0, with no account and no feature limits, and it always will be.</p>
+            </details>
+            <details>
+              <summary>Will it make my site compliant?</summary>
+              <p>No tool can. Automated checks cover only part of WCAG. Tabwalk shows what it found and lists what a person still has to check.</p>
+            </details>
+            <details>
+              <summary>What does it check?</summary>
+              <p>WCAG 2.2 A and AA rules from axe-core on every page it finds through your sitemap, plus best-practice rules shown apart as recommendations.</p>
+            </details>
+            <details>
+              <summary>Where does my data go?</summary>
+              <p>Nowhere. Tabwalk runs on your server with its own Postgres. Pages are opened by a local browser and nothing is sent to us.</p>
+            </details>
+            <details>
+              <summary>How do I get help?</summary>
+              <p>Ask in <a href="https://github.com/Artemy-And/tabwalk/discussions">GitHub Discussions</a>. Bugs go to <a href="https://github.com/Artemy-And/tabwalk/issues/new/choose">issues</a>.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="closing" aria-labelledby="free-title">
+        <h2 id="free-title">Free and open source. The self-hosted version always will be.</h2>
+        <p>Questions, ideas and pull requests are welcome. If Tabwalk saves you time, a star on GitHub helps other people find it.</p>
+        <div class="actions">
+          <a class="button button-primary" href="https://github.com/Artemy-And/tabwalk">Star on GitHub</a>
+          <a class="button button-secondary" href="https://github.com/Artemy-And/tabwalk/discussions">Ask a question</a>
         </div>
       </section>
     </main>
@@ -230,8 +262,7 @@ docker compose up -d</code></pre>
       <div class="wrap">
         <p>
           Tabwalk reports what it measured. It is not legal advice, and it does not certify compliance
-          with WCAG, the ADA or the European Accessibility Act. Automated checks cover only part of
-          what WCAG asks for.
+          with WCAG, the ADA or the European Accessibility Act.
         </p>
         <ul class="footer-links">
           <li><a href="https://github.com/Artemy-And/tabwalk">GitHub</a></li>
