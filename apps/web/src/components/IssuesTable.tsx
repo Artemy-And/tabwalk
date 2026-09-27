@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useI18n } from '../i18n/context';
+import { useRuleHelp } from '../i18n/ruleHelp';
 import type { IssueGroup } from '../lib/api';
 import { Card, ImpactBadge } from './ui';
 
@@ -64,6 +65,7 @@ export function IssuesTable({
   emptyMessage?: string;
 }) {
   const { t } = useI18n();
+  const ruleHelp = useRuleHelp();
   const captions = {
     current: t.issues.caption,
     fixed: t.issues.fixedCaption,
@@ -158,7 +160,7 @@ export function IssuesTable({
                 </td>
                 <td className={TD}>
                   <p className="font-semibold">
-                    {issue.help}
+                    {ruleHelp(issue.ruleId, issue.help)}
                     {variant === 'current' && issue.isNew && (
                       <span className="ml-2 inline-block rounded bg-surface-alt px-1.5 py-px align-[2px] text-xs font-semibold text-accent ring-1 ring-line">
                         {t.issues.newTag}
