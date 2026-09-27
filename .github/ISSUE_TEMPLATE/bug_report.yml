@@ -1,0 +1,48 @@
+name: Bug report
+description: Something in Tabwalk does not work as it should
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Add a site with the URL ...
+        2. Run a scan
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Tabwalk version
+      description: The image tag you run, for example 0.1.0, or a commit if you build from source.
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How you run it
+      options:
+        - docker compose with the published images
+        - docker compose built from source
+        - Without Docker (pnpm)
+        - GitHub Action
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Output of `docker compose logs api worker`, or the Action log. Remove anything private.
+      render: shell
+  - type: markdown
+    attributes:
+      value: If the problem is with a particular site, a public URL helps a lot. Do not post URLs you are not allowed to share.

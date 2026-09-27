@@ -199,6 +199,13 @@ Problems are WCAG 2.2 A/AA failures only. axe-core `best-practice` rules run
 too, but they are shown apart as recommendations: they are not counted as
 problems and never fail the GitHub Action.
 
+## Community
+
+- Questions and setup help: [Discussions](https://github.com/Artemy-And/tabwalk/discussions)
+- Bugs and feature requests: [Issues](https://github.com/Artemy-And/tabwalk/issues/new/choose)
+- Want to help? Read [CONTRIBUTING.md](CONTRIBUTING.md) and look for a
+  [`good first issue`](https://github.com/Artemy-And/tabwalk/labels/good%20first%20issue)
+
 ## License
 
 [AGPL-3.0](LICENSE). Use it, self-host it and change it freely; if you offer a modified
