@@ -32,7 +32,7 @@ docker compose up -d
 
 Open http://localhost:8080, add a site, press **Run a scan**.
 
-To pin a version instead of `latest`, set `TABWALK_VERSION=0.1.0` in `.env`.
+To pin a version instead of `latest`, set `TABWALK_VERSION=0.1.1` in `.env`.
 
 ## GitHub Action
 
@@ -46,7 +46,7 @@ jobs:
   tabwalk:
     runs-on: ubuntu-latest
     steps:
-      - uses: Artemy-And/tabwalk@v0.1.0
+      - uses: Artemy-And/tabwalk@v0.1.1
         with:
           url: https://staging.example.com
           fail-on: serious
