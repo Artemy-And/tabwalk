@@ -5,11 +5,16 @@
   </picture>
 </h1>
 
-**See what's actually broken. Weekly. On your own server.**
+**See what's actually broken. On your own server.**
 
 Self-hosted accessibility monitoring. Tabwalk crawls your site, checks every
 page with axe-core, collapses repeated problems into one row, and shows you a
 report you can hand to a client.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/report-dark.png">
+  <img src="docs/screenshots/report-light.png" alt="A Tabwalk report for a demo shop: 13 unique problems on 66 elements, 6 critical, 3 that need a human, filters for new and fixed problems, and the findings table">
+</picture>
 
 One command to install. No Redis — the job queue lives in the same Postgres.
 
@@ -33,6 +38,16 @@ docker compose up -d
 Open http://localhost:8080, add a site, press **Run a scan**.
 
 To pin a version instead of `latest`, set `TABWALK_VERSION=0.1.1` in `.env`.
+
+### Try it on the demo shop
+
+`examples/demo-site` is a small shop with accessibility problems built in. Start it next to Tabwalk:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.demo.yml up -d
+```
+
+Then add `http://acmestore.example/` as a site and run a scan.
 
 ## GitHub Action
 

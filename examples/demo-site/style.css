@@ -1,0 +1,13 @@
+body { margin: 0; font-family: Georgia, serif; color: #222; background: #fff; }
+header, footer, main { max-width: 960px; margin: 0 auto; padding: 16px; }
+header { display: flex; align-items: center; gap: 24px; border-bottom: 1px solid #eee; }
+nav a { margin-right: 16px; color: #333; }
+.hero { padding: 48px 16px; background: #f4efe6 url('img/hero.svg') center / cover; }
+.hero p { color: #b8b0a2; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.card { border: 1px solid #eee; padding: 12px; }
+.card img, .product img { width: 100%; height: auto; background: #f4efe6; }
+.price { color: #b3b3b3; font-size: 14px; }
+.add { width: 40px; height: 40px; border: 0; background: #2b6; color: #fff; border-radius: 50%; }
+main p a { color: #333; text-decoration: none; }
+footer { font-size: 13px; color: #999; }

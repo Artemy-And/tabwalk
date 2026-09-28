@@ -1,0 +1,13 @@
+# Adds a small demo shop with known accessibility problems.
+# docker compose -f docker-compose.yml -f docker-compose.demo.yml up -d
+# then add http://acmestore.example/ as a site in the dashboard.
+services:
+  demo:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    volumes:
+      - ./examples/demo-site:/usr/share/nginx/html:ro
+    networks:
+      default:
+        aliases:
+          - acmestore.example
