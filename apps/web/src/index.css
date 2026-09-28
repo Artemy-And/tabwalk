@@ -1,65 +1,69 @@
 @import 'tailwindcss';
-@import '@fontsource/instrument-serif/latin-400.css';
-@import '@fontsource/instrument-serif/latin-ext-400.css';
 @import '@fontsource-variable/libre-franklin/wght.css';
 @import '@fontsource-variable/jetbrains-mono/wght.css';
 
 @theme {
   --font-sans: 'Libre Franklin Variable', system-ui, sans-serif;
-  --font-display: 'Instrument Serif', Georgia, serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
 
-  --color-ink: #14181f;
-  --color-muted: #59616e;
-  --color-line: #e0ddd6;
-  --color-line-soft: #efede8;
-  --color-line-strong: #c9c5bc;
+  --color-ink: #0f1115;
+  --color-muted: #515966;
+  --color-line: #e1e4e8;
+  --color-line-soft: #eceef1;
+  --color-line-strong: #cdd1d7;
   --color-surface: #ffffff;
-  --color-surface-alt: #fbfaf8;
-  --color-canvas: #f6f5f1;
-  --color-accent: #0b4f6c;
-  --color-accent-hover: #08394e;
+  --color-surface-alt: #f3f4f6;
+  --color-canvas: #f7f7f8;
+  --color-accent: #2563d6;
+  --color-accent-hover: #1e4fb8;
   --color-on-accent: #ffffff;
-  --color-focus: #0b3a52;
+  --color-primary: #0f1115;
+  --color-primary-hover: #000000;
+  --color-on-primary: #ffffff;
+  --color-focus: #1e4fb8;
+  --color-brand: #2563d6;
 
-  --color-critical: #a8201a;
-  --color-serious: #8a4a12;
+  --color-critical: #b42318;
+  --color-serious: #93470f;
   --color-moderate: #63541a;
   --color-minor: #4a525f;
-  --color-review: #1c4e8a;
-  --color-review-soft: #eef4f8;
-  --color-review-row: #fafbfd;
-  --color-review-line: #c9d9e1;
+  --color-review: #1e4fb8;
+  --color-review-soft: #eef3fc;
+  --color-review-row: #f8faff;
+  --color-review-line: #cbd8f2;
   --color-good: #1e6b44;
-  --color-trend: #c9d9e1;
+  --color-trend: #d3dae6;
 }
 
 @layer base {
   @media (prefers-color-scheme: dark) {
     :root {
-      --color-ink: #ecebe6;
-      --color-muted: #a8adb6;
-      --color-line: #34383f;
-      --color-line-soft: #2a2d33;
-      --color-line-strong: #4a4f58;
-      --color-surface: #1c1e22;
-      --color-surface-alt: #212328;
-      --color-canvas: #141518;
-      --color-accent: #7cc4e4;
-      --color-accent-hover: #a6d8ee;
-      --color-on-accent: #0d1a20;
-      --color-focus: #a6d8ee;
+      --color-ink: #f2f3f5;
+      --color-muted: #9aa1ad;
+      --color-line: #23272e;
+      --color-line-soft: #1b1e24;
+      --color-line-strong: #353a43;
+      --color-surface: #111317;
+      --color-surface-alt: #16191e;
+      --color-canvas: #0a0b0d;
+      --color-accent: #6ea4ff;
+      --color-accent-hover: #9cc0ff;
+      --color-on-accent: #0a0b0d;
+      --color-primary: #f2f3f5;
+      --color-primary-hover: #ffffff;
+      --color-on-primary: #0a0b0d;
+      --color-focus: #a6c8ff;
 
-      --color-critical: #ff9b92;
-      --color-serious: #f2b27a;
+      --color-critical: #ff8a80;
+      --color-serious: #f5b276;
       --color-moderate: #ddc86e;
       --color-minor: #b9bfc9;
-      --color-review: #9cc3f5;
-      --color-review-soft: #1b2634;
-      --color-review-row: #1d2129;
-      --color-review-line: #2f4257;
-      --color-good: #82cf9f;
-      --color-trend: #3a4a57;
+      --color-review: #8fb8ff;
+      --color-review-soft: #16213a;
+      --color-review-row: #121826;
+      --color-review-line: #26375a;
+      --color-good: #7ed6a2;
+      --color-trend: #2a3a48;
     }
   }
 

@@ -6,11 +6,11 @@ import type { Impact, IssueKind, ScanStatus } from '../lib/api';
 type ButtonVariant = 'primary' | 'secondary' | 'danger';
 
 const BUTTON_BASE =
-  'inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg px-[18px] ' +
+  'inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-[10px] px-[18px] ' +
   'text-[15px] font-semibold no-underline disabled:cursor-not-allowed disabled:opacity-50';
 
 const BUTTON_STYLES: Record<ButtonVariant, string> = {
-  primary: 'bg-accent text-on-accent hover:bg-accent-hover hover:text-on-accent',
+  primary: 'bg-primary text-on-primary hover:bg-primary-hover hover:text-on-primary',
   secondary: 'border border-line-strong bg-surface text-ink hover:bg-surface-alt hover:text-ink',
   danger: 'border border-critical bg-surface text-critical hover:bg-surface-alt',
 };
@@ -173,7 +173,7 @@ export function PageHeader({
   return (
     <div className="flex flex-wrap items-end gap-4">
       <div className="min-w-0 grow">
-        <h1 className="mb-1 font-display text-[38px] leading-tight font-normal tracking-[-0.01em] break-words">
+        <h1 className="mb-1 text-[34px] leading-tight font-bold tracking-[-0.03em] break-words sm:text-[40px]">
           {title}
         </h1>
         {subtitle && <p className="text-[15px] text-muted">{subtitle}</p>}
@@ -287,7 +287,7 @@ export function FilterChip({
       onClick={onClick}
       className={`h-9 rounded-full border px-3.5 text-sm ${
         active
-          ? 'border-accent bg-accent font-semibold text-on-accent'
+          ? 'border-primary bg-primary font-semibold text-on-primary'
           : 'border-line-strong bg-surface text-ink hover:bg-surface-alt'
       }`}
     >

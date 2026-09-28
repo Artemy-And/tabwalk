@@ -15,11 +15,11 @@ export function RootLayout() {
         {t.layout.skipToContent}
       </a>
 
-      <header className="border-b border-line bg-surface">
+      <header className="sticky top-0 z-40 border-b border-line-soft bg-surface/85 backdrop-blur">
         <div className="mx-auto flex min-h-[68px] max-w-[1280px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 sm:gap-x-10 sm:px-10">
           <Link
             to="/"
-            className="flex items-center gap-2 font-display text-[23px] sm:gap-2.5 sm:text-[27px] tracking-[-0.01em] text-ink no-underline hover:text-ink"
+            className="flex items-center gap-2.5 text-[19px] font-bold tracking-[-0.01em] text-ink no-underline hover:text-ink sm:text-[20px]"
           >
             <LogoMark size={32} className="size-7 sm:size-8" />
             Tabwalk
