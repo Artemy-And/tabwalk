@@ -16,6 +16,8 @@ export const organizations = pgTable('organizations', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const scanSchedule = pgEnum('scan_schedule', ['off', 'daily', 'weekly']);
+
 export const sites = pgTable(
   'sites',
   {
@@ -25,6 +27,7 @@ export const sites = pgTable(
       .references(() => organizations.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     url: text('url').notNull(),
+    schedule: scanSchedule('schedule').notNull().default('weekly'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('sites_org_idx').on(t.orgId)],
@@ -97,6 +100,7 @@ export const issues = pgTable(
 );
 
 export type Site = typeof sites.$inferSelect;
+export type ScanSchedule = (typeof scanSchedule.enumValues)[number];
 export type Scan = typeof scans.$inferSelect;
 export type Page = typeof pages.$inferSelect;
 export type Issue = typeof issues.$inferSelect;

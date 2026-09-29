@@ -21,6 +21,9 @@ jobs:
       - name: Start with the published images
         run: |
           cp .env.example .env
+          if [ "${{ github.event_name }}" = release ]; then
+            echo "TABWALK_VERSION=${GITHUB_REF_NAME#v}" >> .env
+          fi
           start=$(date +%s)
           docker compose -f docker-compose.yml -f docker-compose.demo.yml up -d
           until curl -sf http://localhost:8080/api/health > /dev/null; do
@@ -64,6 +67,17 @@ jobs:
           echo "$result" | jq '{pages, summary}'
           [ "$(echo "$result" | jq .pages)" -eq 6 ] || { echo "Expected 6 demo pages"; exit 1; }
           [ "$(echo "$result" | jq .summary.uniqueProblems)" -ge 10 ] || { echo "Expected the demo shop's known problems"; exit 1; }
+
+      - name: Check scheduled scans
+        run: |
+          site=$(curl -sf http://localhost:8080/api/sites | jq -r '.[] | select(.name == "Acme Store") | .id')
+          curl -sf "http://localhost:8080/api/sites/$site" | jq -e '.schedule == "weekly" and .nextScanAt != null'
+          curl -sf -X PATCH "http://localhost:8080/api/sites/$site" \
+            -H 'content-type: application/json' \
+            -d '{"schedule":"off"}' | jq -e '.schedule == "off" and .nextScanAt == null'
+          docker compose exec -T db sh -c \
+            'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "select cron from pgboss.schedule"' \
+            | grep -qF '*/15 * * * *' || { echo "The worker did not register the schedule"; exit 1; }
 
       - name: Logs
         if: failure()

@@ -7,9 +7,9 @@
 
 **See what's actually broken. On your own server.**
 
-Self-hosted accessibility monitoring. Tabwalk crawls your site, checks every
-page with axe-core, collapses repeated problems into one row, and shows you a
-report you can hand to a client.
+Self-hosted accessibility monitoring. Tabwalk crawls your site every day or
+every week, checks each page with axe-core, collapses repeated problems into
+one row, and shows what is new and what got fixed since the last scan.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/report-dark.png">
@@ -35,9 +35,11 @@ cp .env.example .env      # Windows: copy .env.example .env
 docker compose up -d
 ```
 
-Open http://localhost:8080, add a site, press **Run a scan**.
+Open http://localhost:8080 and add a site. It is scanned within 15 minutes and
+then weekly; pick daily or off on the site's page, or press **Run a scan** to
+check it right away.
 
-To pin a version instead of `latest`, set `TABWALK_VERSION=0.1.2` in `.env`.
+To pin a version instead of `latest`, set `TABWALK_VERSION=0.2.0` in `.env`.
 
 ### Try it on the demo shop
 
@@ -61,7 +63,7 @@ jobs:
   tabwalk:
     runs-on: ubuntu-latest
     steps:
-      - uses: Artemy-And/tabwalk@v0.1.2
+      - uses: Artemy-And/tabwalk@v0.2.0
         with:
           url: https://staging.example.com
           fail-on: serious
@@ -143,7 +145,8 @@ Prints findings with their fingerprints. Handy while working on checkers.
                  └──────────┘
 ```
 
-`api` and `worker` are the same image with different commands.
+`api` and `worker` are the same image with different commands. The worker also
+runs the schedule: every 15 minutes it queues a scan for each site that is due.
 
 ### Design decisions
 
@@ -151,6 +154,7 @@ Prints findings with their fingerprints. Handy while working on checkers.
 |---|---|
 | Postgres, not MongoDB | One store for data and queue, real joins for reports |
 | pg-boss, not BullMQ | No Redis: one container fewer, one failure mode fewer |
+| Schedules in pg-boss too | No cron container; the schedule lives in the same Postgres |
 | Checkers behind a `Checker` interface | Trackers and PCI checks plug in without a storage rewrite |
 | axe-core hidden behind that interface | The engine belongs to a competitor (Deque); don't hard-wire it |
 | Organizations in the schema from day one | Retrofitting multi-tenancy means rewriting every query |
@@ -164,6 +168,7 @@ apps/server/src/
   api/app.ts            Hono routes
   db/schema.ts          Drizzle tables
   queue/boss.ts         pg-boss setup
+  queue/schedule.ts     daily and weekly scans
   scanner/
     types.ts            Checker interface — the extension point
     crawl.ts            sitemap.xml, falling back to link discovery

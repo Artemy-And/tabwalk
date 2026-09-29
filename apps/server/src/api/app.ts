@@ -5,8 +5,16 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { z } from 'zod';
 import { db } from '../db/index.js';
-import { issues, organizations, pages, type Scan, scans, sites } from '../db/schema.js';
-import { getBoss, SCAN_QUEUE } from '../queue/boss.js';
+import {
+  issues,
+  organizations,
+  pages,
+  type Scan,
+  scanSchedule,
+  scans,
+  sites,
+} from '../db/schema.js';
+import { enqueueScan, nextScanAt } from '../queue/schedule.js';
 
 async function defaultOrgId(): Promise<string> {
   const existing = await db.query.organizations.findFirst();
@@ -19,6 +27,8 @@ async function defaultOrgId(): Promise<string> {
 }
 
 const uuidParam = z.object({ id: z.string().uuid() });
+
+const scheduleField = z.enum(scanSchedule.enumValues);
 
 const TREND_LENGTH = 8;
 
@@ -111,6 +121,7 @@ app.get('/api/sites', async (c) => {
       id: sites.id,
       name: sites.name,
       url: sites.url,
+      schedule: sites.schedule,
       createdAt: sites.createdAt,
       lastScanId: sql<string | null>`(
         select s.id from scans s where s.site_id = sites.id
@@ -191,6 +202,7 @@ app.post(
     z.object({
       name: z.string().min(1).max(200),
       url: z.string().url(),
+      schedule: scheduleField.optional(),
     }),
   ),
   async (c) => {
@@ -199,19 +211,48 @@ app.post(
 
     const [created] = await db
       .insert(sites)
-      .values({ orgId, name: body.name, url: body.url })
+      .values({ orgId, name: body.name, url: body.url, schedule: body.schedule })
       .returning();
 
     return c.json(created, 201);
   },
 );
 
-app.get('/api/sites/:id', zValidator('param', uuidParam), async (c) => {
-  const { id } = c.req.valid('param');
+async function siteWithNextScan(id: string) {
   const site = await db.query.sites.findFirst({ where: eq(sites.id, id) });
+  if (!site) return null;
+
+  const last = await db.query.scans.findFirst({
+    where: eq(scans.siteId, id),
+    orderBy: desc(scans.createdAt),
+    columns: { createdAt: true },
+  });
+
+  return { ...site, nextScanAt: nextScanAt(site.schedule, last?.createdAt ?? null) };
+}
+
+app.get('/api/sites/:id', zValidator('param', uuidParam), async (c) => {
+  const site = await siteWithNextScan(c.req.valid('param').id);
   if (!site) return c.json({ error: 'Site not found' }, 404);
   return c.json(site);
 });
+
+app.patch(
+  '/api/sites/:id',
+  zValidator('param', uuidParam),
+  zValidator('json', z.object({ schedule: scheduleField })),
+  async (c) => {
+    const { id } = c.req.valid('param');
+    const updated = await db
+      .update(sites)
+      .set({ schedule: c.req.valid('json').schedule })
+      .where(eq(sites.id, id))
+      .returning({ id: sites.id });
+    if (updated.length === 0) return c.json({ error: 'Site not found' }, 404);
+
+    return c.json(await siteWithNextScan(id));
+  },
+);
 
 app.delete('/api/sites/:id', zValidator('param', uuidParam), async (c) => {
   const { id } = c.req.valid('param');
@@ -238,13 +279,7 @@ app.post('/api/sites/:id/scans', zValidator('param', uuidParam), async (c) => {
   const site = await db.query.sites.findFirst({ where: eq(sites.id, id) });
   if (!site) return c.json({ error: 'Site not found' }, 404);
 
-  const [scan] = await db.insert(scans).values({ siteId: id }).returning();
-  if (!scan) return c.json({ error: 'Could not create the scan' }, 500);
-
-  const boss = await getBoss();
-  await boss.send(SCAN_QUEUE, { scanId: scan.id });
-
-  return c.json(scan, 202);
+  return c.json(await enqueueScan(id), 202);
 });
 
 app.get('/api/scans/:id', zValidator('param', uuidParam), async (c) => {

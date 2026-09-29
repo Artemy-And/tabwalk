@@ -7,14 +7,72 @@ import {
   Card,
   LiveStatus,
   PageHeader,
+  SelectField,
   StatusBadge,
 } from '../components/ui';
 import { useI18n } from '../i18n/context';
-import { api, isScanActive, POLL_INTERVAL_MS } from '../lib/api';
-import { formatDate, hostOf } from '../lib/format';
+import {
+  api,
+  isScanActive,
+  POLL_INTERVAL_MS,
+  SCHEDULES,
+  type ScanSchedule,
+  type SiteDetail,
+} from '../lib/api';
+import { formatDate, hostOf, isWithin } from '../lib/format';
 
 const TH = 'px-3 py-3 text-[13px] font-semibold text-muted first:pl-5 last:pr-5';
 const TD = 'px-3 py-4 align-top first:pl-5 last:pr-5';
+
+const SOON_MS = 16 * 60 * 1000;
+
+function ScheduleCard({ site }: { site: SiteDetail }) {
+  const { t, locale } = useI18n();
+  const qc = useQueryClient();
+
+  const save = useMutation({
+    mutationFn: (schedule: ScanSchedule) => api.setSchedule(site.id, schedule),
+    onMutate: (schedule) => {
+      qc.setQueryData(['site-info', site.id], { ...site, schedule });
+      return site;
+    },
+    onSuccess: (updated) => qc.setQueryData(['site-info', site.id], updated),
+    onError: (_error, _schedule, previous) => qc.setQueryData(['site-info', site.id], previous),
+  });
+
+  const next =
+    site.schedule === 'off' || !site.nextScanAt
+      ? t.schedule.manual
+      : isWithin(site.nextScanAt, SOON_MS)
+        ? t.schedule.soon
+        : t.schedule.next(formatDate(site.nextScanAt, locale));
+
+  return (
+    <Card className="flex flex-col gap-3 p-5 md:flex-row md:items-end md:gap-5">
+      <div className="md:w-56">
+        <SelectField
+          label={t.schedule.label}
+          value={site.schedule}
+          onChange={(e) => save.mutate(e.target.value as ScanSchedule)}
+        >
+          {SCHEDULES.map((option) => (
+            <option key={option} value={option}>
+              {t.schedule.options[option]}
+            </option>
+          ))}
+        </SelectField>
+      </div>
+      <p aria-live="polite" className="text-[15px] text-muted md:pb-2.5">
+        {save.isPending ? t.schedule.saving : save.isSuccess ? `${t.schedule.saved} ${next}` : next}
+      </p>
+      {save.isError && (
+        <p role="alert" className="text-sm text-critical md:pb-2.5">
+          {save.error.message}
+        </p>
+      )}
+    </Card>
+  );
+}
 
 export function SitePage() {
   const { siteId } = useParams({ from: '/sites/$siteId' });
@@ -32,7 +90,10 @@ export function SitePage() {
 
   const start = useMutation({
     mutationFn: () => api.startScan(siteId),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ['site', siteId] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['site', siteId] });
+      void qc.invalidateQueries({ queryKey: ['site-info', siteId] });
+    },
   });
 
   if (site.isLoading) return <LiveStatus>{t.site.loading}</LiveStatus>;
@@ -62,6 +123,8 @@ export function SitePage() {
           </Button>
         }
       />
+
+      <ScheduleCard site={site.data} />
 
       {start.isSuccess && <LiveStatus>{t.site.queued}</LiveStatus>}
       {start.isError && (

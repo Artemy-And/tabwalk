@@ -70,6 +70,19 @@ export const de: Messages = {
     },
     pagesFailed: (n) => `(${n} fehlgeschlagen)`,
   },
+  schedule: {
+    label: 'Automatische Prüfungen',
+    options: {
+      weekly: 'Wöchentlich',
+      daily: 'Täglich',
+      off: 'Aus',
+    },
+    next: (date) => `Nächste Prüfung ${date}`,
+    soon: 'Nächste Prüfung in den nächsten 15 Minuten',
+    manual: 'Prüfungen laufen nur, wenn Sie eine starten',
+    saving: 'Wird gespeichert…',
+    saved: 'Gespeichert.',
+  },
   scan: {
     loading: 'Ergebnisse werden geladen…',
     notFound: 'Prüfung nicht gefunden.',

@@ -66,6 +66,19 @@ export const en = {
     },
     pagesFailed: (n: number) => `(${n} failed)`,
   },
+  schedule: {
+    label: 'Automatic scans',
+    options: {
+      weekly: 'Weekly',
+      daily: 'Daily',
+      off: 'Off',
+    },
+    next: (date: string) => `Next scan ${date}`,
+    soon: 'Next scan within 15 minutes',
+    manual: 'Scans run only when you start one',
+    saving: 'Saving…',
+    saved: 'Saved.',
+  },
   scan: {
     loading: 'Loading results…',
     notFound: 'Scan not found.',

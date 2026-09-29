@@ -32,10 +32,15 @@ export function isScanActive(status: ScanStatus | null | undefined): boolean {
 export type IssueKind = 'violation' | 'incomplete' | 'recommendation';
 export type Impact = 'critical' | 'serious' | 'moderate' | 'minor' | null;
 
+export type ScanSchedule = 'off' | 'daily' | 'weekly';
+
+export const SCHEDULES: ScanSchedule[] = ['weekly', 'daily', 'off'];
+
 export interface SiteRow {
   id: string;
   name: string;
   url: string;
+  schedule: ScanSchedule;
   createdAt: string;
   lastScanId: string | null;
   lastScanStatus: ScanStatus | null;
@@ -49,7 +54,12 @@ export interface Site {
   id: string;
   name: string;
   url: string;
+  schedule: ScanSchedule;
   createdAt: string;
+}
+
+export interface SiteDetail extends Site {
+  nextScanAt: string | null;
 }
 
 export interface ScanSummary {
@@ -101,9 +111,11 @@ export interface IssueGroup {
 
 export const api = {
   listSites: () => request<SiteRow[]>('/sites'),
-  createSite: (body: { name: string; url: string }) =>
+  createSite: (body: { name: string; url: string; schedule: ScanSchedule }) =>
     request<Site>('/sites', { method: 'POST', body: JSON.stringify(body) }),
-  getSite: (id: string) => request<Site>(`/sites/${id}`),
+  getSite: (id: string) => request<SiteDetail>(`/sites/${id}`),
+  setSchedule: (id: string, schedule: ScanSchedule) =>
+    request<SiteDetail>(`/sites/${id}`, { method: 'PATCH', body: JSON.stringify({ schedule }) }),
   deleteSite: (id: string) => request<undefined>(`/sites/${id}`, { method: 'DELETE' }),
   listScans: (siteId: string) => request<ScanRow[]>(`/sites/${siteId}/scans`),
   startScan: (siteId: string) => request<Scan>(`/sites/${siteId}/scans`, { method: 'POST' }),

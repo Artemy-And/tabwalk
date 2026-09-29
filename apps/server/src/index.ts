@@ -3,6 +3,7 @@ import { app } from './api/app.js';
 import { pool } from './db/index.js';
 import { env } from './env.js';
 import { getBoss, SCAN_QUEUE, type ScanJob, stopBoss } from './queue/boss.js';
+import { enqueueDueScans, SCHEDULE_CRON, SCHEDULE_QUEUE } from './queue/schedule.js';
 import { runScan } from './scanner/runner.js';
 
 const mode = process.argv[2] ?? 'api';
@@ -27,6 +28,13 @@ async function startWorker(): Promise<void> {
       }
     },
   );
+
+  await boss.createQueue(SCHEDULE_QUEUE);
+  await boss.schedule(SCHEDULE_QUEUE, SCHEDULE_CRON);
+  await boss.work(SCHEDULE_QUEUE, async () => {
+    const queued = await enqueueDueScans();
+    if (queued > 0) console.log(`Queued ${queued} scheduled scan(s)`);
+  });
 
   console.log(`Worker waiting for jobs on "${SCAN_QUEUE}"`);
 }

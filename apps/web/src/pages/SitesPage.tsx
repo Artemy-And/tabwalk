@@ -9,11 +9,19 @@ import {
   LiveStatus,
   PageHeader,
   PlusIcon,
+  SelectField,
   StatusBadge,
   TrendBars,
 } from '../components/ui';
 import { useI18n } from '../i18n/context';
-import { api, isScanActive, POLL_INTERVAL_MS, type SiteRow } from '../lib/api';
+import {
+  api,
+  isScanActive,
+  POLL_INTERVAL_MS,
+  SCHEDULES,
+  type ScanSchedule,
+  type SiteRow,
+} from '../lib/api';
 import { formatRelative, hostOf } from '../lib/format';
 
 const TH = 'px-3 py-3 text-[13px] font-semibold text-muted first:pl-5 last:pr-5';
@@ -65,6 +73,7 @@ function AddSiteForm({ id, onDone }: { id: string; onDone: () => void }) {
   const qc = useQueryClient();
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
+  const [schedule, setSchedule] = useState<ScanSchedule>('weekly');
   const [error, setError] = useState<'fillBoth' | Error | null>(null);
 
   const create = useMutation({
@@ -85,7 +94,7 @@ function AddSiteForm({ id, onDone }: { id: string; onDone: () => void }) {
       setError('fillBoth');
       return;
     }
-    create.mutate({ name: name.trim(), url: url.trim() });
+    create.mutate({ name: name.trim(), url: url.trim(), schedule });
   }
 
   return (
@@ -115,6 +124,19 @@ function AddSiteForm({ id, onDone }: { id: string; onDone: () => void }) {
             placeholder="https://example.com"
             hint={t.sites.urlHint}
           />
+        </div>
+        <div className="md:w-48">
+          <SelectField
+            label={t.schedule.label}
+            value={schedule}
+            onChange={(e) => setSchedule(e.target.value as ScanSchedule)}
+          >
+            {SCHEDULES.map((option) => (
+              <option key={option} value={option}>
+                {t.schedule.options[option]}
+              </option>
+            ))}
+          </SelectField>
         </div>
         <Button type="submit" disabled={create.isPending} className="md:mt-[26px]">
           {create.isPending ? t.sites.submitting : t.sites.submit}

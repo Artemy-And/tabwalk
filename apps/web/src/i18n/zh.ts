@@ -63,6 +63,19 @@ export const zh: Messages = {
     },
     pagesFailed: (n) => `（${n} 个失败）`,
   },
+  schedule: {
+    label: '自动检测',
+    options: {
+      weekly: '每周',
+      daily: '每天',
+      off: '关闭',
+    },
+    next: (date) => `下次检测：${date}`,
+    soon: '下次检测将在 15 分钟内开始',
+    manual: '仅在手动开始时检测',
+    saving: '正在保存…',
+    saved: '已保存。',
+  },
   scan: {
     loading: '正在加载结果…',
     notFound: '未找到该检测。',

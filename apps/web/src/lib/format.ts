@@ -23,6 +23,10 @@ export function formatRelative(iso: string, locale: string, now = Date.now()): s
   return rtf.format(0, 'minute');
 }
 
+export function isWithin(iso: string, ms: number, now = Date.now()): boolean {
+  return new Date(iso).getTime() - now < ms;
+}
+
 export function hostOf(url: string): string {
   try {
     return new URL(url).host;

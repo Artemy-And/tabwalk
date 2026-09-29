@@ -1,4 +1,10 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactElement, ReactNode } from 'react';
+import type {
+  ButtonHTMLAttributes,
+  InputHTMLAttributes,
+  ReactElement,
+  ReactNode,
+  SelectHTMLAttributes,
+} from 'react';
 import { useId } from 'react';
 import { useI18n } from '../i18n/context';
 import type { Impact, IssueKind, ScanStatus } from '../lib/api';
@@ -78,6 +84,37 @@ export function Field({
       {error && (
         <span id={errorId} className="text-[13px] text-critical">
           {error}
+        </span>
+      )}
+    </div>
+  );
+}
+
+export function SelectField({
+  label,
+  hint,
+  children,
+  ...props
+}: SelectHTMLAttributes<HTMLSelectElement> & { label: string; hint?: ReactNode }) {
+  const id = useId();
+  const hintId = `${id}-hint`;
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-sm font-semibold text-ink">
+        {label}
+      </label>
+      <select
+        id={id}
+        aria-describedby={hint ? hintId : undefined}
+        className="h-11 rounded-lg border border-line-strong bg-surface px-3 text-[15px] text-ink"
+        {...props}
+      >
+        {children}
+      </select>
+      {hint && (
+        <span id={hintId} className="text-[13px] text-muted">
+          {hint}
         </span>
       )}
     </div>

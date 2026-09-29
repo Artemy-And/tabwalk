@@ -69,6 +69,19 @@ export const es: Messages = {
     },
     pagesFailed: (n) => `(${n} con error)`,
   },
+  schedule: {
+    label: 'Análisis automáticos',
+    options: {
+      weekly: 'Semanal',
+      daily: 'Diario',
+      off: 'Desactivado',
+    },
+    next: (date) => `Próximo análisis: ${date}`,
+    soon: 'Próximo análisis en menos de 15 minutos',
+    manual: 'Los análisis solo se ejecutan cuando inicias uno',
+    saving: 'Guardando…',
+    saved: 'Guardado.',
+  },
   scan: {
     loading: 'Cargando resultados…',
     notFound: 'Análisis no encontrado.',
