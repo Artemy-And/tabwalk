@@ -341,10 +341,36 @@ h1 {
   padding: 24px;
 }
 
+.shot-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 18px;
+}
+
 .shot h2 {
-  margin: 0 0 18px;
+  margin: 0;
   font-size: 26px;
   letter-spacing: -0.02em;
+}
+
+.shot-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-2);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.shot-next .dot {
+  width: 8px;
+  height: 8px;
 }
 
 .stats {
