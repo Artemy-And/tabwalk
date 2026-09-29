@@ -203,7 +203,7 @@ export function SitesPage() {
 
       {sorted.length > 0 && (
         <Card className="overflow-x-auto">
-          <table className="w-full min-w-[760px] border-collapse text-left text-[15px]">
+          <table className="w-full min-w-[860px] border-collapse text-left text-[15px]">
             <caption className="px-5 pt-4 pb-3 text-left text-sm text-muted">
               {t.sites.caption}
             </caption>
@@ -214,6 +214,9 @@ export function SitesPage() {
                 </th>
                 <th scope="col" aria-sort="descending" className={TH}>
                   {t.sites.columns.lastScan}
+                </th>
+                <th scope="col" className={TH}>
+                  {t.sites.columns.schedule}
                 </th>
                 <th scope="col" className={TH}>
                   {t.sites.columns.problems}
@@ -241,6 +244,9 @@ export function SitesPage() {
                   </td>
                   <td className={`${TD} text-muted`}>
                     <LastScanCell site={site} />
+                  </td>
+                  <td className={`${TD} ${site.schedule === 'off' ? 'text-muted' : ''}`}>
+                    {t.schedule.options[site.schedule]}
                   </td>
                   <td className={TD}>
                     <ProblemsCell site={site} />

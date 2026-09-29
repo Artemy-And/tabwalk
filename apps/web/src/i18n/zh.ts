@@ -31,6 +31,7 @@ export const zh: Messages = {
     columns: {
       site: '网站',
       lastScan: '上次检测',
+      schedule: '自动检测',
       problems: '问题',
       needsHuman: '需人工检查',
       trend: '最近检测',

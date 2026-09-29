@@ -35,6 +35,7 @@ export const es: Messages = {
     columns: {
       site: 'Sitio',
       lastScan: 'Último análisis',
+      schedule: 'Análisis automático',
       problems: 'Problemas',
       needsHuman: 'Revisión manual',
       trend: 'Análisis recientes',

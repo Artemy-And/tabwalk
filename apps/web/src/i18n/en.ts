@@ -33,6 +33,7 @@ export const en = {
     columns: {
       site: 'Site',
       lastScan: 'Last scan',
+      schedule: 'Auto scans',
       problems: 'Problems',
       needsHuman: 'Needs a human',
       trend: 'Recent scans',

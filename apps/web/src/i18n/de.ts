@@ -36,6 +36,7 @@ export const de: Messages = {
     columns: {
       site: 'Website',
       lastScan: 'Letzte Prüfung',
+      schedule: 'Auto-Prüfung',
       problems: 'Probleme',
       needsHuman: 'Manuell prüfen',
       trend: 'Letzte Prüfungen',

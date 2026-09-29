@@ -34,6 +34,7 @@ export const ru: Messages = {
     columns: {
       site: 'Сайт',
       lastScan: 'Последняя проверка',
+      schedule: 'Автопроверки',
       problems: 'Проблемы',
       needsHuman: 'Нужен человек',
       trend: 'Последние проверки',
