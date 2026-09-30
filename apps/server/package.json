@@ -8,6 +8,7 @@
     "dev:worker": "tsx watch src/index.ts worker",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx --test src/**/*.test.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/migrate.ts",
     "db:studio": "drizzle-kit studio"
