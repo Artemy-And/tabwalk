@@ -120,6 +120,7 @@ export const ru: Messages = {
       }),
     findingsHeading: 'Найденные проблемы',
     loadingFindings: 'Загружаем проблемы…',
+    exportCsv: 'Скачать CSV',
     filters: {
       label: 'Показать',
       all: 'Все',

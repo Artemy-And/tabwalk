@@ -93,6 +93,7 @@ export const zh: Messages = {
     pages: () => '已检测页面',
     findingsHeading: '检测结果',
     loadingFindings: '正在加载检测结果…',
+    exportCsv: '导出 CSV',
     filters: {
       label: '显示',
       all: '全部',

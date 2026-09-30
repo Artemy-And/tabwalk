@@ -2,7 +2,14 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { IssuesTable } from '../components/IssuesTable';
-import { Breadcrumbs, FilterChip, LiveStatus, PageHeader, StatCard } from '../components/ui';
+import {
+  Breadcrumbs,
+  ButtonLink,
+  FilterChip,
+  LiveStatus,
+  PageHeader,
+  StatCard,
+} from '../components/ui';
 import { useI18n } from '../i18n/context';
 import { api, type IssueGroup, isScanActive, POLL_INTERVAL_MS } from '../lib/api';
 import { formatDate } from '../lib/format';
@@ -86,6 +93,13 @@ export function ScanPage() {
 
       <PageHeader
         title={siteName}
+        actions={
+          done && (
+            <ButtonLink variant="secondary" href={api.issuesCsvUrl(scanId)} download>
+              {t.scan.exportCsv}
+            </ButtonLink>
+          )
+        }
         subtitle={
           <span aria-live="polite">
             {s.status === 'done' && t.scan.finished(date, s.pages)}

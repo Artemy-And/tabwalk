@@ -98,6 +98,7 @@ export const en = {
     pages: (n: number) => plural(n, { one: 'page checked', other: 'pages checked' }),
     findingsHeading: 'Findings',
     loadingFindings: 'Loading findings…',
+    exportCsv: 'Export CSV',
     filters: {
       label: 'Show',
       all: 'All',

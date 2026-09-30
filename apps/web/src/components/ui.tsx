@@ -1,4 +1,5 @@
 import type {
+  AnchorHTMLAttributes,
   ButtonHTMLAttributes,
   InputHTMLAttributes,
   ReactElement,
@@ -32,6 +33,19 @@ export function Button({
       className={`${BUTTON_BASE} ${BUTTON_STYLES[variant]} ${className}`}
       {...props}
     />
+  );
+}
+
+export function ButtonLink({
+  variant = 'primary',
+  className = '',
+  children,
+  ...props
+}: AnchorHTMLAttributes<HTMLAnchorElement> & { variant?: ButtonVariant }) {
+  return (
+    <a className={`${BUTTON_BASE} ${BUTTON_STYLES[variant]} ${className}`} {...props}>
+      {children}
+    </a>
   );
 }
 

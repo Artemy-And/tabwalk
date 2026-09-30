@@ -102,6 +102,7 @@ export const es: Messages = {
     pages: (n) => plural(n, { one: 'página revisada', other: 'páginas revisadas' }),
     findingsHeading: 'Hallazgos',
     loadingFindings: 'Cargando hallazgos…',
+    exportCsv: 'Exportar CSV',
     filters: {
       label: 'Mostrar',
       all: 'Todos',

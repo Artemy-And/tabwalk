@@ -122,4 +122,5 @@ export const api = {
   getScan: (id: string) => request<ScanDetail>(`/scans/${id}`),
   listIssues: (scanId: string) => request<IssueGroup[]>(`/scans/${scanId}/issues`),
   listFixed: (scanId: string) => request<IssueGroup[]>(`/scans/${scanId}/fixed`),
+  issuesCsvUrl: (scanId: string) => `${BASE}/scans/${scanId}/issues.csv`,
 };
