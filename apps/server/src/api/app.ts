@@ -1,7 +1,6 @@
 import { zValidator } from '@hono/zod-validator';
 import { and, desc, eq, getTableColumns, lt, lte, ne, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
-import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { z } from 'zod';
 import { db } from '../db/index.js';
@@ -166,7 +165,6 @@ function csvFilename(siteUrl: string | undefined, date: Date): string {
 export const app = new Hono();
 
 app.use('*', logger());
-app.use('/api/*', cors());
 
 app.get('/api/health', (c) => c.json({ ok: true }));
 
