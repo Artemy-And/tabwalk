@@ -39,7 +39,7 @@ Open http://localhost:8080 and add a site. It is scanned within 15 minutes and
 then weekly; pick daily or off on the site's page, or press **Run a scan** to
 check it right away.
 
-To pin a version instead of `latest`, set `TABWALK_VERSION=0.2.1` in `.env`.
+To pin a version instead of `latest`, set `TABWALK_VERSION=0.2.2` in `.env`.
 
 ### Try it on the demo shop
 
@@ -63,7 +63,7 @@ jobs:
   tabwalk:
     runs-on: ubuntu-latest
     steps:
-      - uses: Artemy-And/tabwalk@v0.2.1
+      - uses: Artemy-And/tabwalk@v0.2.2
         with:
           url: https://staging.example.com
           fail-on: serious
