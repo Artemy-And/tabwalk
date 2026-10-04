@@ -69,6 +69,7 @@
 
   :root {
     color-scheme: light dark;
+    scroll-padding-top: 7.5rem;
   }
 
   body {
