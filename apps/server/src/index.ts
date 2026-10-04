@@ -2,7 +2,7 @@ import { serve } from '@hono/node-server';
 import { app } from './api/app.js';
 import { pool } from './db/index.js';
 import { env } from './env.js';
-import { getBoss, SCAN_QUEUE, type ScanJob, stopBoss } from './queue/boss.js';
+import { createQueue, getBoss, SCAN_QUEUE, type ScanJob, stopBoss } from './queue/boss.js';
 import { enqueueDueScans, SCHEDULE_CRON, SCHEDULE_QUEUE } from './queue/schedule.js';
 import { runScan } from './scanner/runner.js';
 
@@ -29,7 +29,7 @@ async function startWorker(): Promise<void> {
     },
   );
 
-  await boss.createQueue(SCHEDULE_QUEUE);
+  await createQueue(boss, SCHEDULE_QUEUE);
   await boss.schedule(SCHEDULE_QUEUE, SCHEDULE_CRON);
   await boss.work(SCHEDULE_QUEUE, async () => {
     const queued = await enqueueDueScans();

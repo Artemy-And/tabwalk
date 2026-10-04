@@ -22,9 +22,21 @@ export async function getBoss(): Promise<PgBoss> {
   boss.on('error', (err) => console.error('[pg-boss]', err));
 
   await boss.start();
-  await boss.createQueue(SCAN_QUEUE);
+  await createQueue(boss, SCAN_QUEUE);
 
   return boss;
+}
+
+export async function createQueue(boss: PgBoss, name: string): Promise<void> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await boss.createQueue(name);
+      return;
+    } catch (err) {
+      // 40P01: the API and the worker created the queue at the same moment
+      if ((err as { code?: string }).code !== '40P01' || attempt >= 3) throw err;
+    }
+  }
 }
 
 export async function stopBoss(): Promise<void> {
