@@ -1,7 +1,9 @@
 body { margin: 0; font-family: Georgia, serif; color: #222; background: #fff; }
 header, footer, main { max-width: 960px; margin: 0 auto; padding: 16px; }
-header { display: flex; align-items: center; gap: 24px; border-bottom: 1px solid #eee; }
+header { display: flex; align-items: center; gap: 24px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 10; background: #fff; }
+.skip { position: absolute; left: -9999px; }
 nav a { margin-right: 16px; color: #333; }
+.crumbs { font-size: 14px; color: #666; }
 .hero { padding: 48px 16px; background: #f4efe6 url('img/hero.svg') center / cover; }
 .hero p { color: #b8b0a2; }
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -9,5 +11,8 @@ nav a { margin-right: 16px; color: #333; }
 .card img, .product img { width: 100%; height: auto; background: #f4efe6; }
 .price { color: #b3b3b3; font-size: 14px; }
 .add { width: 40px; height: 40px; border: 0; background: #2b6; color: #fff; border-radius: 50%; }
+.add:focus { outline: none; }
 main p a { color: #333; text-decoration: none; }
+main video, main iframe { display: block; margin-top: 16px; }
+.newsletter { margin-top: 32px; padding: 16px; background: #f4efe6; }
 footer { font-size: 13px; color: #999; }

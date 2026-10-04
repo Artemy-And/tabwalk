@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+  <a class="skip" href="#content">Skip to content</a>
   <header>
     <a href="/"><img src="/img/logo.svg" width="120" height="40"></a>
     <nav>
@@ -15,7 +16,7 @@
       <a href="/contact.html">Contact</a>
     </nav>
   </header>
-  <main>
+  <main id="content">
     <h1>Contact</h1>
     <form>
       <input type="text" placeholder="Your name">
@@ -24,10 +25,33 @@
       <textarea placeholder="Message"></textarea>
       <button><img src="/img/cart.svg"></button>
     </form>
+    <section class="newsletter" id="newsletter">
+      <h2>10% off your first order</h2>
+      <form>
+        <input type="email" placeholder="Email" aria-label="Email for the newsletter">
+        <button type="submit">Sign up</button>
+      </form>
+    </section>
   </main>
   <footer>
     <p>Questions about an order? <a href="/contact.html">Click here</a>.</p>
     <p>© Acme Store</p>
   </footer>
+  <script>
+    const box = document.getElementById('newsletter');
+    box.addEventListener('keydown', (event) => {
+      if (event.key !== 'Tab') return;
+      const fields = box.querySelectorAll('input, button');
+      const first = fields[0];
+      const last = fields[fields.length - 1];
+      if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      } else if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      }
+    });
+  </script>
 </body>
 </html>
