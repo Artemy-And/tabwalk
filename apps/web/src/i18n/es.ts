@@ -155,4 +155,9 @@ export const es: Messages = {
     done: 'Terminado',
     failed: 'Error',
   },
+  rules: {
+    'keyboard-trap': 'El foco del teclado no debe quedar atrapado en una parte de la página',
+    'focus-visible': 'El foco del teclado debe ser visible',
+    'focus-obscured': 'Los elementos con foco no deben quedar ocultos bajo otro contenido',
+  },
 };

@@ -143,4 +143,9 @@ export const zh: Messages = {
     done: '已完成',
     failed: '失败',
   },
+  rules: {
+    'keyboard-trap': '键盘焦点不得卡在页面的某一部分',
+    'focus-visible': '键盘焦点必须可见',
+    'focus-obscured': '获得焦点的元素不得被其他内容遮挡',
+  },
 };

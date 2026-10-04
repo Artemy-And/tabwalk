@@ -1,10 +1,11 @@
 import { type Browser, chromium } from 'playwright';
 import { axeChecker } from './checkers/axe.js';
+import { keyboardChecker } from './checkers/keyboard.js';
 import { USER_AGENT } from './crawl.js';
 import { fingerprint } from './fingerprint.js';
 import type { Checker, CheckFinding } from './types.js';
 
-const CHECKERS: Checker[] = [axeChecker];
+const CHECKERS: Checker[] = [axeChecker, keyboardChecker];
 
 export interface PageFinding extends CheckFinding {
   checker: string;

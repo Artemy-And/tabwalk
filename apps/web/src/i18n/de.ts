@@ -156,4 +156,9 @@ export const de: Messages = {
     done: 'Fertig',
     failed: 'Fehlgeschlagen',
   },
+  rules: {
+    'keyboard-trap': 'Der Tastaturfokus darf nicht in einem Teil der Seite hängen bleiben',
+    'focus-visible': 'Der Tastaturfokus muss sichtbar sein',
+    'focus-obscured': 'Fokussierte Elemente dürfen nicht von anderen Inhalten verdeckt werden',
+  },
 };

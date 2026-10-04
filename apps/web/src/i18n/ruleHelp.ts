@@ -10,7 +10,8 @@ function loaderFor(locale: Locale) {
 }
 
 export function useRuleHelp(): (ruleId: string, fallback: string) => string {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
+  const own: Partial<RuleHelp> = t.rules;
 
   const { data } = useQuery({
     queryKey: ['rule-help', locale],
@@ -19,5 +20,5 @@ export function useRuleHelp(): (ruleId: string, fallback: string) => string {
     staleTime: Number.POSITIVE_INFINITY,
   });
 
-  return (ruleId, fallback) => data?.[ruleId] ?? fallback;
+  return (ruleId, fallback) => own[ruleId] ?? data?.[ruleId] ?? fallback;
 }

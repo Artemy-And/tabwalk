@@ -1,6 +1,4 @@
-import { chromium } from 'playwright';
-import { axeChecker } from './scanner/checkers/axe.js';
-import { fingerprint } from './scanner/fingerprint.js';
+import { checkPage, launchBrowser } from './scanner/check.js';
 
 const target = process.argv[2];
 if (!target) {
@@ -10,28 +8,27 @@ if (!target) {
 
 const url = target.startsWith('http') ? target : `file://${target}`;
 
-const browser = await chromium.launch({
-  args: ['--no-sandbox', '--disable-dev-shm-usage'],
-  ...(process.env.CHROMIUM_EXECUTABLE ? { executablePath: process.env.CHROMIUM_EXECUTABLE } : {}),
-});
-
-const context = await browser.newContext({ reducedMotion: 'reduce' });
-const page = await context.newPage();
-await page.goto(url, { waitUntil: 'domcontentloaded' });
-
-const findings = await axeChecker.run(page);
+const browser = await launchBrowser(process.env.CHROMIUM_EXECUTABLE);
+const started = Date.now();
+const { findings } = await checkPage(browser, url, 30_000);
 
 const violations = findings.filter((f) => f.kind === 'violation');
 const incomplete = findings.filter((f) => f.kind === 'incomplete');
 
-console.log(`\nViolations: ${violations.length}, need a human: ${incomplete.length}\n`);
+console.log(
+  `\nViolations: ${violations.length}, need a human: ${incomplete.length}, ` +
+    `${((Date.now() - started) / 1000).toFixed(1)}s\n`,
+);
 
 for (const f of findings) {
-  const mark = f.kind === 'violation' ? '✗' : '?';
-  console.log(`${mark} [${f.impact ?? 'n/a'}] ${f.ruleId} — ${f.help}`);
+  const mark = f.kind === 'violation' ? '✗' : f.kind === 'incomplete' ? '?' : '·';
+  console.log(`${mark} [${f.impact ?? 'n/a'}] ${f.checker}/${f.ruleId} — ${f.help}`);
   console.log(`   wcag: ${f.wcagTags.join(', ') || '—'}`);
-  console.log(`   fingerprint: ${fingerprint(f.ruleId, f.html)}`);
-  console.log(`   ${f.html.slice(0, 90)}\n`);
+  console.log(`   fingerprint: ${f.fingerprint}`);
+  console.log(`   ${f.target.join(' ')}`);
+  console.log(`   ${f.html.slice(0, 90)}`);
+  if (f.failureSummary && f.checker !== 'axe-core') console.log(`   ${f.failureSummary}`);
+  console.log();
 }
 
 await browser.close();

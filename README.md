@@ -8,8 +8,9 @@
 **See what's actually broken. On your own server.**
 
 Self-hosted accessibility monitoring. Tabwalk crawls your site every day or
-every week, checks each page with axe-core, collapses repeated problems into
-one row, and shows what is new and what got fixed since the last scan.
+every week, checks each page with axe-core, presses Tab through it, collapses
+repeated problems into one row, and shows what is new and what got fixed since
+the last scan.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/report-dark.png">
@@ -24,7 +25,29 @@ One command to install. No Redis — the job queue lives in the same Postgres.
 
 Named after the tab walk — pressing Tab through a page to see whether every
 control can be reached and used without a mouse. It is the first thing an
-accessibility tester does by hand.
+accessibility tester does by hand, and Tabwalk does it on every page it scans.
+
+## What it checks
+
+Every page is opened in Chromium and checked twice:
+
+- **axe-core** runs the WCAG 2.2 A and AA rules against the markup.
+- **The tab walk** presses Tab and Shift+Tab through the page and follows the
+  skip link, looking for what only shows up when you use the keyboard:
+
+| Rule | WCAG | What it finds |
+|---|---|---|
+| `keyboard-trap` | 2.1.2 | Focus that cannot leave a widget, a form or a frame |
+| `focus-visible` | 2.4.7 | Elements that take focus while nothing changes on the screen |
+| `focus-obscured` | 2.4.11 | Focused elements hidden under a sticky header, a cookie banner or other fixed content |
+
+What a script cannot decide on its own, such as a loop that Shift+Tab can leave
+or a text field whose only sign of focus is the caret, goes to **needs a human**
+instead of the problem count.
+
+Problems are WCAG 2.2 A/AA failures only. axe-core `best-practice` rules run
+too, but they are shown apart as recommendations: they are not counted as
+problems and never fail the GitHub Action.
 
 ## Quick start
 
@@ -173,7 +196,10 @@ apps/server/src/
     types.ts            Checker interface — the extension point
     crawl.ts            sitemap.xml, falling back to link discovery
     fingerprint.ts      collapses repeated findings
-    checkers/axe.ts     the axe-core checker
+    checkers/
+      axe.ts            the axe-core checker
+      keyboard.ts       the tab walk: traps, invisible and hidden focus
+      keyboard-page.ts  its helpers that run inside the page
     check.ts            opens one page and runs every checker
     runner.ts           orchestrates one scan
   ci.ts                 command-line check used by the GitHub Action
@@ -214,10 +240,6 @@ suggested code fixes (suggested — never applied automatically).
 
 Known MVP gaps: no authentication (a single organization) and pages behind a
 login are not scanned.
-
-Problems are WCAG 2.2 A/AA failures only. axe-core `best-practice` rules run
-too, but they are shown apart as recommendations: they are not counted as
-problems and never fail the GitHub Action.
 
 ## Community
 

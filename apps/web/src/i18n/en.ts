@@ -150,6 +150,11 @@ export const en = {
     done: 'Done',
     failed: 'Failed',
   },
+  rules: {
+    'keyboard-trap': 'Keyboard focus must not get stuck in one part of the page',
+    'focus-visible': 'Keyboard focus must be visible',
+    'focus-obscured': 'Focused elements must not be hidden under other content',
+  },
 };
 
 export type Messages = typeof en;
