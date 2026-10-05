@@ -1,4 +1,5 @@
 import { createRootRoute, createRoute, createRouter } from '@tanstack/react-router';
+import { AccountPage } from './pages/AccountPage';
 import { PagePage } from './pages/PagePage';
 import { RootLayout } from './pages/RootLayout';
 import { ScanPage } from './pages/ScanPage';
@@ -31,7 +32,19 @@ const pageRoute = createRoute({
   component: PagePage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, siteRoute, scanRoute, pageRoute]);
+const accountRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/account',
+  component: AccountPage,
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  siteRoute,
+  scanRoute,
+  pageRoute,
+  accountRoute,
+]);
 
 export const router = createRouter({ routeTree });
 

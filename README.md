@@ -72,9 +72,17 @@ cp .env.example .env      # Windows: copy .env.example .env
 docker compose up -d
 ```
 
-Open http://localhost:8080 and add a site. It is scanned within 15 minutes and
-then weekly; pick daily or off on the site's page, or press **Run a scan** to
-check it right away.
+Open http://localhost:8080, create the admin account and add a site. It is
+scanned within 15 minutes and then weekly; pick daily or off on the site's page,
+or press **Run a scan** to check it right away.
+
+The first person to open a new Tabwalk creates the admin account, so do it
+before the dashboard is reachable by anyone else. Lost the password? This prints
+a new one:
+
+```bash
+docker compose exec api node dist/reset-password.js you@example.com
+```
 
 To pin a version instead of `latest`, set `TABWALK_VERSION=0.2.2` in `.env`.
 
@@ -203,6 +211,7 @@ runs the schedule: every 15 minutes it queues a scan for each site that is due.
 ```
 apps/server/src/
   api/app.ts            Hono routes
+  auth/                 sign-in, sessions and password hashing
   db/schema.ts          Drizzle tables
   queue/boss.ts         pg-boss setup
   queue/schedule.ts     daily and weekly scans
@@ -232,6 +241,7 @@ All of it lives in `.env`:
 | `SCAN_CONCURRENCY` | 3 | Tabs at once. Each costs 300–500 MB |
 | `PAGE_TIMEOUT_MS` | 30000 | Per-page load timeout |
 | `CHROMIUM_EXECUTABLE` | — | Your own Chromium, if the bundled one won't start |
+| `PUBLIC_URL` | — | The dashboard's address, e.g. `https://a11y.example.com`. Makes the sign-in cookie Secure |
 
 ## Accessibility of Tabwalk itself
 
@@ -252,7 +262,7 @@ Phase 2 adds the AI layer: plain-language reports, the `incomplete` bucket
 turned into a manual-review checklist, alt-text judged by a vision model, and
 suggested code fixes (suggested — never applied automatically).
 
-Known MVP gaps: no authentication (a single organization) and pages behind a
+Known MVP gaps: one organization with one admin account, and pages behind a
 login are not scanned.
 
 ## Community

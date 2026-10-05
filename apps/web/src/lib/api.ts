@@ -1,5 +1,14 @@
 const BASE = import.meta.env.VITE_API_URL ?? '/api';
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers);
   if (!headers.has('content-type')) headers.set('content-type', 'application/json');
@@ -14,7 +23,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       // ignore
     }
-    throw new Error(message);
+    throw new ApiError(message, res.status);
   }
 
   if (res.status === 204) return undefined as T;
@@ -135,7 +144,29 @@ export interface PageDetail {
   tabOrder: { width: number; height: number; stops: TabStop[] } | null;
 }
 
+export interface AuthConfig {
+  setup: boolean;
+  sso: { label: string } | null;
+}
+
+export interface Me {
+  email: string;
+  name: string | null;
+  hasPassword: boolean;
+}
+
+const post = (path: string, body: unknown) =>
+  request<unknown>(path, { method: 'POST', body: JSON.stringify(body) });
+
 export const api = {
+  authConfig: () => request<AuthConfig>('/auth/config'),
+  me: () => request<Me>('/auth/me'),
+  setup: (body: { email: string; password: string }) => post('/auth/setup', body),
+  login: (body: { email: string; password: string }) => post('/auth/login', body),
+  logout: () => post('/auth/logout', {}),
+  changePassword: (body: { current: string; password: string }) => post('/auth/password', body),
+  ssoUrl: `${BASE}/auth/oidc/start`,
+
   listSites: () => request<SiteRow[]>('/sites'),
   createSite: (body: { name: string; url: string; schedule: ScanSchedule }) =>
     request<Site>('/sites', { method: 'POST', body: JSON.stringify(body) }),

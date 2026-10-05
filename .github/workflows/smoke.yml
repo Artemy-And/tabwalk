@@ -34,45 +34,49 @@ jobs:
 
       - name: Add a site and scan it
         run: |
-          site=$(curl -sf -X POST http://localhost:8080/api/sites \
+          # creates the first account; images before 0.3.0 have no sign-in and answer 404
+          curl -s -o /dev/null -c cookies.txt -X POST http://localhost:8080/api/auth/setup \
+            -H 'content-type: application/json' \
+            -d '{"email":"smoke@example.com","password":"smoke-test-password"}'
+          site=$(curl -sf -b cookies.txt -X POST http://localhost:8080/api/sites \
             -H 'content-type: application/json' \
             -d '{"name":"Tabwalk","url":"https://tabwalk.dev"}' | jq -r .id)
-          scan=$(curl -sf -X POST "http://localhost:8080/api/sites/$site/scans" | jq -r .id)
+          scan=$(curl -sf -b cookies.txt -X POST "http://localhost:8080/api/sites/$site/scans" | jq -r .id)
           start=$(date +%s)
           while :; do
-            status=$(curl -sf "http://localhost:8080/api/scans/$scan" | jq -r .status)
+            status=$(curl -sf -b cookies.txt "http://localhost:8080/api/scans/$scan" | jq -r .status)
             [ "$status" = done ] && break
             [ "$status" = failed ] && { curl -s "http://localhost:8080/api/scans/$scan" | jq; exit 1; }
             [ $(( $(date +%s) - start )) -gt 300 ] && { echo "Scan timed out ($status)"; exit 1; }
             sleep 3
           done
-          curl -sf "http://localhost:8080/api/scans/$scan" | jq '{status, pages, summary}'
-          pages=$(curl -sf "http://localhost:8080/api/scans/$scan" | jq .pages)
+          curl -sf -b cookies.txt "http://localhost:8080/api/scans/$scan" | jq '{status, pages, summary}'
+          pages=$(curl -sf -b cookies.txt "http://localhost:8080/api/scans/$scan" | jq .pages)
           [ "$pages" -ge 1 ] || { echo "No pages were checked"; exit 1; }
           curl -sf http://localhost:8080/ | grep -q '<title>' || { echo "Dashboard did not load"; exit 1; }
 
       - name: Scan the demo shop
         run: |
-          site=$(curl -sf -X POST http://localhost:8080/api/sites             -H 'content-type: application/json'             -d '{"name":"Acme Store","url":"http://acmestore.example/"}' | jq -r .id)
-          scan=$(curl -sf -X POST "http://localhost:8080/api/sites/$site/scans" | jq -r .id)
+          site=$(curl -sf -b cookies.txt -X POST http://localhost:8080/api/sites             -H 'content-type: application/json'             -d '{"name":"Acme Store","url":"http://acmestore.example/"}' | jq -r .id)
+          scan=$(curl -sf -b cookies.txt -X POST "http://localhost:8080/api/sites/$site/scans" | jq -r .id)
           start=$(date +%s)
           while :; do
-            status=$(curl -sf "http://localhost:8080/api/scans/$scan" | jq -r .status)
+            status=$(curl -sf -b cookies.txt "http://localhost:8080/api/scans/$scan" | jq -r .status)
             [ "$status" = done ] && break
             [ "$status" = failed ] && { curl -s "http://localhost:8080/api/scans/$scan" | jq; exit 1; }
             [ $(( $(date +%s) - start )) -gt 300 ] && { echo "Demo scan timed out ($status)"; exit 1; }
             sleep 3
           done
-          result=$(curl -sf "http://localhost:8080/api/scans/$scan")
+          result=$(curl -sf -b cookies.txt "http://localhost:8080/api/scans/$scan")
           echo "$result" | jq '{pages, summary}'
           [ "$(echo "$result" | jq .pages)" -eq 6 ] || { echo "Expected 6 demo pages"; exit 1; }
           [ "$(echo "$result" | jq .summary.uniqueProblems)" -ge 10 ] || { echo "Expected the demo shop's known problems"; exit 1; }
 
       - name: Check scheduled scans
         run: |
-          site=$(curl -sf http://localhost:8080/api/sites | jq -r '.[] | select(.name == "Acme Store") | .id')
-          curl -sf "http://localhost:8080/api/sites/$site" | jq -e '.schedule == "weekly" and .nextScanAt != null'
-          curl -sf -X PATCH "http://localhost:8080/api/sites/$site" \
+          site=$(curl -sf -b cookies.txt http://localhost:8080/api/sites | jq -r '.[] | select(.name == "Acme Store") | .id')
+          curl -sf -b cookies.txt "http://localhost:8080/api/sites/$site" | jq -e '.schedule == "weekly" and .nextScanAt != null'
+          curl -sf -b cookies.txt -X PATCH "http://localhost:8080/api/sites/$site" \
             -H 'content-type: application/json' \
             -d '{"schedule":"off"}' | jq -e '.schedule == "off" and .nextScanAt == null'
           docker compose exec -T db sh -c \

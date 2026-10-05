@@ -3,29 +3,13 @@ import { and, desc, eq, getTableColumns, lt, lte, ne, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { z } from 'zod';
+import { authRoutes } from '../auth/routes.js';
+import { type AuthEnv, requireUser } from '../auth/session.js';
 import { db } from '../db/index.js';
-import {
-  issues,
-  organizations,
-  pages,
-  type Scan,
-  scanSchedule,
-  scans,
-  sites,
-  tabOrders,
-} from '../db/schema.js';
+import { defaultOrgId } from '../db/org.js';
+import { issues, pages, type Scan, scanSchedule, scans, sites, tabOrders } from '../db/schema.js';
 import { enqueueScan, nextScanAt } from '../queue/schedule.js';
 import { toCsv } from './csv.js';
-
-async function defaultOrgId(): Promise<string> {
-  const existing = await db.query.organizations.findFirst();
-  if (existing) return existing.id;
-
-  const [created] = await db.insert(organizations).values({ name: 'My organization' }).returning();
-
-  if (!created) throw new Error('Could not create the default organization');
-  return created.id;
-}
 
 const uuidParam = z.object({ id: z.string().uuid() });
 
@@ -172,11 +156,18 @@ function csvFilename(siteUrl: string | undefined, date: Date): string {
   return `tabwalk-${host}-${date.toISOString().slice(0, 10)}.csv`;
 }
 
-export const app = new Hono();
+export const app = new Hono<AuthEnv>();
 
 app.use('*', logger());
 
 app.get('/api/health', (c) => c.json({ ok: true }));
+
+app.route('/api/auth', authRoutes);
+
+app.use('/api/*', async (c, next) => {
+  if (c.req.path === '/api/health' || c.req.path.startsWith('/api/auth/')) return next();
+  return requireUser(c, next);
+});
 
 app.get('/api/sites', async (c) => {
   const rows = await db
