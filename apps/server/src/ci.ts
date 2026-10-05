@@ -100,6 +100,8 @@ if (failOn !== 'none' && !IMPACTS.includes(failOn)) {
   fail(`--fail-on must be one of ${[...IMPACTS, 'none'].join(', ')}, got "${failOn}"`);
 }
 
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
 const maxPages = positiveInt('max-pages', values['max-pages']);
 const concurrency = positiveInt('concurrency', values.concurrency);
 const timeoutMs = positiveInt('timeout', values.timeout);
@@ -110,7 +112,7 @@ if (urls.length === 0) {
   process.exit(2);
 }
 
-console.log(`Checking ${urls.length} pages of ${siteUrl}`);
+console.log(`Checking ${plural(urls.length, 'page')} of ${siteUrl}`);
 
 const browser = await launchBrowser(process.env.CHROMIUM_EXECUTABLE);
 const groups = new Map<string, Group>();
@@ -188,16 +190,16 @@ await writeFile(
 );
 
 const headline =
-  `${checked} pages checked · ${summary.uniqueProblems} unique problems ` +
-  `on ${summary.elements} elements (${summary.critical} critical, ${summary.serious} serious) · ` +
-  `${summary.incomplete} need a human · ${summary.recommendations} recommendations`;
+  `${plural(checked, 'page')} checked · ${plural(summary.uniqueProblems, 'unique problem')} ` +
+  `on ${plural(summary.elements, 'element')} (${summary.critical} critical, ${summary.serious} serious) · ` +
+  `${summary.incomplete} need a human · ${plural(summary.recommendations, 'recommendation')}`;
 
 console.log(headline);
 for (const g of violations) {
-  const pages = `${g.pages.length} ${g.pages.length === 1 ? 'page' : 'pages'}`;
+  const pages = plural(g.pages.length, 'page');
   console.log(`  [${g.impact}] ${g.ruleId} ${g.target.join(' ')}: ${g.help} (${pages})`);
 }
-if (failedPages.length > 0) console.log(`${failedPages.length} pages failed to load`);
+if (failedPages.length > 0) console.log(`${plural(failedPages.length, 'page')} failed to load`);
 console.log(`Report written to ${values.report}`);
 
 if (process.env.GITHUB_STEP_SUMMARY) {
@@ -205,14 +207,14 @@ if (process.env.GITHUB_STEP_SUMMARY) {
   if (violations.length > 0) parts.push(table(violations));
   if (incomplete.length > 0) {
     parts.push(
-      `<details><summary>${incomplete.length} results need a human</summary>\n\n${table(
+      `<details><summary>${plural(incomplete.length, 'result')} ${incomplete.length === 1 ? 'needs' : 'need'} a human</summary>\n\n${table(
         incomplete,
       )}\n\n</details>`,
     );
   }
   if (recommendations.length > 0) {
     parts.push(
-      `<details><summary>${recommendations.length} recommendations beyond WCAG</summary>
+      `<details><summary>${plural(recommendations.length, 'recommendation')} beyond WCAG</summary>
 
 ${table(recommendations)}
 
@@ -221,7 +223,7 @@ ${table(recommendations)}
   }
   if (failedPages.length > 0) {
     parts.push(
-      `${failedPages.length} pages failed to load: ${failedPages.map((p) => p.url).join(', ')}`,
+      `${plural(failedPages.length, 'page')} failed to load: ${failedPages.map((p) => p.url).join(', ')}`,
     );
   }
   parts.push(
