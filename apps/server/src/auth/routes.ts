@@ -1,8 +1,8 @@
-import { zValidator } from '@hono/zod-validator';
 import { eq, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { z } from 'zod';
+import { json } from '../api/validate.js';
 import { db } from '../db/index.js';
 import { defaultOrgId } from '../db/org.js';
 import { sessions, users } from '../db/schema.js';
@@ -17,14 +17,6 @@ const SETUP_LOCK = 7_331_001;
 
 const passwordSchema = z.string().min(8, 'Use at least 8 characters').max(256);
 const emailSchema = z.string().trim().toLowerCase().email('Enter a valid email address');
-
-function json<T extends z.ZodTypeAny>(schema: T) {
-  return zValidator('json', schema, (result, c) => {
-    if (!result.success) {
-      return c.json({ error: result.error.issues[0]?.message ?? 'Invalid request' }, 400);
-    }
-  });
-}
 
 async function needsSetup(): Promise<boolean> {
   const [row] = await db.select({ count: sql<number>`count(*)::int` }).from(users);

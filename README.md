@@ -9,8 +9,9 @@
 
 Self-hosted accessibility monitoring. Tabwalk crawls your site every day or
 every week, checks each page with axe-core, presses Tab through it, collapses
-repeated problems into one row, and shows what is new and what got fixed since
-the last scan.
+repeated problems into one row, shows what is new and what got fixed since the
+last scan, and tells Slack, Discord, ntfy or your inbox when something new
+breaks.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/report-dark.png">
@@ -213,6 +214,7 @@ apps/server/src/
   api/app.ts            Hono routes
   auth/                 sign-in, sessions and password hashing
   db/schema.ts          Drizzle tables
+  notify/               Slack, Discord, ntfy, webhook and email messages
   queue/boss.ts         pg-boss setup
   queue/schedule.ts     daily and weekly scans
   scanner/
@@ -242,6 +244,19 @@ All of it lives in `.env`:
 | `PAGE_TIMEOUT_MS` | 30000 | Per-page load timeout |
 | `CHROMIUM_EXECUTABLE` | — | Your own Chromium, if the bundled one won't start |
 | `PUBLIC_URL` | — | The dashboard's address, e.g. `https://a11y.example.com`. Makes the sign-in cookie Secure |
+
+### Notifications
+
+Under **Settings**, add a Slack, Discord or ntfy channel, a webhook that gets
+JSON, or an email address. Tabwalk sends a message when a scan finds new
+problems, when a site gets its first scan and when a scan fails. Set
+`PUBLIC_URL` so every message links to its report. Email goes out through your
+own SMTP server:
+
+```bash
+SMTP_URL=smtps://user:password@smtp.example.com:465
+SMTP_FROM=Tabwalk <tabwalk@example.com>
+```
 
 ### Single sign-on
 

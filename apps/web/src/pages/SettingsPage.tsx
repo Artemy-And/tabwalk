@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type SubmitEvent, useState } from 'react';
+import { NotificationsSection } from '../components/NotificationsSection';
 import { Button, Card, Field, PageHeader } from '../components/ui';
 import { useI18n } from '../i18n/context';
 import { api } from '../lib/api';
@@ -24,9 +25,9 @@ function PasswordForm() {
 
   return (
     <Card className="flex max-w-[480px] flex-col gap-4 p-5">
-      <h2 id="password-heading" className="text-[17px] font-semibold">
+      <h3 id="password-heading" className="text-[17px] font-semibold">
         {t.account.passwordHeading}
-      </h2>
+      </h3>
       <form aria-labelledby="password-heading" onSubmit={onSubmit} className="flex flex-col gap-4">
         <Field
           label={t.account.current}
@@ -62,7 +63,7 @@ function PasswordForm() {
   );
 }
 
-export function AccountPage() {
+export function SettingsPage() {
   const { t } = useI18n();
   const qc = useQueryClient();
   const me = useQuery({ queryKey: ['me'], queryFn: api.me });
@@ -75,9 +76,9 @@ export function AccountPage() {
   if (!me.data) return null;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10">
       <PageHeader
-        title={t.account.title}
+        title={t.settings.title}
         subtitle={t.account.signedInAs(me.data.email)}
         actions={
           <Button variant="secondary" onClick={() => signOut.mutate()} disabled={signOut.isPending}>
@@ -85,11 +86,17 @@ export function AccountPage() {
           </Button>
         }
       />
-      {me.data.hasPassword ? (
-        <PasswordForm />
-      ) : (
-        <p className="text-[15px] text-muted">{t.account.ssoOnly}</p>
-      )}
+      <NotificationsSection />
+      <section aria-labelledby="account-heading" className="flex flex-col gap-4">
+        <h2 id="account-heading" className="text-[22px] font-bold tracking-[-0.01em]">
+          {t.account.title}
+        </h2>
+        {me.data.hasPassword ? (
+          <PasswordForm />
+        ) : (
+          <p className="text-[15px] text-muted">{t.account.ssoOnly}</p>
+        )}
+      </section>
     </div>
   );
 }

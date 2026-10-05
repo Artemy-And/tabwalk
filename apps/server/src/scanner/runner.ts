@@ -1,8 +1,9 @@
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, isNotNull, sql } from 'drizzle-orm';
 import type { Browser } from 'playwright';
 import { db } from '../db/index.js';
 import { issues, pages, scans, sites, tabOrders } from '../db/schema.js';
 import { env } from '../env.js';
+import { notifyScan } from '../notify/notify.js';
 import { checkPage, launchBrowser, mapWithConcurrency } from './check.js';
 import { discoverUrls } from './crawl.js';
 
@@ -53,7 +54,8 @@ async function scanOnePage(browser: Browser, scanId: string, url: string): Promi
 
     return true;
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    // Playwright appends a multi-line call log; the first line says what went wrong
+    const message = (err instanceof Error ? err.message : String(err)).split('\n')[0] ?? '';
     await db
       .insert(pages)
       .values({ scanId, url, error: message })
@@ -101,6 +103,13 @@ export async function runScan(scanId: string): Promise<void> {
     });
 
     const ok = outcomes.filter(Boolean).length;
+    if (ok === 0) {
+      const failed = await db.query.pages.findFirst({
+        where: and(eq(pages.scanId, scanId), isNotNull(pages.error)),
+        columns: { error: true },
+      });
+      throw new Error(`No page could be loaded: ${failed?.error ?? 'unknown error'}`);
+    }
 
     await db
       .update(scans)
@@ -131,4 +140,11 @@ export async function runScan(scanId: string): Promise<void> {
   } finally {
     await browser?.close().catch(() => {});
   }
+
+  await notifyScan(scanId).catch((err: unknown) => {
+    console.warn(
+      `[scan ${scanId}] notifications failed:`,
+      err instanceof Error ? err.message : err,
+    );
+  });
 }

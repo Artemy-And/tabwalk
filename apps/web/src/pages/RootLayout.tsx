@@ -21,7 +21,7 @@ export function RootLayout() {
     queryFn: api.authConfig,
     enabled: signedOut,
   });
-  const onAccount = pathname.startsWith('/account');
+  const onSettings = pathname.startsWith('/settings');
 
   let content = <LiveStatus>{t.auth.checking}</LiveStatus>;
   if (me.data) content = <Outlet />;
@@ -58,12 +58,15 @@ export function RootLayout() {
                 <Link
                   to="/"
                   activeOptions={{ exact: true }}
-                  className={`${NAV_LINK} ${onAccount ? NAV_IDLE : NAV_ACTIVE}`}
+                  className={`${NAV_LINK} ${onSettings ? NAV_IDLE : NAV_ACTIVE}`}
                 >
                   {t.layout.sites}
                 </Link>
-                <Link to="/account" className={`${NAV_LINK} ${onAccount ? NAV_ACTIVE : NAV_IDLE}`}>
-                  {t.layout.account}
+                <Link
+                  to="/settings"
+                  className={`${NAV_LINK} ${onSettings ? NAV_ACTIVE : NAV_IDLE}`}
+                >
+                  {t.layout.settings}
                 </Link>
               </>
             )}

@@ -144,6 +144,24 @@ export interface PageDetail {
   tabOrder: { width: number; height: number; stops: TabStop[] } | null;
 }
 
+export type ChannelKind = 'slack' | 'discord' | 'ntfy' | 'webhook' | 'email';
+
+export const CHANNEL_KINDS: ChannelKind[] = ['slack', 'discord', 'ntfy', 'webhook', 'email'];
+
+export interface Channel {
+  id: string;
+  kind: ChannelKind;
+  target: string;
+  lastSentAt: string | null;
+  lastError: string | null;
+}
+
+export interface Notifications {
+  email: boolean;
+  links: boolean;
+  channels: Channel[];
+}
+
 export interface AuthConfig {
   setup: boolean;
   sso: { label: string } | null;
@@ -166,6 +184,11 @@ export const api = {
   logout: () => post('/auth/logout', {}),
   changePassword: (body: { current: string; password: string }) => post('/auth/password', body),
   ssoUrl: `${BASE}/auth/oidc/start`,
+  notifications: () => request<Notifications>('/notifications'),
+  addChannel: (body: { kind: ChannelKind; target: string }) =>
+    request<Channel>('/notifications', { method: 'POST', body: JSON.stringify(body) }),
+  removeChannel: (id: string) => request<undefined>(`/notifications/${id}`, { method: 'DELETE' }),
+  testChannel: (id: string) => request<Channel>(`/notifications/${id}/test`, { method: 'POST' }),
 
   listSites: () => request<SiteRow[]>('/sites'),
   createSite: (body: { name: string; url: string; schedule: ScanSchedule }) =>

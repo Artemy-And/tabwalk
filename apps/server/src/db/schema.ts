@@ -42,6 +42,24 @@ export const sessions = pgTable(
   (t) => [index('sessions_user_idx').on(t.userId)],
 );
 
+export const channelKind = pgEnum('channel_kind', ['slack', 'discord', 'ntfy', 'webhook', 'email']);
+
+export const channels = pgTable(
+  'notification_channels',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    kind: channelKind('kind').notNull(),
+    target: text('target').notNull(),
+    lastSentAt: timestamp('last_sent_at', { withTimezone: true }),
+    lastError: text('last_error'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('notification_channels_org_idx').on(t.orgId)],
+);
+
 export const scanSchedule = pgEnum('scan_schedule', ['off', 'daily', 'weekly']);
 
 export const sites = pgTable(
@@ -145,6 +163,8 @@ export const issues = pgTable(
 );
 
 export type User = typeof users.$inferSelect;
+export type Channel = typeof channels.$inferSelect;
+export type ChannelKind = (typeof channelKind.enumValues)[number];
 export type Site = typeof sites.$inferSelect;
 export type ScanSchedule = (typeof scanSchedule.enumValues)[number];
 export type Scan = typeof scans.$inferSelect;

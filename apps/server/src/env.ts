@@ -28,6 +28,8 @@ const schema = z
     OIDC_CLIENT_SECRET: optional(z.string()),
     OIDC_LABEL: optional(z.string()),
     OIDC_ALLOWED_DOMAINS: list,
+    SMTP_URL: optional(z.string().url()),
+    SMTP_FROM: optional(z.string()),
   })
   .superRefine((value, ctx) => {
     if (!value.OIDC_ISSUER) return;

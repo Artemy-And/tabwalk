@@ -8,6 +8,7 @@ import { type AuthEnv, requireUser } from '../auth/session.js';
 import { db } from '../db/index.js';
 import { defaultOrgId } from '../db/org.js';
 import { issues, pages, type Scan, scanSchedule, scans, sites, tabOrders } from '../db/schema.js';
+import { notificationRoutes } from '../notify/routes.js';
 import { enqueueScan, nextScanAt } from '../queue/schedule.js';
 import { toCsv } from './csv.js';
 
@@ -168,6 +169,8 @@ app.use('/api/*', async (c, next) => {
   if (c.req.path === '/api/health' || c.req.path.startsWith('/api/auth/')) return next();
   return requireUser(c, next);
 });
+
+app.route('/api/notifications', notificationRoutes);
 
 app.get('/api/sites', async (c) => {
   const rows = await db
