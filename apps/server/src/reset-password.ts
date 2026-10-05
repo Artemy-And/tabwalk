@@ -31,6 +31,4 @@ await db
 await db.delete(sessions).where(eq(sessions.userId, user.id));
 await pool.end();
 
-console.log(
-  `New password for ${email}: ${password}\nChange it on the Account page after signing in.`,
-);
+console.log(`New password for ${email}: ${password}\nChange it under Settings after signing in.`);

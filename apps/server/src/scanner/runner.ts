@@ -85,7 +85,9 @@ export async function runScan(scanId: string): Promise<void> {
     const urls = await discoverUrls(site.url, env.MAX_PAGES_PER_SCAN);
     if (urls.length === 0) throw new Error('No pages found to scan');
 
-    console.log(`[scan ${scanId}] ${site.url}: ${urls.length} pages to check`);
+    console.log(
+      `[scan ${scanId}] ${site.url}: ${urls.length} ${urls.length === 1 ? 'page' : 'pages'} to check`,
+    );
 
     browser = await launchBrowser(env.CHROMIUM_EXECUTABLE);
 
