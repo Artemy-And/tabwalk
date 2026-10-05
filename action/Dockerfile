@@ -1,4 +1,4 @@
-ARG IMAGE=ghcr.io/artemy-and/tabwalk-server:0.2.3
+ARG IMAGE=ghcr.io/artemy-and/tabwalk-server:0.3.0
 FROM ${IMAGE}
 
 # GitHub mounts the workspace and job summary files owned by the runner user
