@@ -243,6 +243,24 @@ All of it lives in `.env`:
 | `CHROMIUM_EXECUTABLE` | — | Your own Chromium, if the bundled one won't start |
 | `PUBLIC_URL` | — | The dashboard's address, e.g. `https://a11y.example.com`. Makes the sign-in cookie Secure |
 
+### Single sign-on
+
+Google Workspace, Microsoft Entra ID, Keycloak, Authentik or any other OpenID
+Connect provider can sign people in next to the password:
+
+```bash
+PUBLIC_URL=https://a11y.example.com
+OIDC_ISSUER=https://accounts.google.com
+OIDC_CLIENT_ID=...
+OIDC_CLIENT_SECRET=...
+OIDC_LABEL=Sign in with Google
+OIDC_ALLOWED_DOMAINS=example.com
+```
+
+Register `https://a11y.example.com/api/auth/oidc/callback` as the redirect URI.
+People from `OIDC_ALLOWED_DOMAINS` get an account on their first sign-in; anyone
+else needs an account with the same email first.
+
 ## Accessibility of Tabwalk itself
 
 An accessibility tool has to pass its own check. Two failures that a 2026 audit
@@ -262,8 +280,8 @@ Phase 2 adds the AI layer: plain-language reports, the `incomplete` bucket
 turned into a manual-review checklist, alt-text judged by a vision model, and
 suggested code fixes (suggested — never applied automatically).
 
-Known MVP gaps: one organization with one admin account, and pages behind a
-login are not scanned.
+Known MVP gaps: one organization where every account sees every site, and pages
+behind a login are not scanned.
 
 ## Community
 

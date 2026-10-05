@@ -4,8 +4,11 @@ import { useI18n } from '../i18n/context';
 import { type AuthConfig, api } from '../lib/api';
 import { Button, ButtonLink, Card, Field } from './ui';
 
-function ssoError(): string | null {
-  return new URLSearchParams(window.location.search).get('sso_error');
+// a failed single sign-on comes back as ?sso_error=; show it once
+function takeSsoError(): string | null {
+  const message = new URLSearchParams(window.location.search).get('sso_error');
+  if (message) window.history.replaceState(null, '', window.location.pathname);
+  return message;
 }
 
 export function AuthScreen({ config }: { config: AuthConfig }) {
@@ -13,6 +16,7 @@ export function AuthScreen({ config }: { config: AuthConfig }) {
   const qc = useQueryClient();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [ssoError] = useState(takeSsoError);
   const setup = config.setup;
 
   const submit = useMutation({
@@ -27,7 +31,7 @@ export function AuthScreen({ config }: { config: AuthConfig }) {
     submit.mutate();
   }
 
-  const error = submit.error?.message ?? ssoError();
+  const error = submit.error?.message ?? ssoError;
 
   return (
     <div className="mx-auto flex w-full max-w-[440px] flex-col gap-5 py-4">

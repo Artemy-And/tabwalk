@@ -12,7 +12,7 @@ export type AuthEnv = { Variables: { user: User } };
 const COOKIE = 'tabwalk_session';
 const TTL_MS = 30 * 86_400_000;
 
-function secure(c: Context): boolean {
+export function secure(c: Context): boolean {
   if (env.PUBLIC_URL) return env.PUBLIC_URL.startsWith('https://');
   return c.req.header('x-forwarded-proto') === 'https' || c.req.url.startsWith('https://');
 }

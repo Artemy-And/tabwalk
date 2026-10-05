@@ -39,6 +39,11 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       PORT: ${PORT}
       PUBLIC_URL: ${PUBLIC_URL:-}
+      OIDC_ISSUER: ${OIDC_ISSUER:-}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
+      OIDC_LABEL: ${OIDC_LABEL:-}
+      OIDC_ALLOWED_DOMAINS: ${OIDC_ALLOWED_DOMAINS:-}
     depends_on:
       migrate:
         condition: service_completed_successfully

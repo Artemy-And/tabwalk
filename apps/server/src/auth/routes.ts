@@ -1,12 +1,15 @@
 import { zValidator } from '@hono/zod-validator';
 import { eq, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { z } from 'zod';
 import { db } from '../db/index.js';
 import { defaultOrgId } from '../db/org.js';
 import { sessions, users } from '../db/schema.js';
-import { hashPassword, verifyPassword } from './crypto.js';
-import { type AuthEnv, endSession, requireUser, startSession } from './session.js';
+import { env } from '../env.js';
+import { hashPassword, randomToken, verifyPassword } from './crypto.js';
+import { Oidc, type OidcChecks } from './oidc.js';
+import { type AuthEnv, endSession, requireUser, secure, startSession } from './session.js';
 
 const MAX_FAILURES = 10;
 const LOCK_MS = 15 * 60_000;
@@ -33,8 +36,19 @@ const failures = new Map<string, { count: number; until: number }>();
 
 let dummyHash: Promise<string> | null = null;
 
+const oidc = Oidc.fromEnv();
+const OIDC_COOKIE = 'tabwalk_oidc';
+const OIDC_PATH = '/api/auth/oidc';
+const OIDC_TTL_MS = 10 * 60_000;
+// sign-ins on their way through the identity provider, by the id in their cookie
+const pending = new Map<string, { checks: OidcChecks; until: number }>();
+
+const ssoError = (message: string) => `/?sso_error=${encodeURIComponent(message)}`;
+
 export const authRoutes = new Hono<AuthEnv>()
-  .get('/config', async (c) => c.json({ setup: await needsSetup(), sso: null }))
+  .get('/config', async (c) =>
+    c.json({ setup: await needsSetup(), sso: oidc ? { label: oidc.label } : null }),
+  )
 
   .post('/setup', json(z.object({ email: emailSchema, password: passwordSchema })), async (c) => {
     const { email, password } = c.req.valid('json');
@@ -108,4 +122,66 @@ export const authRoutes = new Hono<AuthEnv>()
       await startSession(c, user);
       return c.json({ ok: true });
     },
-  );
+  )
+
+  .get('/oidc/start', async (c) => {
+    if (!oidc) return c.redirect(ssoError('Single sign-on is not set up'));
+    try {
+      const { url, checks } = await oidc.start();
+      const now = Date.now();
+      for (const [key, item] of pending) if (item.until < now) pending.delete(key);
+      const id = randomToken(24);
+      pending.set(id, { checks, until: now + OIDC_TTL_MS });
+      setCookie(c, OIDC_COOKIE, id, {
+        httpOnly: true,
+        sameSite: 'Lax',
+        secure: secure(c),
+        path: OIDC_PATH,
+        maxAge: OIDC_TTL_MS / 1000,
+      });
+      return c.redirect(url);
+    } catch (error) {
+      console.error('SSO discovery failed', error);
+      return c.redirect(ssoError('Could not reach the identity provider'));
+    }
+  })
+
+  .get('/oidc/callback', async (c) => {
+    if (!oidc) return c.redirect(ssoError('Single sign-on is not set up'));
+    const id = getCookie(c, OIDC_COOKIE);
+    deleteCookie(c, OIDC_COOKIE, { path: OIDC_PATH, secure: secure(c) });
+    const saved = id ? pending.get(id) : undefined;
+    if (id) pending.delete(id);
+    if (!saved || saved.until < Date.now()) {
+      return c.redirect(ssoError('Sign-in expired, try again'));
+    }
+
+    let identity: { email: string; name: string | null };
+    try {
+      identity = await oidc.finish(new URL(c.req.url).search, saved.checks);
+    } catch (error) {
+      console.error('SSO callback failed', error);
+      return c.redirect(ssoError(error instanceof Error ? error.message : 'Sign-in failed'));
+    }
+
+    const { email, name } = identity;
+    let user = await db.query.users.findFirst({ where: eq(users.email, email) });
+    if (!user) {
+      const domain = email.split('@')[1] ?? '';
+      if (!env.OIDC_ALLOWED_DOMAINS.includes(domain)) {
+        return c.redirect(
+          ssoError(
+            `${email} has no account here. An admin can add ${domain} to OIDC_ALLOWED_DOMAINS.`,
+          ),
+        );
+      }
+      [user] = await db
+        .insert(users)
+        .values({ orgId: await defaultOrgId(), email, name })
+        .returning();
+    }
+    if (!user) return c.redirect(ssoError('Sign-in failed'));
+    if (!user.name && name) await db.update(users).set({ name }).where(eq(users.id, user.id));
+    await startSession(c, user);
+    return c.redirect('/');
+  });
