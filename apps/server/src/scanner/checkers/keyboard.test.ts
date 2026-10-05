@@ -256,6 +256,28 @@ test('a working skip link passes', async () => {
   assert.deepEqual(findings, []);
 });
 
+test('the skip link is still checked after a loop that Escape closes', async () => {
+  const findings = await check(
+    `<a class="skip" href="#main">Skip</a>${links}
+     <div id="box"><input aria-label="Email"><button>Sign up</button></div>
+     <main id="main"><a href="/read">Read</a></main>
+     <script>
+       document.querySelector('.skip').addEventListener('click', (e) => e.preventDefault());
+       const box = document.getElementById('box');
+       let open = true;
+       box.addEventListener('keydown', (e) => {
+         if (e.key === 'Escape') open = false;
+         if (e.key !== 'Tab' || !open) return;
+         const [first, last] = box.querySelectorAll('input, button');
+         if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+         else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+       });
+     </script>`,
+  );
+  assert.deepEqual(only(findings, 'keyboard-trap'), []);
+  assert.equal(only(findings, 'skip-link-target').length, 1);
+});
+
 test('a page with its own __name helper is still checked', async () => {
   const findings = await check(
     `<script>window.__name = function (_n, v) { return v; };</script>${links}<button class="buy">Buy</button>`,

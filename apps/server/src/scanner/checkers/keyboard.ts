@@ -272,14 +272,16 @@ async function walk(page: Page, result: Walk): Promise<void> {
   let exits = 0;
   let start = 0;
 
-  const restart = () => {
+  // after closing a dialog or frame: if it was all the walk had seen, the page starts after it
+  const restart = (closed: Stop[]) => {
     exits++;
+    const ids = new Set(closed.map((s) => s.id));
+    if (stops.slice(start).every((s) => ids.has(s.id))) start = stops.length;
     index.clear();
     run.length = 0;
     frame = -1;
     frameRun = 0;
     scroll = null;
-    start = stops.length;
   };
 
   for (let i = 0; i < MAX_STOPS && inTime(); i++) {
@@ -301,7 +303,7 @@ async function walk(page: Page, result: Walk): Promise<void> {
         stop.id,
       );
       if (floating && exits < MAX_EXITS && (await closeFrame(page, stop))) {
-        restart();
+        restart([stop]);
         continue;
       }
       findings.push(
@@ -329,7 +331,7 @@ async function walk(page: Page, result: Walk): Promise<void> {
       const cycle = run.slice(seen);
       if (await inDialog(page, cycle)) {
         if (exits < MAX_EXITS && (await closeCycle(page, cycle))) {
-          restart();
+          restart(cycle);
           continue;
         }
         const box = (await container(page, cycle)) ?? stop;
@@ -347,7 +349,7 @@ async function walk(page: Page, result: Walk): Promise<void> {
       }
       const trap = await tryToLeave(page, cycle);
       if (trap === 'left' && exits < MAX_EXITS) {
-        restart();
+        restart(cycle);
         continue;
       }
       if (trap !== 'left') findings.push(trap);
