@@ -21,8 +21,14 @@ export interface Stop extends Described {
   obscurer: Described | null;
 }
 
+export interface SkipTarget {
+  fragment: string;
+  found: boolean;
+}
+
 export interface KeyboardHelpers {
   active(): Stop | null;
+  element(id: number): Element | null;
   clip(id: number): Box | null;
   describe(id: number): Described | null;
   settle(): Promise<void>;
@@ -35,8 +41,10 @@ export interface KeyboardHelpers {
   container(ids: number[]): Described | null;
   inDialog(ids: number[]): boolean;
   floating(id: number): boolean;
-  skipTarget(id: number): boolean | null;
+  pickExit(ids: number[] | null): boolean;
+  skipTarget(id: number): SkipTarget | null;
   pastSkipTarget(id: number): boolean;
+  anyPastSkipTarget(): boolean;
 }
 
 declare global {
@@ -53,6 +61,14 @@ export function installKeyboardHelpers(margin: number): void {
     'a[href], area[href], button, input:not([type="hidden"]), select, textarea, iframe, summary, ' +
     'audio[controls], video[controls], [contenteditable]:not([contenteditable="false"]), [tabindex]';
   const TEXT_INPUTS = ['text', 'email', 'search', 'tel', 'url', 'password', 'number'];
+  const CONTROL =
+    'button, a[href], input[type="button"], input[type="submit"], [role="button"], [role="link"]';
+  // buttons that close a cookie banner or a pop-up; accept first, a refusal can end in a paywall
+  const EXITS = [
+    /^(accept|agree|allow|consent|i agree|i accept|ok|okay|got it|understood)\b|\b(accept|allow) all\b|akzeptieren|zustimmen|einverstanden|alle erlauben|accepter|j'accepte|aceptar|acepto|accett|accepteren|akkoord|принять|согласен|понятно|хорошо|接受|同意/,
+    /^(reject|decline|deny|refuse)\b|\b(only|just) (the )?(necessary|essential|required)\b|\b(necessary|essential|required)( cookies)? only\b|continue without|ablehnen|nur (notwendige|erforderliche|essenzielle)|refuser|continuer sans|rechazar|rifiut|weigeren|отклонить|только необходимые|拒绝/,
+    /^(close|dismiss|continue|no,? thanks|not now|maybe later|skip)\b|schließen|fermer|cerrar|chiudi|sluiten|закрыть|продолжить|关闭|^[×✕✖x]$/,
+  ];
 
   const ids = new WeakMap<Element, number>();
   const byId = new Map<number, Element>();
@@ -324,6 +340,28 @@ export function installKeyboardHelpers(margin: number): void {
     return getComputedStyle(el).visibility !== 'hidden';
   };
 
+  const afterTarget = (target: Element, el: Element): boolean => {
+    let light = el;
+    while (light.getRootNode() instanceof ShadowRoot)
+      light = (light.getRootNode() as ShadowRoot).host;
+    return (
+      contains(target, light) ||
+      (target.compareDocumentPosition(light) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0
+    );
+  };
+
+  const labelOf = (el: Element): string =>
+    (
+      (el instanceof HTMLElement ? el.innerText : el.textContent) ||
+      el.getAttribute('aria-label') ||
+      (el instanceof HTMLInputElement ? el.value : '') ||
+      el.getAttribute('title') ||
+      ''
+    )
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+
   const clear = (color: string): boolean =>
     color === 'transparent' || /^rgba\(.*,\s*0\)$/.test(color);
 
@@ -376,6 +414,10 @@ export function installKeyboardHelpers(margin: number): void {
         scroll: `${Math.round(window.scrollX)},${Math.round(window.scrollY)}`,
         obscurer: cover ? describeEl(cover) : null,
       };
+    },
+
+    element(id) {
+      return byId.get(id) ?? null;
     },
 
     clip(id) {
@@ -492,6 +534,26 @@ export function installKeyboardHelpers(margin: number): void {
       return el !== undefined && floatingAround(el) !== null;
     },
 
+    pickExit(list) {
+      const candidates = (
+        list ? list.map((id) => byId.get(id)) : [...document.querySelectorAll(TABBABLE)]
+      ).filter(
+        (el): el is HTMLElement =>
+          el instanceof HTMLElement && el.matches(CONTROL) && isTabbable(el),
+      );
+      for (const pattern of EXITS) {
+        const exit = candidates.find((el) => {
+          const label = labelOf(el);
+          return label.length <= 60 && pattern.test(label);
+        });
+        if (exit) {
+          exit.focus();
+          return deepActive() === exit;
+        }
+      }
+      return false;
+    },
+
     skipTarget(id) {
       const link = byId.get(id);
       if (!(link instanceof HTMLAnchorElement) || !link.hasAttribute('href')) return null;
@@ -509,20 +571,29 @@ export function installKeyboardHelpers(margin: number): void {
       ) {
         return null;
       }
-      const fragment = decodeURIComponent(url.hash.slice(1));
+      let fragment: string;
+      try {
+        fragment = decodeURIComponent(url.hash.slice(1));
+      } catch {
+        return null;
+      }
       if (!fragment || fragment === 'top' || /^[/!]/.test(fragment)) return null;
       const target = document.getElementById(fragment) ?? document.getElementsByName(fragment)[0];
-      if (!target) return false;
+      if (!target) return { fragment, found: false };
       skip = { link, target };
-      return true;
+      return { fragment, found: true };
     },
 
     pastSkipTarget(id) {
       const el = byId.get(id);
-      if (!el || !skip) return false;
-      return (
-        contains(skip.target, el) ||
-        (skip.target.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0
+      return el !== undefined && skip !== null && afterTarget(skip.target, el);
+    },
+
+    anyPastSkipTarget() {
+      const target = skip?.target;
+      if (!target) return false;
+      return [...document.querySelectorAll(TABBABLE)].some(
+        (el) => isTabbable(el) && afterTarget(target, el),
       );
     },
   };

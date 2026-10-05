@@ -147,5 +147,6 @@ export const zh: Messages = {
     'keyboard-trap': '键盘焦点不得卡在页面的某一部分',
     'focus-visible': '键盘焦点必须可见',
     'focus-obscured': '获得焦点的元素不得被其他内容遮挡',
+    'skip-link-target': '跳转链接必须把键盘焦点移到重复内容之后',
   },
 };

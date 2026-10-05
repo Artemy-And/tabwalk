@@ -5,8 +5,12 @@ import { type Box, type Described, installKeyboardHelpers, type Stop } from './k
 const MAX_STOPS = 300;
 const MAX_FRAME_STOPS = 100;
 const MAX_VISUAL_CHECKS = 40;
+const MAX_EXITS = 3;
 const TIME_BUDGET_MS = 20_000;
 const CLIP_MARGIN = 6;
+
+// tsx (esbuild keepNames) wraps named functions in __name(); a page may define its own
+const INSTALL = `(() => { const __name = (fn) => fn; (${installKeyboardHelpers})(${CLIP_MARGIN}); })()`;
 
 const RULES = {
   trap: {
@@ -30,6 +34,13 @@ const RULES = {
     helpUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html',
     wcagTags: ['wcag22aa', 'wcag2411'],
   },
+  skip: {
+    ruleId: 'skip-link-target',
+    impact: 'moderate',
+    help: 'Skip links must move keyboard focus past the repeated content',
+    helpUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/bypass-blocks.html',
+    wcagTags: ['wcag2a', 'wcag241'],
+  },
 } as const;
 
 type Rule = (typeof RULES)[keyof typeof RULES];
@@ -44,7 +55,7 @@ interface Walk {
   stops: Stop[];
   visible: Map<string, boolean>;
   obscured: Map<number, { stop: Stop; how: keyof typeof APPROACH }>;
-  traps: CheckFinding[];
+  findings: CheckFinding[];
 }
 
 function finding(
@@ -146,17 +157,59 @@ function inDialog(page: Page, cycle: Stop[]): Promise<boolean> {
   );
 }
 
-async function trapFinding(page: Page, cycle: Stop[]): Promise<CheckFinding | null> {
+async function released(page: Page, gone: (now: Stop | null) => boolean): Promise<boolean> {
+  await page.keyboard.press('Enter');
+  for (let i = 0; i < 20; i++) {
+    await settle(page);
+    if (gone(await current(page))) return true;
+    await page.waitForTimeout(150);
+  }
+  return false;
+}
+
+async function closeCycle(page: Page, cycle: Stop[]): Promise<boolean> {
+  const ids = cycle.map((s) => s.id);
+  const picked = await page.evaluate(
+    (list) => window.__tabwalkKeyboard?.pickExit(list) ?? false,
+    ids,
+  );
+  return picked && (await released(page, (now) => !now || !ids.includes(now.id)));
+}
+
+async function closeFrame(page: Page, stop: Stop): Promise<boolean> {
+  const handle = await page.evaluateHandle(
+    (id) => window.__tabwalkKeyboard?.element(id) ?? null,
+    stop.id,
+  );
+  const frame = await handle.asElement()?.contentFrame();
+  await handle.dispose();
+  if (!frame) return false;
+  const picked = await frame
+    .evaluate(INSTALL)
+    .then(() => frame.evaluate(() => window.__tabwalkKeyboard?.pickExit(null) ?? false))
+    .catch(() => false);
+  return picked && (await released(page, (now) => now?.id !== stop.id));
+}
+
+async function container(page: Page, cycle: Stop[]): Promise<Described | null> {
+  return page.evaluate(
+    (ids) => window.__tabwalkKeyboard?.container(ids) ?? null,
+    cycle.map((s) => s.id),
+  );
+}
+
+async function tryToLeave(page: Page, cycle: Stop[]): Promise<CheckFinding | 'left'> {
   const ids = cycle.map((s) => s.id);
   const inCycle = new Set(ids);
   const backOut = await leaves(page, 'Shift+Tab', inCycle);
 
   await page.evaluate((id) => window.__tabwalkKeyboard?.focus(id), ids[0] ?? 0);
   await page.keyboard.press('Escape');
-  if (await leaves(page, 'Tab', inCycle)) return null;
+  if (await leaves(page, 'Tab', inCycle)) return 'left';
+  if (await closeCycle(page, cycle)) return 'left';
 
-  const box = await page.evaluate((list) => window.__tabwalkKeyboard?.container(list) ?? null, ids);
-  if (!box) return null;
+  const box = (await container(page, cycle)) ?? cycle[0];
+  if (!box) return 'left';
 
   const list = listOf(
     cycle.map((s) => s.selector),
@@ -185,14 +238,13 @@ async function trapFinding(page: Page, cycle: Stop[]): Promise<CheckFinding | nu
 async function walk(page: Page, result: Walk): Promise<void> {
   const deadline = Date.now() + TIME_BUDGET_MS;
   const inTime = () => Date.now() < deadline;
-  const { stops, visible, obscured } = result;
+  const { stops, visible, obscured, findings } = result;
 
-  // tsx (esbuild keepNames) wraps named functions in __name(); a page may define its own
-  await page.evaluate(
-    `(() => { const __name = (fn) => fn; (${installKeyboardHelpers})(${CLIP_MARGIN}); })()`,
-  );
+  await page.evaluate(INSTALL);
 
+  const recorded = new Set<number>();
   const index = new Map<number, number>();
+  const run: Stop[] = [];
   const unreached = () =>
     page.evaluate(
       (ids) => window.__tabwalkKeyboard?.unreached(ids) ?? 0,
@@ -202,9 +254,20 @@ async function walk(page: Page, result: Walk): Promise<void> {
   let scroll: string | null = null;
   let ended = false;
   let lostFocus = 0;
-  let cycleFrom = -1;
   let frame = -1;
   let frameRun = 0;
+  let exits = 0;
+  let start = 0;
+
+  const restart = () => {
+    exits++;
+    index.clear();
+    run.length = 0;
+    frame = -1;
+    frameRun = 0;
+    scroll = null;
+    start = stops.length;
+  };
 
   for (let i = 0; i < MAX_STOPS && inTime(); i++) {
     const stop = await press(page, 'Tab', scroll);
@@ -220,7 +283,15 @@ async function walk(page: Page, result: Walk): Promise<void> {
 
     if (stop.frame && stop.id === frame) {
       if (++frameRun < MAX_FRAME_STOPS) continue;
-      result.traps.push(
+      const floating = await page.evaluate(
+        (id) => window.__tabwalkKeyboard?.floating(id) ?? false,
+        stop.id,
+      );
+      if (floating && exits < MAX_EXITS && (await closeFrame(page, stop))) {
+        restart();
+        continue;
+      }
+      findings.push(
         finding(
           RULES.trap,
           'incomplete',
@@ -230,7 +301,7 @@ async function walk(page: Page, result: Walk): Promise<void> {
             'Check that keyboard users can get out of it.',
         ),
       );
-      if (await page.evaluate((id) => window.__tabwalkKeyboard?.floating(id), stop.id)) return;
+      if (floating) return;
       break;
     }
     frame = stop.frame ? stop.id : -1;
@@ -238,11 +309,41 @@ async function walk(page: Page, result: Walk): Promise<void> {
 
     const seen = index.get(stop.id);
     if (seen !== undefined) {
-      if (seen === 0 && lostFocus > 0) ended = true;
-      else cycleFrom = seen;
+      if (seen === 0 && (lostFocus > 0 || (await unreached()) === 0)) {
+        ended = true;
+        break;
+      }
+      const cycle = run.slice(seen);
+      if (await inDialog(page, cycle)) {
+        if (exits < MAX_EXITS && (await closeCycle(page, cycle))) {
+          restart();
+          continue;
+        }
+        const box = (await container(page, cycle)) ?? stop;
+        findings.push(
+          finding(
+            RULES.trap,
+            'incomplete',
+            box.selector,
+            box.html,
+            'Focus stays inside this dialog and Tabwalk could not close it from the keyboard. ' +
+              'Check that keyboard users can close it and reach the rest of the page.',
+          ),
+        );
+        return;
+      }
+      const trap = await tryToLeave(page, cycle);
+      if (trap === 'left' && exits < MAX_EXITS) {
+        restart();
+        continue;
+      }
+      if (trap !== 'left') findings.push(trap);
       break;
     }
-    index.set(stop.id, stops.length);
+    index.set(stop.id, run.length);
+    run.push(stop);
+    if (recorded.has(stop.id)) continue;
+    recorded.add(stop.id);
     stops.push(stop);
 
     const key = visualKey(stop);
@@ -252,18 +353,6 @@ async function walk(page: Page, result: Walk): Promise<void> {
       visualChecks++;
       const shows = await focusShows(page, stop);
       if (shows !== null) visible.set(key, shows);
-    }
-  }
-
-  if (cycleFrom >= 0) {
-    const cycle = stops.slice(cycleFrom);
-    if (cycleFrom === 0 && (await unreached()) === 0) {
-      ended = true;
-    } else if (await inDialog(page, cycle)) {
-      return;
-    } else {
-      const trap = await trapFinding(page, cycle);
-      if (trap) result.traps.push(trap);
     }
   }
 
@@ -299,27 +388,42 @@ async function walk(page: Page, result: Walk): Promise<void> {
     }
   }
 
-  const first = stops[0];
+  const first = stops[start];
   if (!first || !inTime()) return;
-  const hasTarget = await page.evaluate(
+  const target = await page.evaluate(
     (id) => window.__tabwalkKeyboard?.skipTarget(id) ?? null,
     first.id,
   );
-  if (!hasTarget) return;
+  if (!target?.found) return;
+  if (!(await page.evaluate(() => window.__tabwalkKeyboard?.anyPastSkipTarget() ?? false))) return;
   await page.evaluate((id) => window.__tabwalkKeyboard?.focus(id), first.id);
   await page.keyboard.press('Enter');
   await settle(page);
+  await page.waitForTimeout(300);
   const landed = await press(page, 'Tab', null);
-  if (!landed?.obscurer || obscured.has(landed.id)) return;
+  if (!landed) return;
   const past = await page.evaluate(
     (id) => window.__tabwalkKeyboard?.pastSkipTarget(id) ?? false,
     landed.id,
   );
-  if (past) obscured.set(landed.id, { stop: landed, how: 'skip' });
+  if (!past) {
+    findings.push(
+      finding(
+        RULES.skip,
+        'violation',
+        first.selector,
+        first.html,
+        `After the skip link, Tab moves to ${landed.selector}, which comes before ` +
+          `#${target.fragment}, so the link does not skip anything.`,
+      ),
+    );
+  } else if (landed.obscurer && !obscured.has(landed.id)) {
+    obscured.set(landed.id, { stop: landed, how: 'skip' });
+  }
 }
 
-function report({ stops, visible, obscured, traps }: Walk): CheckFinding[] {
-  const findings = [...traps];
+function report({ stops, visible, obscured, findings: walked }: Walk): CheckFinding[] {
+  const findings = [...walked];
 
   for (const stop of stops) {
     if (stop.frame || obscured.has(stop.id) || visible.get(visualKey(stop)) !== false) continue;
@@ -362,7 +466,7 @@ function report({ stops, visible, obscured, traps }: Walk): CheckFinding[] {
       covered: [],
       ways: new Set<string>(),
     };
-    group.covered.push(stop.selector);
+    if (!group.covered.includes(stop.selector)) group.covered.push(stop.selector);
     group.ways.add(APPROACH[how]);
     byCover.set(stop.obscurer.selector, group);
   }
@@ -383,19 +487,40 @@ function report({ stops, visible, obscured, traps }: Walk): CheckFinding[] {
     );
   }
 
-  return findings;
+  // a page that re-renders its menus hands the walk new copies of the same elements
+  const reported = new Set<string>();
+  return findings.filter((f) => {
+    const key = `${f.kind}|${f.ruleId}|${f.target.join(' ')}|${f.html}`;
+    if (reported.has(key)) return false;
+    reported.add(key);
+    return true;
+  });
+}
+
+function emptyWalk(): Walk {
+  return { stops: [], visible: new Map(), obscured: new Map(), findings: [] };
 }
 
 export const keyboardChecker: Checker = {
   name: 'keyboard',
 
   async run(page: Page): Promise<CheckFinding[]> {
-    const result: Walk = { stops: [], visible: new Map(), obscured: new Map(), traps: [] };
-    try {
-      await walk(page, result);
-    } catch (err) {
-      console.warn(`[keyboard] ${page.url()}: ${err instanceof Error ? err.message : String(err)}`);
+    let result = emptyWalk();
+    for (let attempt = 0; ; attempt++) {
+      try {
+        await walk(page, result);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        // closing a cookie banner sometimes reloads the page
+        if (attempt === 0 && /context was destroyed|navigat/i.test(message)) {
+          await page.waitForLoadState('load', { timeout: 15_000 }).catch(() => {});
+          await page.waitForLoadState('networkidle', { timeout: 5_000 }).catch(() => {});
+          result = emptyWalk();
+          continue;
+        }
+        console.warn(`[keyboard] ${page.url()}: ${message}`);
+      }
+      return report(result);
     }
-    return report(result);
   },
 };

@@ -159,5 +159,7 @@ export const es: Messages = {
     'keyboard-trap': 'El foco del teclado no debe quedar atrapado en una parte de la página',
     'focus-visible': 'El foco del teclado debe ser visible',
     'focus-obscured': 'Los elementos con foco no deben quedar ocultos bajo otro contenido',
+    'skip-link-target':
+      'Los enlaces para saltar deben llevar el foco del teclado más allá del contenido repetido',
   },
 };

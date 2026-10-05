@@ -154,6 +154,7 @@ export const en = {
     'keyboard-trap': 'Keyboard focus must not get stuck in one part of the page',
     'focus-visible': 'Keyboard focus must be visible',
     'focus-obscured': 'Focused elements must not be hidden under other content',
+    'skip-link-target': 'Skip links must move keyboard focus past the repeated content',
   },
 };
 

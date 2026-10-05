@@ -160,16 +160,41 @@ test('a dialog that holds focus is not a keyboard trap', async () => {
   const findings = await check(
     `${links}<div id="box" role="dialog" aria-label="Newsletter"><input aria-label="Email"><button>Sign up</button></div><a href="/d">After</a>${trapScript(false)}`,
   );
-  assert.deepEqual(only(findings, 'keyboard-trap'), []);
+  assert.deepEqual(
+    only(findings, 'keyboard-trap').map((f) => f.kind),
+    ['incomplete'],
+  );
 });
 
-test('the page behind a modal that holds focus is not walked', async () => {
+test('a dialog that cannot be closed from the keyboard stops the walk', async () => {
   const findings = await check(
     `<div id="box" class="consent" role="dialog" aria-modal="true" aria-label="Cookies"><button autofocus>Accept</button><button>Decline</button></div>
      ${links}${tall}<footer><a href="/terms">Terms</a></footer>${trapScript(false)}`,
     '.consent{position:fixed;left:0;right:0;bottom:0;height:200px;background:#fff}',
   );
-  assert.deepEqual(findings, []);
+  assert.deepEqual(
+    findings.map((f) => `${f.ruleId} ${f.kind}`),
+    ['keyboard-trap incomplete'],
+  );
+});
+
+test('a cookie dialog is closed from the keyboard and the walk goes on', async () => {
+  const findings = await check(
+    `<div id="box" class="consent" role="dialog" aria-modal="true" aria-label="Cookies"><button autofocus>Accept all</button><button>Reject all</button></div>
+     ${links}<button class="buy">Buy</button>${trapScript(false)}
+     <script>document.getElementById('box').addEventListener('click', () => document.getElementById('box').remove());</script>`,
+    '.consent{position:fixed;left:0;right:0;bottom:0;height:200px;background:#fff}.buy:focus{outline:none}',
+  );
+  assert.deepEqual(only(findings, 'keyboard-trap'), []);
+  assert.equal(only(findings, 'focus-visible')[0]?.target[0], 'button.buy');
+});
+
+test('a loop that a close button ends is not a trap', async () => {
+  const findings = await check(
+    `${links}<div id="box"><input aria-label="Email"><button id="close">Close</button></div><a href="/d">After</a>${trapScript(false)}
+     <script>document.getElementById('close').addEventListener('click', () => { document.getElementById('box').hidden = true; });</script>`,
+  );
+  assert.deepEqual(only(findings, 'keyboard-trap'), []);
 });
 
 const trapFrame =
@@ -198,6 +223,37 @@ test('the page behind a floating frame that keeps focus is not walked', async ()
     findings.map((f) => `${f.ruleId} ${f.kind}`),
     ['keyboard-trap incomplete'],
   );
+});
+
+test('a cookie frame is closed from the keyboard and the walk goes on', async () => {
+  const consent =
+    '<div class="consent"><iframe title="Cookies" srcdoc="<button>Accept all</button><button>Reject all</button><script>' +
+    "document.addEventListener('keydown', (e) => { if (e.key !== 'Tab') return; e.preventDefault();" +
+    " const [a, b] = document.querySelectorAll('button'); (document.activeElement === a ? b : a).focus(); });" +
+    " document.addEventListener('click', () => parent.document.querySelector('.consent').remove());" +
+    '</script>"></iframe></div>';
+  const findings = await check(
+    `${consent}${links}<button class="buy">Buy</button>`,
+    '.consent{position:fixed;left:0;right:0;bottom:0;height:200px;background:#fff}' +
+      '.consent iframe{width:100%;height:100%;border:0}.buy:focus{outline:none}',
+  );
+  assert.deepEqual(only(findings, 'keyboard-trap'), []);
+  assert.equal(only(findings, 'focus-visible')[0]?.target[0], 'button.buy');
+});
+
+test('a skip link that does not move focus fails skip-link-target', async () => {
+  const findings = await check(
+    `<a class="skip" href="#main">Skip</a>${links}<main id="main"><a href="/read">Read</a></main>
+     <script>document.querySelector('.skip').addEventListener('click', (e) => e.preventDefault());</script>`,
+  );
+  assert.match(only(findings, 'skip-link-target')[0]?.failureSummary ?? '', /comes before #main/);
+});
+
+test('a working skip link passes', async () => {
+  const findings = await check(
+    `<a class="skip" href="#main">Skip</a>${links}<main id="main"><a href="/read">Read</a></main>`,
+  );
+  assert.deepEqual(findings, []);
 });
 
 test('a page with its own __name helper is still checked', async () => {

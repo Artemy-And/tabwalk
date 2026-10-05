@@ -40,6 +40,11 @@ Every page is opened in Chromium and checked twice:
 | `keyboard-trap` | 2.1.2 | Focus that cannot leave a widget, a form or a frame |
 | `focus-visible` | 2.4.7 | Elements that take focus while nothing changes on the screen |
 | `focus-obscured` | 2.4.11 | Focused elements hidden under a sticky header, a cookie banner or other fixed content |
+| `skip-link-target` | 2.4.1 | Skip links that leave focus where it was |
+
+A cookie banner or a pop-up that holds focus is closed the way a keyboard user
+would close it, with Enter on its accept or close button, and the walk goes on
+to the page behind it.
 
 What a script cannot decide on its own, such as a loop that Shift+Tab can leave
 or a text field whose only sign of focus is the caret, goes to **needs a human**

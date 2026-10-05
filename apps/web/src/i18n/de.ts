@@ -160,5 +160,7 @@ export const de: Messages = {
     'keyboard-trap': 'Der Tastaturfokus darf nicht in einem Teil der Seite hängen bleiben',
     'focus-visible': 'Der Tastaturfokus muss sichtbar sein',
     'focus-obscured': 'Fokussierte Elemente dürfen nicht von anderen Inhalten verdeckt werden',
+    'skip-link-target':
+      'Sprunglinks müssen den Tastaturfokus hinter die wiederholten Inhalte setzen',
   },
 };
