@@ -19,6 +19,11 @@ type AxeResult = {
   nodes: AxeNode[];
 };
 
+function standardsOf(tags: string[]): string[] {
+  const own = tags.filter((t) => /^(EN-9\.|RGAA-\d)/.test(t));
+  return tags.includes('wcag2a') || tags.includes('wcag2aa') ? [...own, 'section508'] : own;
+}
+
 function isWcag(rule: AxeResult): boolean {
   return rule.tags.some((t) => TAGS.includes(t));
 }
@@ -35,6 +40,7 @@ function toFindings(results: AxeResult[], kind: CheckFinding['kind']): CheckFind
         help: rule.help,
         helpUrl: rule.helpUrl ?? null,
         wcagTags: rule.tags.filter((t) => t.startsWith('wcag')),
+        standards: standardsOf(rule.tags),
         target: node.target.map((t) => String(t)),
         html: node.html,
         failureSummary: node.failureSummary ?? null,

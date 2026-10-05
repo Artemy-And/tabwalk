@@ -101,6 +101,7 @@ export interface IssueGroup {
   help: string;
   helpUrl: string | null;
   wcagTags: string[];
+  standards: string[];
   occurrences: number;
   pagesAffected: number;
   sampleHtml: string;

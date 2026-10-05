@@ -88,6 +88,7 @@ export const issues = pgTable(
     help: text('help').notNull(),
     helpUrl: text('help_url'),
     wcagTags: jsonb('wcag_tags').$type<string[]>().notNull().default([]),
+    standards: jsonb('standards').$type<string[]>().notNull().default([]),
     target: jsonb('target').$type<string[]>().notNull().default([]),
     html: text('html').notNull(),
     failureSummary: text('failure_summary'),

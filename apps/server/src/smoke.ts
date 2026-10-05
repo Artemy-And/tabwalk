@@ -23,7 +23,7 @@ console.log(
 for (const f of findings) {
   const mark = f.kind === 'violation' ? '✗' : f.kind === 'incomplete' ? '?' : '·';
   console.log(`${mark} [${f.impact ?? 'n/a'}] ${f.checker}/${f.ruleId} — ${f.help}`);
-  console.log(`   wcag: ${f.wcagTags.join(', ') || '—'}`);
+  console.log(`   wcag: ${f.wcagTags.join(', ') || '—'} | ${f.standards.join(', ') || '—'}`);
   console.log(`   fingerprint: ${f.fingerprint}`);
   console.log(`   ${f.target.join(' ')}`);
   console.log(`   ${f.html.slice(0, 90)}`);

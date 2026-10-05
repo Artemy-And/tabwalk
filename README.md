@@ -54,6 +54,10 @@ Problems are WCAG 2.2 A/AA failures only. axe-core `best-practice` rules run
 too, but they are shown apart as recommendations: they are not counted as
 problems and never fail the GitHub Action.
 
+Next to the WCAG criterion, each problem lists the matching clauses of
+EN 301 549 (the standard behind the European Accessibility Act), RGAA (France)
+and Section 508 (US federal sites), in the dashboard and in the CSV export.
+
 ## Quick start
 
 ```bash

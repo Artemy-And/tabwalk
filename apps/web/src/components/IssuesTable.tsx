@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useI18n } from '../i18n/context';
 import { useRuleHelp } from '../i18n/ruleHelp';
 import type { IssueGroup } from '../lib/api';
+import { standardLabel } from '../lib/format';
 import { Card, ImpactBadge } from './ui';
 
 type SortKey = 'pagesAffected' | 'impact' | 'ruleId';
@@ -197,6 +198,11 @@ export function IssuesTable({
                     issue.ruleId
                   )}
                   {issue.wcagTags.length > 0 && <p>{issue.wcagTags.join(' · ')}</p>}
+                  {issue.standards.length > 0 && (
+                    <p className="mt-0.5 font-sans text-[13px]">
+                      {issue.standards.map(standardLabel).join(' · ')}
+                    </p>
+                  )}
                 </td>
                 <td className={`${TD} tabular-nums`}>{issue.pagesAffected}</td>
               </tr>

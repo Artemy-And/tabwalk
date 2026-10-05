@@ -19,6 +19,7 @@ const RULES = {
     help: 'Keyboard focus must not get stuck in one part of the page',
     helpUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap.html',
     wcagTags: ['wcag2a', 'wcag212'],
+    standards: ['EN-9.2.1.2', 'RGAA-12.9.1', 'section508'],
   },
   visible: {
     ruleId: 'focus-visible',
@@ -26,6 +27,7 @@ const RULES = {
     help: 'Keyboard focus must be visible',
     helpUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html',
     wcagTags: ['wcag2aa', 'wcag247'],
+    standards: ['EN-9.2.4.7', 'RGAA-10.7.1', 'section508'],
   },
   obscured: {
     ruleId: 'focus-obscured',
@@ -33,6 +35,7 @@ const RULES = {
     help: 'Focused elements must not be hidden under other content',
     helpUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html',
     wcagTags: ['wcag22aa', 'wcag2411'],
+    standards: [],
   },
   skip: {
     ruleId: 'skip-link-target',
@@ -40,6 +43,7 @@ const RULES = {
     help: 'Skip links must move keyboard focus past the repeated content',
     helpUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/bypass-blocks.html',
     wcagTags: ['wcag2a', 'wcag241'],
+    standards: ['EN-9.2.4.1', 'RGAA-12.7.1', 'section508'],
   },
 } as const;
 
@@ -72,6 +76,7 @@ function finding(
     help: rule.help,
     helpUrl: rule.helpUrl,
     wcagTags: [...rule.wcagTags],
+    standards: [...rule.standards],
     target: [target],
     html,
     failureSummary,

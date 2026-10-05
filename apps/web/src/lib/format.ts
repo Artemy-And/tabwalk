@@ -34,3 +34,8 @@ export function hostOf(url: string): string {
     return url;
   }
 }
+
+export function standardLabel(code: string): string {
+  if (code === 'section508') return 'Section 508';
+  return code.replace(/^EN-/, 'EN ').replace(/^RGAA-/, 'RGAA ');
+}

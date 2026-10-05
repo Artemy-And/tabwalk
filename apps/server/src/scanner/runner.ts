@@ -34,6 +34,7 @@ async function scanOnePage(browser: Browser, scanId: string, url: string): Promi
           help: f.help,
           helpUrl: f.helpUrl,
           wcagTags: f.wcagTags,
+          standards: f.standards,
           target: f.target,
           html: f.html,
           failureSummary: f.failureSummary,

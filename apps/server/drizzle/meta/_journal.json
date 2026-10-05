@@ -22,6 +22,13 @@
       "when": 1790663905243,
       "tag": "0002_site_schedule",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791183108695,
+      "tag": "0003_issue_standards",
+      "breakpoints": true
     }
   ]
 }

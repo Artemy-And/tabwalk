@@ -14,6 +14,7 @@ interface Group {
   help: string;
   helpUrl: string | null;
   wcagTags: string[];
+  standards: string[];
   fingerprint: string;
   target: string[];
   html: string;
@@ -127,6 +128,7 @@ await mapWithConcurrency(urls, concurrency, async (url) => {
         help: f.help,
         helpUrl: f.helpUrl,
         wcagTags: f.wcagTags,
+        standards: f.standards,
         fingerprint: f.fingerprint,
         target: f.target,
         html: f.html,

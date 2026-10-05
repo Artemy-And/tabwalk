@@ -68,6 +68,7 @@ function groupedIssues(scanId: string) {
       help: issues.help,
       helpUrl: issues.helpUrl,
       wcagTags: issues.wcagTags,
+      standards: issues.standards,
       occurrences: sql<number>`count(*)::int`,
       pagesAffected: sql<number>`count(distinct ${issues.pageId})::int`,
       sampleHtml: sql<string>`min(${issues.html})`,
@@ -85,6 +86,7 @@ function groupedIssues(scanId: string) {
       issues.help,
       issues.helpUrl,
       issues.wcagTags,
+      issues.standards,
     )
     .orderBy(desc(sql`count(distinct ${issues.pageId})`));
 }
@@ -150,6 +152,13 @@ function selectorOf(target: string): string {
   } catch {
     return target;
   }
+}
+
+function clauses(standards: string[], prefix: string): string {
+  return standards
+    .filter((s) => s.startsWith(prefix))
+    .map((s) => s.slice(prefix.length))
+    .join(' ');
 }
 
 function csvFilename(siteUrl: string | undefined, date: Date): string {
@@ -408,6 +417,9 @@ app.get('/api/scans/:id/issues.csv', zValidator('param', uuidParam), async (c) =
       'Impact',
       'Rule',
       'WCAG',
+      'EN 301 549',
+      'RGAA',
+      'Section 508',
       'What is wrong',
       'Help URL',
       'Pages',
@@ -423,6 +435,9 @@ app.get('/api/scans/:id/issues.csv', zValidator('param', uuidParam), async (c) =
       row.impact,
       row.ruleId,
       row.wcagTags.join(' '),
+      clauses(row.standards, 'EN-'),
+      clauses(row.standards, 'RGAA-'),
+      row.standards.includes('section508') ? 'yes' : '',
       row.help,
       row.helpUrl,
       row.pagesAffected,

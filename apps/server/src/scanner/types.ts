@@ -7,6 +7,7 @@ export interface CheckFinding {
   help: string;
   helpUrl: string | null;
   wcagTags: string[];
+  standards: string[];
   target: string[];
   html: string;
   failureSummary: string | null;
