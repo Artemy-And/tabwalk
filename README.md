@@ -15,7 +15,7 @@ breaks.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/report-dark.png">
-  <img src="docs/screenshots/report-light.png" alt="A Tabwalk report for a demo shop: 13 unique problems on 66 elements, 6 critical, 3 that need a human, filters for new and fixed problems, and the findings table">
+  <img src="docs/screenshots/report-light.png" alt="A Tabwalk report for a demo shop: 17 unique problems on 81 elements, 8 critical, 4 that need a human, filters for new and fixed problems, and the findings table">
 </picture>
 
 One command to install. No Redis — the job queue lives in the same Postgres.
@@ -51,6 +51,11 @@ Every page also gets a picture of its Tab order: a screenshot with each stop
 outlined, numbered and joined to the next one, plus the same stops as a list.
 Open a page from the scan report to see it. Pictures are kept for the latest
 scan of each site.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/tab-order-dark.png">
+  <img src="docs/screenshots/tab-order-light.png" alt="The Tab order of the demo shop's home page: 13 numbered stops joined by a line, from the logo and the menu through the product cards to the link in the footer">
+</picture>
 
 What a script cannot decide on its own, such as a loop that Shift+Tab can leave
 or a text field whose only sign of focus is the caret, goes to **needs a human**
