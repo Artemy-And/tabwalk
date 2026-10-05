@@ -14,6 +14,7 @@
 
 :root {
   color-scheme: light dark;
+  scroll-padding-top: 5.5rem;
   --bg: #f7f7f8;
   --panel: #ffffff;
   --panel-2: #f3f4f6;
@@ -517,6 +518,7 @@ h2.big {
 
 .mini-row span:last-child {
   color: var(--muted);
+  white-space: nowrap;
 }
 
 .bars {
@@ -573,6 +575,49 @@ h2.big {
   display: flex;
   gap: 10px;
   align-items: center;
+}
+
+.card.wide {
+  grid-column: 1 / -1;
+  min-height: 0;
+}
+
+.walk {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.stops {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.stops span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  border: 1.5px dashed var(--accent);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.stops b {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 12px;
 }
 
 .dot {
@@ -692,7 +737,8 @@ footer a {
 
 @media (max-width: 900px) {
   .bento,
-  .honest {
+  .honest,
+  .walk {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -737,6 +783,10 @@ footer a {
 
 .dot-critical {
   background: var(--critical);
+}
+
+.dot-serious {
+  background: var(--serious);
 }
 
 .bars .h90 {

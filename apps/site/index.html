@@ -6,7 +6,7 @@
     <title>Tabwalk — self-hosted accessibility monitoring</title>
     <meta
       name="description"
-      content="Free and open source accessibility monitoring. Tabwalk crawls your site, checks every page against WCAG with axe-core and shows what is actually broken — including what a machine cannot judge. Runs on your own server."
+      content="Free and open source accessibility monitoring. Tabwalk crawls your site, checks every page against WCAG with axe-core, presses Tab through it and shows what is actually broken — including what a machine cannot judge. Runs on your own server."
     />
     <link rel="canonical" href="https://tabwalk.dev/" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -64,13 +64,14 @@
     <main id="main">
       <div class="hero">
         <div class="wrap">
-          <a class="pill" href="https://github.com/Artemy-And/tabwalk/releases/tag/v0.2.0">
-            <span class="tag">New</span><b>Tabwalk 0.2.0: scheduled scans</b><span aria-hidden="true">→</span>
+          <a class="pill" href="https://github.com/Artemy-And/tabwalk/releases/tag/v0.3.0">
+            <span class="tag">New</span><b>Tabwalk 0.3.0: it presses Tab now</b><span aria-hidden="true">→</span>
           </a>
           <h1>See what’s actually broken. On your own server.</h1>
           <p class="lede">
-            Tabwalk scans your site every day or week, checks each page against WCAG with axe-core and
-            collapses repeated problems into one row. What a machine cannot judge is shown too, not quietly dropped.
+            Tabwalk scans your site every day or week, checks each page against WCAG with axe-core, presses Tab
+            through it like a tester and collapses repeated problems into one row. What a machine cannot judge is
+            shown too, not quietly dropped.
           </p>
           <div class="actions">
             <a class="btn btn-light" href="https://github.com/Artemy-And/tabwalk">Star on GitHub</a>
@@ -93,7 +94,8 @@
               <div class="rows">
                 <div class="row"><span class="badge c-critical">Critical</span><span>Buttons must have discernible text</span><code>button.add</code><span class="pages">38 pages</span></div>
                 <div class="row"><span class="badge c-critical">Critical</span><span>Images must have alternative text</span><code>.gallery img</code><span class="pages">31 pages</span></div>
-                <div class="row"><span class="badge c-serious">Serious</span><span>Elements must meet minimum color contrast ratio thresholds</span><code>.price--old</code><span class="pages">44 pages</span></div>
+                <div class="row"><span class="badge c-critical">Critical</span><span>Keyboard focus must not get stuck in one part of the page</span><code>#newsletter form</code><span class="pages">1 page</span></div>
+                <div class="row"><span class="badge c-serious">Serious</span><span>Focused elements must not be hidden under other content</span><code>header.sticky</code><span class="pages">44 pages</span></div>
                 <div class="row"><span class="badge c-review">Needs review</span><span>Links must be distinguishable without relying on color</span><code>main p &gt; a</code><span class="pages">23 pages</span></div>
               </div>
             </div>
@@ -108,6 +110,30 @@
             <p>Everything in the report points at something you can change, and nothing pretends to be more than it is.</p>
           </div>
           <div class="bento">
+            <div class="card wide">
+              <h3>Presses Tab for you</h3>
+              <p>
+                A real browser tabs through every page, the way a tester does by hand. It catches keyboard traps,
+                focus that never shows and focus hidden under sticky headers and cookie banners, and draws each
+                page’s Tab order as a numbered map.
+              </p>
+              <div class="art walk">
+                <div class="stops" aria-hidden="true">
+                  <span><b>1</b>Skip to content</span>
+                  <span><b>2</b>Home</span>
+                  <span><b>3</b>Kettles</span>
+                  <span><b>4</b>Search</span>
+                  <span><b>5</b>Cast iron pan</span>
+                  <span><b>6</b>Add to cart</span>
+                  <span><b>7</b>Newsletter</span>
+                </div>
+                <div class="mini checks">
+                  <div class="mini-row"><span><i class="dot dot-critical"></i>Focus stuck in the newsletter form</span><span>1 page</span></div>
+                  <div class="mini-row"><span><i class="dot dot-serious"></i>Add to cart shows no focus</span><span>38 pages</span></div>
+                  <div class="mini-row"><span><i class="dot dot-serious"></i>Sticky header covers the breadcrumbs</span><span>44 pages</span></div>
+                </div>
+              </div>
+            </div>
             <div class="card">
               <h3>One mistake counts once</h3>
               <p>A broken button in a template used on 500 pages is one row with a page count, not 500 rows.</p>
@@ -128,14 +154,14 @@
             </div>
             <div class="card">
               <h3>Keeps watching</h3>
-              <p>Scans each site daily or weekly on its own, then shows what is new, what got fixed and how it trends.</p>
+              <p>Scans each site daily or weekly on its own, shows what is new and what got fixed, and tells Slack, Discord, ntfy or your inbox when something breaks.</p>
               <div class="art mini bars" aria-hidden="true">
                 <i class="h90"></i><i class="h84"></i><i class="h86"></i><i class="h70"></i><i class="h62"></i><i class="h55"></i><i class="h44"></i><i class="h36"></i>
               </div>
             </div>
             <div class="card">
               <h3>Runs on your server</h3>
-              <p>One compose file. No Redis, no account, and no page content leaves your network.</p>
+              <p>One compose file. No Redis, no cloud account, and no page content leaves your network.</p>
               <div class="art mini term" id="install">
                 <div>$ docker compose up -d</div>
                 <div class="ok">✓ db ✓ api ✓ worker ✓ web</div>
@@ -193,7 +219,11 @@
             </details>
             <details>
               <summary>What does it check?</summary>
-              <p>WCAG 2.2 A and AA rules from axe-core on every page it finds through your sitemap, plus best-practice rules shown apart as recommendations.</p>
+              <p>WCAG 2.2 A and AA rules from axe-core, plus a keyboard walk that finds traps, invisible focus and focus hidden under fixed content, on every page it finds through your sitemap. Each problem lists the matching EN 301 549, RGAA and Section 508 clauses. Best-practice rules are shown apart as recommendations.</p>
+            </details>
+            <details>
+              <summary>Can my team sign in with Google or Microsoft?</summary>
+              <p>Yes. The dashboard has its own accounts, and single sign-on works with Google Workspace, Microsoft Entra ID, Keycloak or any other OpenID Connect provider.</p>
             </details>
             <details>
               <summary>Where does my data go?</summary>
