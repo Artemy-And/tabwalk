@@ -109,6 +109,31 @@ export const en = {
       recommendations: 'Recommendations',
     },
   },
+  pages: {
+    heading: 'Pages',
+    caption: 'Pages checked in this scan. Open one to see its tab order.',
+    loading: 'Loading pages…',
+    columns: {
+      page: 'Page',
+      problems: 'Problems',
+      tabStops: 'Tab stops',
+    },
+    failed: (error: string) => `Could not check: ${error}`,
+  },
+  page: {
+    loading: 'Loading the page…',
+    notFound: 'Page not found.',
+    tabOrder: 'Tab order',
+    tabOrderIntro: (n: number) =>
+      `${n} ${plural(n, { one: 'tab stop', other: 'tab stops' })}. Each number shows where focus lands when you press Tab, starting from the top of the page.`,
+    pictureAlt: (n: number) =>
+      `The page with its ${n} ${plural(n, { one: 'tab stop', other: 'tab stops' })} numbered in order. The same stops are listed below.`,
+    listHeading: 'Tab stops in order',
+    unnamed: 'no text',
+    notDrawn: 'not in the picture',
+    noPicture:
+      'There is no tab order picture for this page. Pictures are kept for the latest scan of each site.',
+  },
   issues: {
     empty: 'No findings.',
     emptyFilter: 'Nothing matches this filter.',

@@ -1,14 +1,16 @@
 import { eq, sql } from 'drizzle-orm';
 import type { Browser } from 'playwright';
 import { db } from '../db/index.js';
-import { issues, pages, scans, sites } from '../db/schema.js';
+import { issues, pages, scans, sites, tabOrders } from '../db/schema.js';
 import { env } from '../env.js';
 import { checkPage, launchBrowser, mapWithConcurrency } from './check.js';
 import { discoverUrls } from './crawl.js';
 
 async function scanOnePage(browser: Browser, scanId: string, url: string): Promise<boolean> {
   try {
-    const { title, findings } = await checkPage(browser, url, env.PAGE_TIMEOUT_MS);
+    const { title, findings, tabOrder } = await checkPage(browser, url, env.PAGE_TIMEOUT_MS, {
+      tabOrder: true,
+    });
 
     const [pageRow] = await db
       .insert(pages)
@@ -20,6 +22,13 @@ async function scanOnePage(browser: Browser, scanId: string, url: string): Promi
       .returning();
 
     if (!pageRow) throw new Error('Failed to store the page');
+
+    if (tabOrder) {
+      await db
+        .insert(tabOrders)
+        .values({ pageId: pageRow.id, ...tabOrder })
+        .onConflictDoUpdate({ target: tabOrders.pageId, set: tabOrder });
+    }
 
     if (findings.length > 0) {
       await db.insert(issues).values(
@@ -102,6 +111,14 @@ export async function runScan(scanId: string): Promise<void> {
         pagesFailed: outcomes.length - ok,
       })
       .where(eq(scans.id, scanId));
+
+    // pictures are kept for the latest scan of each site only
+    await db.delete(tabOrders).where(
+      sql`${tabOrders.pageId} in (
+        select p.id from pages p join scans s on s.id = p.scan_id
+        where s.site_id = ${site.id} and s.id <> ${scanId}
+      )`,
+    );
 
     console.log(`[scan ${scanId}] done: ${ok} of ${outcomes.length}`);
   } catch (err) {

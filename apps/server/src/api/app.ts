@@ -12,6 +12,7 @@ import {
   scanSchedule,
   scans,
   sites,
+  tabOrders,
 } from '../db/schema.js';
 import { enqueueScan, nextScanAt } from '../queue/schedule.js';
 import { toCsv } from './csv.js';
@@ -484,10 +485,49 @@ app.get('/api/scans/:id/pages', zValidator('param', uuidParam), async (c) => {
         select count(*) from issues i
         where i.page_id = pages.id and i.kind = 'violation'
       )::int`,
+      tabStops: sql<number | null>`(
+        select jsonb_array_length(t.stops) from tab_orders t where t.page_id = pages.id
+      )`,
     })
     .from(pages)
     .where(eq(pages.scanId, id))
     .orderBy(pages.url);
 
   return c.json(rows);
+});
+
+app.get('/api/pages/:id', zValidator('param', uuidParam), async (c) => {
+  const { id } = c.req.valid('param');
+  const [row] = await db
+    .select({
+      id: pages.id,
+      url: pages.url,
+      title: pages.title,
+      error: pages.error,
+      scan: { id: scans.id, createdAt: scans.createdAt },
+      site: { id: sites.id, name: sites.name },
+    })
+    .from(pages)
+    .innerJoin(scans, eq(scans.id, pages.scanId))
+    .innerJoin(sites, eq(sites.id, scans.siteId))
+    .where(eq(pages.id, id));
+  if (!row) return c.json({ error: 'Page not found' }, 404);
+
+  const tabOrder = await db.query.tabOrders.findFirst({
+    where: eq(tabOrders.pageId, id),
+    columns: { width: true, height: true, stops: true },
+  });
+  return c.json({ ...row, tabOrder: tabOrder ?? null });
+});
+
+app.get('/api/pages/:id/tab-order.webp', zValidator('param', uuidParam), async (c) => {
+  const order = await db.query.tabOrders.findFirst({
+    where: eq(tabOrders.pageId, c.req.valid('param').id),
+    columns: { image: true },
+  });
+  if (!order) return c.json({ error: 'No tab order picture for this page' }, 404);
+  return c.body(new Uint8Array(order.image), 200, {
+    'content-type': 'image/webp',
+    'cache-control': 'private, max-age=86400',
+  });
 });

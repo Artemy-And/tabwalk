@@ -1,6 +1,6 @@
 import { type Browser, chromium } from 'playwright';
 import { axeChecker } from './checkers/axe.js';
-import { keyboardChecker } from './checkers/keyboard.js';
+import { drawTabOrder, keyboardChecker, type TabOrder } from './checkers/keyboard.js';
 import { USER_AGENT } from './crawl.js';
 import { fingerprint } from './fingerprint.js';
 import type { Checker, CheckFinding } from './types.js';
@@ -15,6 +15,7 @@ export interface PageFinding extends CheckFinding {
 export interface PageResult {
   title: string | null;
   findings: PageFinding[];
+  tabOrder: TabOrder | null;
 }
 
 export function launchBrowser(executablePath?: string): Promise<Browser> {
@@ -28,6 +29,7 @@ export async function checkPage(
   browser: Browser,
   url: string,
   timeoutMs: number,
+  options: { tabOrder?: boolean } = {},
 ): Promise<PageResult> {
   const context = await browser.newContext({ userAgent: USER_AGENT, reducedMotion: 'reduce' });
   const page = await context.newPage();
@@ -45,7 +47,9 @@ export async function checkPage(
       }
     }
 
-    return { title, findings };
+    const tabOrder = options.tabOrder ? await drawTabOrder(page).catch(() => null) : null;
+
+    return { title, findings, tabOrder };
   } finally {
     await context.close().catch(() => {});
   }

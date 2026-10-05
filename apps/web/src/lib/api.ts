@@ -110,6 +110,31 @@ export interface IssueGroup {
   isNew?: boolean;
 }
 
+export interface PageRow {
+  id: string;
+  url: string;
+  title: string | null;
+  error: string | null;
+  problems: number;
+  tabStops: number | null;
+}
+
+export interface TabStop {
+  label: string;
+  selector: string;
+  drawn: boolean;
+}
+
+export interface PageDetail {
+  id: string;
+  url: string;
+  title: string | null;
+  error: string | null;
+  scan: { id: string; createdAt: string };
+  site: { id: string; name: string };
+  tabOrder: { width: number; height: number; stops: TabStop[] } | null;
+}
+
 export const api = {
   listSites: () => request<SiteRow[]>('/sites'),
   createSite: (body: { name: string; url: string; schedule: ScanSchedule }) =>
@@ -124,4 +149,7 @@ export const api = {
   listIssues: (scanId: string) => request<IssueGroup[]>(`/scans/${scanId}/issues`),
   listFixed: (scanId: string) => request<IssueGroup[]>(`/scans/${scanId}/fixed`),
   issuesCsvUrl: (scanId: string) => `${BASE}/scans/${scanId}/issues.csv`,
+  listPages: (scanId: string) => request<PageRow[]>(`/scans/${scanId}/pages`),
+  getPage: (id: string) => request<PageDetail>(`/pages/${id}`),
+  tabOrderUrl: (pageId: string) => `${BASE}/pages/${pageId}/tab-order.webp`,
 };

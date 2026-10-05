@@ -39,3 +39,21 @@ export function standardLabel(code: string): string {
   if (code === 'section508') return 'Section 508';
   return code.replace(/^EN-/, 'EN ').replace(/^RGAA-/, 'RGAA ');
 }
+
+export function pathOf(url: string): string {
+  try {
+    const { pathname, search } = new URL(url);
+    return `${pathname}${search}`;
+  } catch {
+    return url;
+  }
+}
+
+export function shortUrl(url: string): string {
+  try {
+    const { host, pathname, search } = new URL(url);
+    return `${host}${pathname}${search}`;
+  } catch {
+    return url;
+  }
+}

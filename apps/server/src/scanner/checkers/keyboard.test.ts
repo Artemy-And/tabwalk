@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { type Browser, chromium } from 'playwright';
 import type { CheckFinding } from '../types.js';
-import { keyboardChecker } from './keyboard.js';
+import { drawTabOrder, keyboardChecker } from './keyboard.js';
 
 let browser: Browser;
 
@@ -323,4 +323,34 @@ test('a link drawn over a sticky header with pointer-events off is not obscured'
       '.skip{position:fixed;top:8px;left:8px;z-index:2;pointer-events:none;background:#fff}',
   );
   assert.deepEqual(only(findings, 'focus-obscured'), []);
+});
+
+test('the tab order is drawn as a numbered picture', async () => {
+  const context = await browser.newContext({ reducedMotion: 'reduce' });
+  const page = await context.newPage();
+  await page.setContent(
+    '<!doctype html><html lang="en"><body>' +
+      '<a href="/a">One</a> <a href="/b">Two</a><p style="height:900px"></p><button>Buy</button>' +
+      '<a href="/hidden" style="position:absolute;left:-9999px">Hidden</a></body></html>',
+  );
+  try {
+    await keyboardChecker.run(page);
+    const order = await drawTabOrder(page);
+    assert.ok(order);
+    assert.equal(order.image.subarray(8, 12).toString(), 'WEBP');
+    assert.deepEqual(
+      order.stops.map((s) => [s.label, s.drawn]),
+      [
+        ['One', true],
+        ['Two', true],
+        ['Buy', true],
+        ['Hidden', false],
+      ],
+    );
+    assert.equal(await page.locator('svg').count(), 0);
+    if (process.env.TAB_ORDER_OUT)
+      (await import('node:fs')).writeFileSync(process.env.TAB_ORDER_OUT, order.image);
+  } finally {
+    await context.close();
+  }
 });

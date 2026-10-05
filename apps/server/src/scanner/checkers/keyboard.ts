@@ -1,11 +1,19 @@
 import type { Page } from 'playwright';
 import type { Checker, CheckFinding } from '../types.js';
-import { type Box, type Described, installKeyboardHelpers, type Stop } from './keyboard-page.js';
+import {
+  type Box,
+  type Described,
+  installKeyboardHelpers,
+  type OrderStop,
+  type Stop,
+} from './keyboard-page.js';
 
 const MAX_STOPS = 300;
 const MAX_FRAME_STOPS = 100;
 const MAX_VISUAL_CHECKS = 40;
 const MAX_EXITS = 3;
+const ORDER_MAX_HEIGHT = 6000;
+const ORDER_SCALE = 0.75;
 const TIME_BUDGET_MS = 20_000;
 const CLIP_MARGIN = 6;
 
@@ -525,7 +533,46 @@ export const keyboardChecker: Checker = {
         }
         console.warn(`[keyboard] ${page.url()}: ${message}`);
       }
+      await page
+        .evaluate(
+          (list) => window.__tabwalkKeyboard?.setOrder(list),
+          result.stops.map((s) => ({ id: s.id, visible: s.onScreen })),
+        )
+        .catch(() => {});
       return report(result);
     }
   },
 };
+
+export interface TabOrder {
+  image: Buffer;
+  width: number;
+  height: number;
+  stops: OrderStop[];
+}
+
+export async function drawTabOrder(page: Page): Promise<TabOrder | null> {
+  const layout = await page.evaluate(
+    ([max, scale]) => window.__tabwalkKeyboard?.drawOrder(max, scale) ?? null,
+    [ORDER_MAX_HEIGHT, ORDER_SCALE] as const,
+  );
+  if (!layout) return null;
+  try {
+    const cdp = await page.context().newCDPSession(page);
+    const { data } = await cdp.send('Page.captureScreenshot', {
+      format: 'webp',
+      quality: 60,
+      captureBeyondViewport: true,
+      clip: { x: 0, y: 0, width: layout.width, height: layout.height, scale: ORDER_SCALE },
+    });
+    await cdp.detach();
+    return {
+      image: Buffer.from(data, 'base64'),
+      width: Math.round(layout.width * ORDER_SCALE),
+      height: Math.round(layout.height * ORDER_SCALE),
+      stops: layout.stops,
+    };
+  } finally {
+    await page.evaluate(() => window.__tabwalkKeyboard?.clearOrder()).catch(() => {});
+  }
+}

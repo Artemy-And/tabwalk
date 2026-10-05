@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { IssuesTable } from '../components/IssuesTable';
+import { PagesTable } from '../components/PagesTable';
 import {
   Breadcrumbs,
   ButtonLink,
@@ -196,6 +197,8 @@ export function ScanPage() {
           )}
         </section>
       )}
+
+      {done && <PagesTable scanId={scanId} />}
 
       <p className="max-w-[700px] text-[13px] text-muted">{t.sites.disclaimer}</p>
     </div>

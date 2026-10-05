@@ -1,4 +1,5 @@
 import {
+  customType,
   index,
   integer,
   jsonb,
@@ -67,6 +68,24 @@ export const pages = pgTable(
   },
   (t) => [uniqueIndex('pages_scan_url_idx').on(t.scanId, t.url)],
 );
+
+const bytea = customType<{ data: Buffer }>({ dataType: () => 'bytea' });
+
+export interface TabStop {
+  label: string;
+  selector: string;
+  drawn: boolean;
+}
+
+export const tabOrders = pgTable('tab_orders', {
+  pageId: uuid('page_id')
+    .primaryKey()
+    .references(() => pages.id, { onDelete: 'cascade' }),
+  image: bytea('image').notNull(),
+  width: integer('width').notNull(),
+  height: integer('height').notNull(),
+  stops: jsonb('stops').$type<TabStop[]>().notNull(),
+});
 
 export const issueKind = pgEnum('issue_kind', ['violation', 'incomplete', 'recommendation']);
 

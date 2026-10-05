@@ -104,6 +104,30 @@ export const zh: Messages = {
       recommendations: '建议',
     },
   },
+  pages: {
+    heading: '页面',
+    caption: '本次扫描检查的页面。打开页面可查看其 Tab 顺序。',
+    loading: '正在加载页面…',
+    columns: {
+      page: '页面',
+      problems: '问题',
+      tabStops: 'Tab 停靠点',
+    },
+    failed: (error: string) => `无法检查：${error}`,
+  },
+  page: {
+    loading: '正在加载页面…',
+    notFound: '未找到页面。',
+    tabOrder: 'Tab 顺序',
+    tabOrderIntro: (n: number) =>
+      `共 ${n} 个 Tab 停靠点。每个数字表示从页面顶部开始按 Tab 时焦点到达的位置。`,
+    pictureAlt: (n: number) =>
+      `按顺序编号的 ${n} 个 Tab 停靠点的页面截图。下方列出了相同的停靠点。`,
+    listHeading: '按顺序排列的 Tab 停靠点',
+    unnamed: '无文本',
+    notDrawn: '不在图片中',
+    noPicture: '此页面没有 Tab 顺序图片。图片只保留每个网站最近一次扫描的结果。',
+  },
   issues: {
     empty: '没有检测结果。',
     emptyFilter: '没有符合此筛选条件的结果。',

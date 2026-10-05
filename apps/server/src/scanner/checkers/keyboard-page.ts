@@ -26,6 +26,18 @@ export interface SkipTarget {
   found: boolean;
 }
 
+export interface OrderStop {
+  label: string;
+  selector: string;
+  drawn: boolean;
+}
+
+export interface OrderLayout {
+  width: number;
+  height: number;
+  stops: OrderStop[];
+}
+
 export interface KeyboardHelpers {
   active(): Stop | null;
   element(id: number): Element | null;
@@ -45,6 +57,9 @@ export interface KeyboardHelpers {
   skipTarget(id: number): SkipTarget | null;
   pastSkipTarget(id: number): boolean;
   anyPastSkipTarget(): boolean;
+  setOrder(stops: { id: number; visible: boolean }[]): void;
+  drawOrder(maxHeight: number, scale: number): OrderLayout | null;
+  clearOrder(): void;
 }
 
 declare global {
@@ -75,6 +90,8 @@ export function installKeyboardHelpers(margin: number): void {
   let nextId = 1;
   let skip: { link: Element; target: Element } | null = null;
   let lastCover: Element | null = null;
+  let order: { id: number; visible: boolean }[] = [];
+  let overlay: Element | null = null;
 
   const idOf = (el: Element): number => {
     let id = ids.get(el);
@@ -318,13 +335,15 @@ export function installKeyboardHelpers(margin: number): void {
     if (!(el instanceof HTMLElement) || getComputedStyle(el).pointerEvents !== 'none') {
       return coverAt(el, box);
     }
-    const style = el.getAttribute('style');
+    // only CSSOM edits: a strict CSP ignores a style attribute set from script
+    const value = el.style.getPropertyValue('pointer-events');
+    const priority = el.style.getPropertyPriority('pointer-events');
     el.style.setProperty('pointer-events', 'auto', 'important');
     try {
       return coverAt(el, box);
     } finally {
-      if (style === null) el.removeAttribute('style');
-      else el.setAttribute('style', style);
+      if (value) el.style.setProperty('pointer-events', value, priority);
+      else el.style.removeProperty('pointer-events');
     }
   };
 
@@ -350,17 +369,40 @@ export function installKeyboardHelpers(margin: number): void {
     );
   };
 
-  const labelOf = (el: Element): string =>
+  const nameOf = (el: Element): string =>
     (
       (el instanceof HTMLElement ? el.innerText : el.textContent) ||
       el.getAttribute('aria-label') ||
-      (el instanceof HTMLInputElement ? el.value : '') ||
+      (el instanceof HTMLInputElement ? el.value || el.placeholder : '') ||
       el.getAttribute('title') ||
+      el.getAttribute('alt') ||
+      el.querySelector('img[alt]')?.getAttribute('alt') ||
       ''
     )
       .replace(/\s+/g, ' ')
-      .trim()
-      .toLowerCase();
+      .trim();
+
+  const labelOf = (el: Element): string => nameOf(el).toLowerCase();
+
+  const pageBox = (el: Element): Box | null => {
+    let left = Number.POSITIVE_INFINITY;
+    let top = Number.POSITIVE_INFINITY;
+    let right = Number.NEGATIVE_INFINITY;
+    let bottom = Number.NEGATIVE_INFINITY;
+    for (const r of rectsOf(el)) {
+      left = Math.min(left, r.left);
+      top = Math.min(top, r.top);
+      right = Math.max(right, r.right);
+      bottom = Math.max(bottom, r.bottom);
+    }
+    if (right <= left || bottom <= top) return null;
+    return {
+      x: left + window.scrollX,
+      y: top + window.scrollY,
+      width: right - left,
+      height: bottom - top,
+    };
+  };
 
   const clear = (color: string): boolean =>
     color === 'transparent' || /^rgba\(.*,\s*0\)$/.test(color);
@@ -595,6 +637,104 @@ export function installKeyboardHelpers(margin: number): void {
       return [...document.querySelectorAll(TABBABLE)].some(
         (el) => isTabbable(el) && afterTarget(target, el),
       );
+    },
+
+    setOrder(list) {
+      order = list;
+    },
+
+    drawOrder(maxHeight, scale) {
+      if (order.length === 0) return null;
+      window.scrollTo(0, 0);
+      const root = document.documentElement;
+      const width = root.clientWidth || window.innerWidth;
+      const height = Math.min(
+        Math.max(root.scrollHeight, document.body?.scrollHeight ?? 0),
+        maxHeight,
+      );
+      const ns = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(ns, 'svg');
+      svg.setAttribute('width', String(width));
+      svg.setAttribute('height', String(height));
+      Object.assign(svg.style, {
+        position: 'absolute',
+        left: '0',
+        top: '0',
+        zIndex: '2147483647',
+        pointerEvents: 'none',
+        overflow: 'visible',
+      });
+      const draw = (name: string, attrs: Record<string, string | number>): Element => {
+        const node = document.createElementNS(ns, name);
+        for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));
+        svg.appendChild(node);
+        return node;
+      };
+
+      // sizes are divided by the scale so they come out right in the smaller picture
+      const radius = 12 / scale;
+      const line = 2 / scale;
+      const badges: [number, number, number][] = [];
+      const stops = order.map(({ id, visible }, i) => {
+        const el = byId.get(id);
+        const box = el?.isConnected && visible && !transparent(el) ? pageBox(el) : null;
+        const drawn = box !== null && box.y < height;
+        if (box && drawn) {
+          draw('rect', {
+            x: box.x,
+            y: box.y,
+            width: box.width,
+            height: box.height,
+            fill: 'none',
+            stroke: '#2563d6',
+            'stroke-width': line,
+          });
+          badges.push([Math.max(radius, box.x), Math.max(radius, box.y), i + 1]);
+        }
+        return {
+          label: el ? nameOf(el).slice(0, 100) : '',
+          selector: el ? selectorOf(el) : '',
+          drawn,
+        };
+      });
+      if (badges.length > 1) {
+        draw('polyline', {
+          points: badges.map(([x, y]) => `${x},${y}`).join(' '),
+          fill: 'none',
+          stroke: '#2563d6',
+          'stroke-width': line,
+          'stroke-opacity': 0.7,
+        });
+      }
+      for (const [x, y, n] of badges) {
+        draw('circle', {
+          cx: x,
+          cy: y,
+          r: radius,
+          fill: '#2563d6',
+          stroke: '#fff',
+          'stroke-width': line,
+        });
+        const label = draw('text', {
+          x,
+          y,
+          fill: '#fff',
+          'font-family': 'Arial, sans-serif',
+          'font-size': (n > 99 ? 9 : 12) / scale,
+          'font-weight': 700,
+          'text-anchor': 'middle',
+          'dominant-baseline': 'central',
+        });
+        label.textContent = String(n);
+      }
+      root.appendChild(svg);
+      overlay = svg;
+      return { width, height, stops };
+    },
+
+    clearOrder() {
+      overlay?.remove();
+      overlay = null;
     },
   };
 }

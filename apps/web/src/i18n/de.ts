@@ -114,6 +114,31 @@ export const de: Messages = {
       recommendations: 'Empfehlungen',
     },
   },
+  pages: {
+    heading: 'Seiten',
+    caption: 'In diesem Scan geprüfte Seiten. Öffnen Sie eine, um ihre Tab-Reihenfolge zu sehen.',
+    loading: 'Seiten werden geladen…',
+    columns: {
+      page: 'Seite',
+      problems: 'Probleme',
+      tabStops: 'Tab-Stopps',
+    },
+    failed: (error: string) => `Prüfung fehlgeschlagen: ${error}`,
+  },
+  page: {
+    loading: 'Seite wird geladen…',
+    notFound: 'Seite nicht gefunden.',
+    tabOrder: 'Tab-Reihenfolge',
+    tabOrderIntro: (n: number) =>
+      `${n} ${plural(n, { one: 'Tab-Stopp', other: 'Tab-Stopps' })}. Jede Zahl zeigt, wohin der Fokus beim Drücken von Tab springt, vom Seitenanfang an.`,
+    pictureAlt: (n: number) =>
+      `Die Seite mit ihren ${n} nummerierten ${plural(n, { one: 'Tab-Stopp', other: 'Tab-Stopps' })}. Dieselben Stopps sind unten aufgeführt.`,
+    listHeading: 'Tab-Stopps in Reihenfolge',
+    unnamed: 'ohne Text',
+    notDrawn: 'nicht im Bild',
+    noPicture:
+      'Für diese Seite gibt es kein Bild der Tab-Reihenfolge. Bilder werden nur für den letzten Scan jeder Website aufbewahrt.',
+  },
   issues: {
     empty: 'Keine Befunde.',
     emptyFilter: 'Nichts passt zu diesem Filter.',

@@ -46,6 +46,11 @@ A cookie banner or a pop-up that holds focus is closed the way a keyboard user
 would close it, with Enter on its accept or close button, and the walk goes on
 to the page behind it.
 
+Every page also gets a picture of its Tab order: a screenshot with each stop
+outlined, numbered and joined to the next one, plus the same stops as a list.
+Open a page from the scan report to see it. Pictures are kept for the latest
+scan of each site.
+
 What a script cannot decide on its own, such as a loop that Shift+Tab can leave
 or a text field whose only sign of focus is the caret, goes to **needs a human**
 instead of the problem count.

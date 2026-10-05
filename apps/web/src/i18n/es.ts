@@ -113,6 +113,31 @@ export const es: Messages = {
       recommendations: 'Recomendaciones',
     },
   },
+  pages: {
+    heading: 'Páginas',
+    caption: 'Páginas revisadas en este análisis. Abre una para ver su orden de tabulación.',
+    loading: 'Cargando páginas…',
+    columns: {
+      page: 'Página',
+      problems: 'Problemas',
+      tabStops: 'Paradas de Tab',
+    },
+    failed: (error: string) => `No se pudo revisar: ${error}`,
+  },
+  page: {
+    loading: 'Cargando la página…',
+    notFound: 'Página no encontrada.',
+    tabOrder: 'Orden de tabulación',
+    tabOrderIntro: (n: number) =>
+      `${n} ${plural(n, { one: 'parada', other: 'paradas' })} de Tab. Cada número indica adónde va el foco al pulsar Tab, desde el principio de la página.`,
+    pictureAlt: (n: number) =>
+      `La página con sus ${n} ${plural(n, { one: 'parada', other: 'paradas' })} de Tab numeradas en orden. Las mismas paradas aparecen en la lista de abajo.`,
+    listHeading: 'Paradas de Tab en orden',
+    unnamed: 'sin texto',
+    notDrawn: 'no aparece en la imagen',
+    noPicture:
+      'No hay imagen del orden de tabulación para esta página. Las imágenes se guardan solo para el último análisis de cada sitio.',
+  },
   issues: {
     empty: 'Sin hallazgos.',
     emptyFilter: 'Nada coincide con este filtro.',
