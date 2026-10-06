@@ -104,8 +104,7 @@ export const de: Messages = {
     nameLabel: 'Name',
     namePlaceholder: 'Kunden-Website',
     urlLabel: 'URL',
-    urlHint:
-      'Die Seiten kommen aus der sitemap.xml oder, falls es keine gibt, aus den Links der Startseite',
+    urlHint: 'Tabwalk beginnt hier, liest die Sitemap und folgt den Links von Seite zu Seite',
     submit: 'Hinzufügen',
     submitting: 'Wird hinzugefügt…',
     fillBoth: 'Bitte beide Felder ausfüllen',

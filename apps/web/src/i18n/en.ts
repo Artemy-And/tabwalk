@@ -103,7 +103,7 @@ export const en = {
     nameLabel: 'Name',
     namePlaceholder: 'Client site',
     urlLabel: 'URL',
-    urlHint: 'Pages come from sitemap.xml, or from links on the home page if there is none',
+    urlHint: 'Tabwalk starts here, reads the sitemap and follows links from page to page',
     submit: 'Add site',
     submitting: 'Adding…',
     fillBoth: 'Fill in both fields',

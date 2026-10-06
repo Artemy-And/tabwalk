@@ -105,8 +105,7 @@ export const es: Messages = {
     nameLabel: 'Nombre',
     namePlaceholder: 'Sitio del cliente',
     urlLabel: 'URL',
-    urlHint:
-      'Las páginas se toman del sitemap.xml o, si no existe, de los enlaces de la página de inicio',
+    urlHint: 'Tabwalk empieza aquí, lee el sitemap y sigue los enlaces de página en página',
     submit: 'Añadir',
     submitting: 'Añadiendo…',
     fillBoth: 'Rellena los dos campos',

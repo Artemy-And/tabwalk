@@ -100,7 +100,7 @@ export const zh: Messages = {
     nameLabel: '名称',
     namePlaceholder: '客户网站',
     urlLabel: '网址',
-    urlHint: '页面来自 sitemap.xml；如果没有，则来自首页上的链接',
+    urlHint: 'Tabwalk 从这里开始，读取 sitemap，并沿着链接逐页检测',
     submit: '添加',
     submitting: '正在添加…',
     fillBoth: '请填写两个字段',

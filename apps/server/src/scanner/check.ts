@@ -16,7 +16,11 @@ export interface PageResult {
   title: string | null;
   findings: PageFinding[];
   tabOrder: TabOrder | null;
+  links: string[];
 }
+
+// the address answered with a file or a download instead of a page
+export class NotAPageError extends Error {}
 
 export function launchBrowser(executablePath?: string): Promise<Browser> {
   return chromium.launch({
@@ -35,10 +39,32 @@ export async function checkPage(
   const page = await context.newPage();
 
   try {
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
+    const response = await page
+      .goto(url, { waitUntil: 'domcontentloaded', timeout: timeoutMs })
+      .catch((err: unknown) => {
+        if (err instanceof Error && err.message.includes('Download is starting')) {
+          throw new NotAPageError(`Not a web page: ${url}`);
+        }
+        throw err;
+      });
+    const type = response?.headers()['content-type'];
+    if (type && !/html/i.test(type)) throw new NotAPageError(`Not a web page: ${type}`);
     await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
 
     const title = await page.title().catch(() => null);
+
+    // read before the tab walk, which presses keys on the page
+    const links = await page
+      .$$eval('a[href], area[href]', (elements) =>
+        elements.map((el) => {
+          try {
+            return new URL(el.getAttribute('href') ?? '', document.baseURI).href;
+          } catch {
+            return '';
+          }
+        }),
+      )
+      .catch(() => [] as string[]);
 
     const findings: PageFinding[] = [];
     for (const checker of CHECKERS) {
@@ -49,29 +75,8 @@ export async function checkPage(
 
     const tabOrder = options.tabOrder ? await drawTabOrder(page).catch(() => null) : null;
 
-    return { title, findings, tabOrder };
+    return { title, findings, tabOrder, links };
   } finally {
     await context.close().catch(() => {});
   }
-}
-
-export async function mapWithConcurrency<T, R>(
-  items: T[],
-  limit: number,
-  fn: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let cursor = 0;
-
-  async function worker(): Promise<void> {
-    for (;;) {
-      const index = cursor++;
-      const item = items[index];
-      if (item === undefined) return;
-      results[index] = await fn(item);
-    }
-  }
-
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
-  return results;
 }

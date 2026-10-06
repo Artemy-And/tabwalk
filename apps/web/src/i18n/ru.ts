@@ -104,7 +104,7 @@ export const ru: Messages = {
     nameLabel: 'Название',
     namePlaceholder: 'Сайт клиента',
     urlLabel: 'Адрес',
-    urlHint: 'Страницы берутся из sitemap.xml, а если его нет — из ссылок на главной',
+    urlHint: 'Tabwalk начнёт отсюда, прочитает sitemap и пойдёт по ссылкам со страницы на страницу',
     submit: 'Добавить',
     submitting: 'Добавляем…',
     fillBoth: 'Заполните оба поля',

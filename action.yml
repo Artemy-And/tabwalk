@@ -8,11 +8,18 @@ branding:
 
 inputs:
   url:
-    description: Site to check. Pages come from sitemap.xml, or from links on this page
+    description: Site to check. Tabwalk starts here, reads the sitemap and follows links from page to page
     required: true
   max-pages:
     description: Maximum number of pages to check
     default: '50'
+  # no args below: GitHub hands every input to the container as an INPUT_* variable
+  include:
+    description: 'Check only pages under these paths, one per line or comma-separated, like /blog/ or /docs/*'
+    default: ''
+  exclude:
+    description: 'Skip pages under these paths, one per line or comma-separated, like /tag/ or *?page=*'
+    default: ''
   fail-on:
     description: Lowest impact that fails the job - critical, serious, moderate, minor or none
     default: critical

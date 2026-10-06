@@ -127,8 +127,10 @@ jobs:
 
 | Input | Default | Meaning |
 |---|---|---|
-| `url` | — | Site to check; pages come from its sitemap or home page links |
+| `url` | — | Site to check. Tabwalk starts here, reads the sitemap and follows links from page to page |
 | `max-pages` | 50 | Page cap |
+| `include` | — | Check only pages under these paths, one per line, like `/blog/` or `/docs/*` |
+| `exclude` | — | Skip pages under these paths, one per line, like `/tag/` or `*?page=*` |
 | `fail-on` | `critical` | Lowest impact that fails the job: `critical`, `serious`, `moderate`, `minor` or `none` |
 | `report` | `tabwalk-report.json` | JSON report path in the workspace |
 
@@ -224,7 +226,7 @@ apps/server/src/
   queue/schedule.ts     daily and weekly scans
   scanner/
     types.ts            Checker interface — the extension point
-    crawl.ts            sitemap.xml, falling back to link discovery
+    crawl.ts            sitemaps from robots.txt, then links on every page it opens
     fingerprint.ts      collapses repeated findings
     checkers/
       axe.ts            the axe-core checker
@@ -249,6 +251,14 @@ All of it lives in `.env`:
 | `PAGE_TIMEOUT_MS` | 30000 | Per-page load timeout |
 | `CHROMIUM_EXECUTABLE` | — | Your own Chromium, if the bundled one won't start |
 | `PUBLIC_URL` | — | The dashboard's address, e.g. `https://a11y.example.com`. Makes the sign-in cookie Secure |
+
+### Which pages are checked
+
+Tabwalk starts at the site's address, reads the sitemaps listed in `robots.txt`
+(or `/sitemap.xml`), then follows the links on every page it opens until it
+reaches the page cap. Links are read after the page's scripts have run, so a
+single-page app without a sitemap is checked page by page. Links to files such
+as PDFs and images are skipped.
 
 ### Notifications
 

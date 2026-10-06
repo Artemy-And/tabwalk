@@ -4,14 +4,20 @@ import { db } from '../db/index.js';
 import { issues, pages, scans, sites, tabOrders } from '../db/schema.js';
 import { env } from '../env.js';
 import { notifyScan } from '../notify/notify.js';
-import { checkPage, launchBrowser, mapWithConcurrency } from './check.js';
-import { discoverUrls } from './crawl.js';
+import { checkPage, launchBrowser, NotAPageError } from './check.js';
+import { crawl } from './crawl.js';
 
-async function scanOnePage(browser: Browser, scanId: string, url: string): Promise<boolean> {
+type PageOutcome = { ok: boolean; links: string[] } | null;
+
+// null when the address turned out to be a file, which is not a page to report
+async function scanOnePage(browser: Browser, scanId: string, url: string): Promise<PageOutcome> {
   try {
-    const { title, findings, tabOrder } = await checkPage(browser, url, env.PAGE_TIMEOUT_MS, {
-      tabOrder: true,
-    });
+    const { title, findings, tabOrder, links } = await checkPage(
+      browser,
+      url,
+      env.PAGE_TIMEOUT_MS,
+      { tabOrder: true },
+    );
 
     const [pageRow] = await db
       .insert(pages)
@@ -52,8 +58,9 @@ async function scanOnePage(browser: Browser, scanId: string, url: string): Promi
       );
     }
 
-    return true;
+    return { ok: true, links };
   } catch (err) {
+    if (err instanceof NotAPageError) return null;
     // Playwright appends a multi-line call log; the first line says what went wrong
     const message = (err instanceof Error ? err.message : String(err)).split('\n')[0] ?? '';
     await db
@@ -63,7 +70,7 @@ async function scanOnePage(browser: Browser, scanId: string, url: string): Promi
         target: [pages.scanId, pages.url],
         set: { error: message, scannedAt: new Date() },
       });
-    return false;
+    return { ok: false, links: [] };
   }
 }
 
@@ -82,29 +89,34 @@ export async function runScan(scanId: string): Promise<void> {
   let browser: Browser | null = null;
 
   try {
-    const urls = await discoverUrls(site.url, env.MAX_PAGES_PER_SCAN);
-    if (urls.length === 0) throw new Error('No pages found to scan');
-
-    console.log(
-      `[scan ${scanId}] ${site.url}: ${urls.length} ${urls.length === 1 ? 'page' : 'pages'} to check`,
-    );
+    const limit = env.MAX_PAGES_PER_SCAN;
+    console.log(`[scan ${scanId}] ${site.url}: checking up to ${limit} pages`);
 
     browser = await launchBrowser(env.CHROMIUM_EXECUTABLE);
 
-    const outcomes = await mapWithConcurrency(urls, env.SCAN_CONCURRENCY, async (url) => {
-      const ok = await scanOnePage(browser as Browser, scanId, url);
-      await db
-        .update(scans)
-        .set(
-          ok
-            ? { pagesScanned: sql`${scans.pagesScanned} + 1` }
-            : { pagesFailed: sql`${scans.pagesFailed} + 1` },
-        )
-        .where(eq(scans.id, scanId));
-      return ok;
+    let ok = 0;
+    let failed = 0;
+    await crawl(site.url, {
+      limit,
+      concurrency: env.SCAN_CONCURRENCY,
+      visit: async (url) => {
+        const outcome = await scanOnePage(browser as Browser, scanId, url);
+        if (!outcome) return [];
+        if (outcome.ok) ok += 1;
+        else failed += 1;
+        await db
+          .update(scans)
+          .set(
+            outcome.ok
+              ? { pagesScanned: sql`${scans.pagesScanned} + 1` }
+              : { pagesFailed: sql`${scans.pagesFailed} + 1` },
+          )
+          .where(eq(scans.id, scanId));
+        return outcome.links;
+      },
     });
 
-    const ok = outcomes.filter(Boolean).length;
+    if (ok === 0 && failed === 0) throw new Error('No pages found to scan');
     if (ok === 0) {
       const failed = await db.query.pages.findFirst({
         where: and(eq(pages.scanId, scanId), isNotNull(pages.error)),
@@ -119,7 +131,7 @@ export async function runScan(scanId: string): Promise<void> {
         status: 'done',
         finishedAt: new Date(),
         pagesScanned: ok,
-        pagesFailed: outcomes.length - ok,
+        pagesFailed: failed,
       })
       .where(eq(scans.id, scanId));
 
@@ -131,7 +143,7 @@ export async function runScan(scanId: string): Promise<void> {
       )`,
     );
 
-    console.log(`[scan ${scanId}] done: ${ok} of ${outcomes.length}`);
+    console.log(`[scan ${scanId}] done: ${ok} of ${ok + failed}`);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`[scan ${scanId}] failed:`, message);

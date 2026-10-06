@@ -1,7 +1,7 @@
 import { appendFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
-import { checkPage, launchBrowser, mapWithConcurrency, type PageFinding } from './scanner/check.js';
-import { discoverUrls } from './scanner/crawl.js';
+import { checkPage, launchBrowser, NotAPageError, type PageFinding } from './scanner/check.js';
+import { crawl } from './scanner/crawl.js';
 
 const IMPACTS = ['critical', 'serious', 'moderate', 'minor'] as const;
 type ImpactLevel = (typeof IMPACTS)[number];
@@ -24,11 +24,13 @@ interface Group {
 
 const USAGE = `Usage: ci <url> [options]
 
-Crawls the site from its sitemap (or home page links), checks every page
-and exits with code 1 when a problem at or above --fail-on is found.
+Starts at <url> and the site's sitemap, follows links from page to page, checks
+every page and exits with code 1 when a problem at or above --fail-on is found.
 
 Options:
   --max-pages <n>     pages to check, default 50
+  --include <paths>   check only pages under these paths, like /blog/,/docs/*
+  --exclude <paths>   skip pages under these paths, like /tag/,*?page=*
   --fail-on <level>   critical | serious | moderate | minor | none, default critical
   --report <path>     JSON report file, default tabwalk-report.json
   --concurrency <n>   pages checked at once, default 3
@@ -74,6 +76,8 @@ const { values, positionals } = parseArgs({
   allowPositionals: true,
   options: {
     'max-pages': { type: 'string', default: '50' },
+    include: { type: 'string', multiple: true },
+    exclude: { type: 'string', multiple: true },
     'fail-on': { type: 'string', default: 'critical' },
     report: { type: 'string', default: 'tabwalk-report.json' },
     concurrency: { type: 'string', default: '3' },
@@ -102,48 +106,64 @@ if (failOn !== 'none' && !IMPACTS.includes(failOn)) {
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
+// repeated flags, commas or new lines; the GitHub Action passes its inputs as INPUT_* variables
+function patterns(flags: string[] | undefined, input: string | undefined): string[] {
+  return [...(flags ?? []), input ?? '']
+    .flatMap((value) => value.split(/[\n,]/))
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
 const maxPages = positiveInt('max-pages', values['max-pages']);
 const concurrency = positiveInt('concurrency', values.concurrency);
 const timeoutMs = positiveInt('timeout', values.timeout);
+const include = patterns(values.include, process.env.INPUT_INCLUDE);
+const exclude = patterns(values.exclude, process.env.INPUT_EXCLUDE);
 
-const urls = await discoverUrls(siteUrl, maxPages);
-if (urls.length === 0) {
-  console.error(`No pages found at ${siteUrl}`);
-  process.exit(2);
-}
-
-console.log(`Checking ${plural(urls.length, 'page')} of ${siteUrl}`);
+console.log(`Checking up to ${plural(maxPages, 'page')} of ${siteUrl}`);
 
 const browser = await launchBrowser(process.env.CHROMIUM_EXECUTABLE);
 const groups = new Map<string, Group>();
 const failedPages: { url: string; error: string }[] = [];
+let checked = 0;
 
-await mapWithConcurrency(urls, concurrency, async (url) => {
-  try {
-    const { findings } = await checkPage(browser, url, timeoutMs);
-    for (const f of findings) {
-      const key = `${f.kind}:${f.fingerprint}`;
-      const group = groups.get(key) ?? {
-        kind: f.kind,
-        ruleId: f.ruleId,
-        impact: impactOf(f.impact),
-        help: f.help,
-        helpUrl: f.helpUrl,
-        wcagTags: f.wcagTags,
-        standards: f.standards,
-        fingerprint: f.fingerprint,
-        target: f.target,
-        html: f.html,
-        pages: [],
-        elements: 0,
-      };
-      if (!group.pages.includes(url)) group.pages.push(url);
-      group.elements += 1;
-      groups.set(key, group);
+await crawl(siteUrl, {
+  limit: maxPages,
+  concurrency,
+  rules: { include, exclude },
+  visit: async (url) => {
+    try {
+      const { findings, links } = await checkPage(browser, url, timeoutMs);
+      checked += 1;
+      for (const f of findings) {
+        const key = `${f.kind}:${f.fingerprint}`;
+        const group = groups.get(key) ?? {
+          kind: f.kind,
+          ruleId: f.ruleId,
+          impact: impactOf(f.impact),
+          help: f.help,
+          helpUrl: f.helpUrl,
+          wcagTags: f.wcagTags,
+          standards: f.standards,
+          fingerprint: f.fingerprint,
+          target: f.target,
+          html: f.html,
+          pages: [],
+          elements: 0,
+        };
+        if (!group.pages.includes(url)) group.pages.push(url);
+        group.elements += 1;
+        groups.set(key, group);
+      }
+      return links;
+    } catch (err) {
+      // a link to a file is not a page that failed
+      if (!(err instanceof NotAPageError)) {
+        failedPages.push({ url, error: err instanceof Error ? err.message : String(err) });
+      }
+      return [];
     }
-  } catch (err) {
-    failedPages.push({ url, error: err instanceof Error ? err.message : String(err) });
-  }
+  },
 });
 
 await browser.close();
@@ -156,7 +176,6 @@ const incomplete = sorted.filter((g) => g.kind === 'incomplete');
 const recommendations = sorted.filter((g) => g.kind === 'recommendation');
 const count = (impact: ImpactLevel) => violations.filter((g) => g.impact === impact).length;
 const blocking = failOn === 'none' ? [] : violations.filter((g) => rank(g.impact) <= rank(failOn));
-const checked = urls.length - failedPages.length;
 
 const summary = {
   uniqueProblems: violations.length,
@@ -234,7 +253,9 @@ ${table(recommendations)}
 }
 
 if (checked === 0) {
-  console.error('No page could be loaded');
+  console.error(
+    failedPages.length > 0 ? 'No page could be loaded' : `No pages found at ${siteUrl}`,
+  );
   process.exit(2);
 }
 
