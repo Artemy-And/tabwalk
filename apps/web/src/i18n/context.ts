@@ -2,19 +2,27 @@ import { createContext, useContext } from 'react';
 import { de } from './de';
 import { en, type Messages } from './en';
 import { es } from './es';
+import { fr } from './fr';
+import { it } from './it';
+import { nl } from './nl';
+import { pl } from './pl';
 import { ru } from './ru';
 import { zh } from './zh';
 
-export const LOCALES = ['en', 'de', 'es', 'ru', 'zh'] as const;
+export const LOCALES = ['en', 'de', 'es', 'fr', 'it', 'nl', 'pl', 'ru', 'zh'] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'en';
 
-export const MESSAGES: Record<Locale, Messages> = { en, de, es, ru, zh };
+export const MESSAGES: Record<Locale, Messages> = { en, de, es, fr, it, nl, pl, ru, zh };
 
 export const LOCALE_NAMES: Record<Locale, string> = {
   en: 'English',
   de: 'Deutsch',
   es: 'Español',
+  fr: 'Français',
+  it: 'Italiano',
+  nl: 'Nederlands',
+  pl: 'Polski',
   ru: 'Русский',
   zh: '简体中文',
 };
