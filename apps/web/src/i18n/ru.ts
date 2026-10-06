@@ -243,6 +243,7 @@ export const ru: Messages = {
       new: 'Новые с прошлой проверки',
       fixed: 'Исправлено',
       recommendations: 'Рекомендации',
+      dismissed: 'Отклонённые',
     },
   },
   pages: {
@@ -298,6 +299,27 @@ export const ru: Messages = {
     newTag: 'Новая',
     fixedNote: 'В этой проверке не найдена',
     firstSeen: (date) => `Впервые найдена ${date}`,
+    dismissedCaption:
+      'Отклонённые находки остаются в данных, но нигде не считаются: ни в итогах, ни в трендах, ни в сравнении, ни в уведомлениях.',
+    dismiss: 'Отклонить',
+    dismissReason: 'Почему',
+    reasons: {
+      false_positive: 'Это не проблема: Tabwalk ошибся',
+      wont_fix: 'Не будем чинить: принимаем как есть',
+    },
+    reasonShort: {
+      false_positive: 'Ложное срабатывание',
+      wont_fix: 'Не будем чинить',
+    },
+    dismissNote: 'Комментарий (необязательно)',
+    dismissSubmit: 'Отклонить',
+    dismissing: 'Отклоняем…',
+    dismissedAs: (reason, date, who) => (who ? `${reason}, ${date}, ${who}` : `${reason}, ${date}`),
+    reopen: 'Вернуть',
+    reopening: 'Возвращаем…',
+    dismissedNotice: (problem) =>
+      `Отклонено: ${problem}. Теперь находка в фильтре «Отклонённые» и не считается.`,
+    reopenedNotice: (problem) => `Возвращено: ${problem}. Находка снова считается.`,
   },
   impact: {
     critical: 'Критическая',

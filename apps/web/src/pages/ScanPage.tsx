@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { IssuesTable } from '../components/IssuesTable';
 import { PagesTable } from '../components/PagesTable';
 import {
@@ -15,20 +15,30 @@ import { useI18n } from '../i18n/context';
 import { api, type IssueGroup, isScanActive, POLL_INTERVAL_MS } from '../lib/api';
 import { formatDate } from '../lib/format';
 
-type Filter = 'all' | 'critical' | 'review' | 'new' | 'fixed' | 'recommendations';
+type Filter = 'all' | 'critical' | 'review' | 'new' | 'fixed' | 'recommendations' | 'dismissed';
 
+// a dismissed finding shows up under Dismissed and nowhere else
 const FILTERS: Record<Exclude<Filter, 'fixed'>, (issue: IssueGroup) => boolean> = {
-  all: (issue) => issue.kind !== 'recommendation',
-  critical: (issue) => issue.kind === 'violation' && issue.impact === 'critical',
-  review: (issue) => issue.kind === 'incomplete',
-  new: (issue) => issue.isNew === true,
-  recommendations: (issue) => issue.kind === 'recommendation',
+  all: (issue) => !issue.dismissal && issue.kind !== 'recommendation',
+  critical: (issue) =>
+    !issue.dismissal && issue.kind === 'violation' && issue.impact === 'critical',
+  review: (issue) => !issue.dismissal && issue.kind === 'incomplete',
+  new: (issue) => !issue.dismissal && issue.isNew === true,
+  recommendations: (issue) => !issue.dismissal && issue.kind === 'recommendation',
+  dismissed: (issue) => Boolean(issue.dismissal),
 };
 
 export function ScanPage() {
   const { t, locale } = useI18n();
   const { scanId } = useParams({ from: '/scans/$scanId' });
   const [filter, setFilter] = useState<Filter>('all');
+  const [notice, setNotice] = useState<string | null>(null);
+  const noticeRef = useRef<HTMLParagraphElement>(null);
+
+  // the row that had focus is gone after a dismissal, so focus goes to what happened
+  useEffect(() => {
+    if (notice) noticeRef.current?.focus();
+  }, [notice]);
 
   const scan = useQuery({
     queryKey: ['scan', scanId],
@@ -59,6 +69,7 @@ export function ScanPage() {
       review: list.filter(FILTERS.review).length,
       new: list.filter(FILTERS.new).length,
       recommendations: list.filter(FILTERS.recommendations).length,
+      dismissed: list.filter(FILTERS.dismissed).length,
     };
   }, [issues.data]);
 
@@ -186,7 +197,21 @@ export function ScanPage() {
                     {t.scan.filters.recommendations} {counts.recommendations}
                   </FilterChip>
                 )}
+                {(counts.dismissed > 0 || filter === 'dismissed') && (
+                  <FilterChip
+                    active={filter === 'dismissed'}
+                    onClick={() => setFilter('dismissed')}
+                  >
+                    {t.scan.filters.dismissed} {counts.dismissed}
+                  </FilterChip>
+                )}
               </fieldset>
+
+              {notice && (
+                <p ref={noticeRef} tabIndex={-1} className="text-[15px]">
+                  {notice}
+                </p>
+              )}
 
               {filter === 'fixed' && fixed.isLoading ? (
                 <LiveStatus>{t.scan.loadingFindings}</LiveStatus>
@@ -194,14 +219,13 @@ export function ScanPage() {
                 <IssuesTable
                   issues={visible}
                   variant={
-                    filter === 'fixed'
-                      ? 'fixed'
-                      : filter === 'recommendations'
-                        ? 'recommendations'
-                        : 'current'
+                    filter === 'fixed' || filter === 'recommendations' || filter === 'dismissed'
+                      ? filter
+                      : 'current'
                   }
                   emptyMessage={filter === 'all' ? undefined : t.issues.emptyFilter}
                   scanDate={s.createdAt}
+                  actions={s.site ? { siteId: s.site.id, scanId, onChange: setNotice } : undefined}
                 />
               )}
             </>

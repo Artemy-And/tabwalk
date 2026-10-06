@@ -134,6 +134,19 @@ export interface IssueGroup {
   sampleSummary: string | null;
   isNew?: boolean;
   firstSeenAt?: string;
+  dismissal?: Dismissal | null;
+}
+
+export type DismissalReason = 'false_positive' | 'wont_fix';
+
+export const DISMISSAL_REASONS: DismissalReason[] = ['false_positive', 'wont_fix'];
+
+export interface Dismissal {
+  reason: DismissalReason;
+  note: string | null;
+  createdAt: string;
+  // the email of whoever dismissed it, if that account still exists
+  by: string | null;
 }
 
 export interface PageRow {
@@ -214,6 +227,15 @@ export const api = {
   updateSite: (id: string, body: SiteUpdate) =>
     request<SiteDetail>(`/sites/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   deleteSite: (id: string) => request<undefined>(`/sites/${id}`, { method: 'DELETE' }),
+  dismiss: (
+    siteId: string,
+    body: { fingerprint: string; reason: DismissalReason; note?: string },
+  ) =>
+    request<unknown>(`/sites/${siteId}/dismissals`, { method: 'PUT', body: JSON.stringify(body) }),
+  reopen: (siteId: string, fingerprint: string) =>
+    request<undefined>(`/sites/${siteId}/dismissals/${encodeURIComponent(fingerprint)}`, {
+      method: 'DELETE',
+    }),
   listScans: (siteId: string) => request<ScanRow[]>(`/sites/${siteId}/scans`),
   startScan: (siteId: string) => request<Scan>(`/sites/${siteId}/scans`, { method: 'POST' }),
   getScan: (id: string) => request<ScanDetail>(`/scans/${id}`),

@@ -225,6 +225,7 @@ export const de: Messages = {
       new: 'Neu seit letzter Prüfung',
       fixed: 'Behoben',
       recommendations: 'Empfehlungen',
+      dismissed: 'Verworfen',
     },
   },
   pages: {
@@ -280,6 +281,28 @@ export const de: Messages = {
     newTag: 'Neu',
     fixedNote: 'In dieser Prüfung nicht gefunden',
     firstSeen: (date) => `Erstmals gefunden am ${date}`,
+    dismissedCaption:
+      'Verworfene Befunde bleiben in den Daten, zählen aber nirgends: nicht in Summen, Verläufen, Vergleichen oder Benachrichtigungen.',
+    dismiss: 'Verwerfen',
+    dismissReason: 'Warum',
+    reasons: {
+      false_positive: 'Kein Problem: Tabwalk hat sich geirrt',
+      wont_fix: 'Wird nicht behoben: wir akzeptieren es',
+    },
+    reasonShort: {
+      false_positive: 'Fehlalarm',
+      wont_fix: 'Wird nicht behoben',
+    },
+    dismissNote: 'Notiz (optional)',
+    dismissSubmit: 'Verwerfen',
+    dismissing: 'Wird verworfen…',
+    dismissedAs: (reason, date, who) =>
+      who ? `${reason}, ${date}, von ${who}` : `${reason}, ${date}`,
+    reopen: 'Wieder öffnen',
+    reopening: 'Wird geöffnet…',
+    dismissedNotice: (problem) =>
+      `Verworfen: ${problem}. Der Befund steht jetzt unter „Verworfen“ und zählt nicht mehr.`,
+    reopenedNotice: (problem) => `Wieder geöffnet: ${problem}. Der Befund zählt wieder.`,
   },
   impact: {
     critical: 'Kritisch',

@@ -221,6 +221,7 @@ export const en = {
       new: 'New since last scan',
       fixed: 'Fixed',
       recommendations: 'Recommendations',
+      dismissed: 'Dismissed',
     },
   },
   pages: {
@@ -275,6 +276,28 @@ export const en = {
     newTag: 'New',
     fixedNote: 'Not found in this scan',
     firstSeen: (date: string) => `First seen ${date}`,
+    dismissedCaption:
+      'Dismissed findings stay in the data but count nowhere: not in totals, trends, comparisons or notifications.',
+    dismiss: 'Dismiss',
+    dismissReason: 'Why',
+    reasons: {
+      false_positive: 'Not a problem: Tabwalk got it wrong',
+      wont_fix: 'Won’t fix: we accept it',
+    },
+    reasonShort: {
+      false_positive: 'False positive',
+      wont_fix: 'Won’t fix',
+    },
+    dismissNote: 'Note (optional)',
+    dismissSubmit: 'Dismiss',
+    dismissing: 'Dismissing…',
+    dismissedAs: (reason: string, date: string, who: string | null) =>
+      who ? `${reason}, ${date}, by ${who}` : `${reason}, ${date}`,
+    reopen: 'Reopen',
+    reopening: 'Reopening…',
+    dismissedNotice: (problem: string) =>
+      `Dismissed: ${problem}. It is under Dismissed now and no longer counts.`,
+    reopenedNotice: (problem: string) => `Reopened: ${problem}. It counts again.`,
   },
   impact: {
     critical: 'Critical',

@@ -225,6 +225,7 @@ export const es: Messages = {
       new: 'Nuevos desde el último análisis',
       fixed: 'Corregidos',
       recommendations: 'Recomendaciones',
+      dismissed: 'Descartados',
     },
   },
   pages: {
@@ -280,6 +281,28 @@ export const es: Messages = {
     newTag: 'Nuevo',
     fixedNote: 'No encontrado en este análisis',
     firstSeen: (date) => `Detectado por primera vez el ${date}`,
+    dismissedCaption:
+      'Los hallazgos descartados siguen en los datos, pero no cuentan en ninguna parte: ni en totales, ni en tendencias, ni en comparaciones, ni en notificaciones.',
+    dismiss: 'Descartar',
+    dismissReason: 'Por qué',
+    reasons: {
+      false_positive: 'No es un problema: Tabwalk se equivocó',
+      wont_fix: 'No se corregirá: lo aceptamos',
+    },
+    reasonShort: {
+      false_positive: 'Falso positivo',
+      wont_fix: 'No se corregirá',
+    },
+    dismissNote: 'Nota (opcional)',
+    dismissSubmit: 'Descartar',
+    dismissing: 'Descartando…',
+    dismissedAs: (reason, date, who) =>
+      who ? `${reason}, ${date}, por ${who}` : `${reason}, ${date}`,
+    reopen: 'Reabrir',
+    reopening: 'Reabriendo…',
+    dismissedNotice: (problem) =>
+      `Descartado: ${problem}. Ahora está en «Descartados» y ya no cuenta.`,
+    reopenedNotice: (problem) => `Reabierto: ${problem}. Vuelve a contar.`,
   },
   impact: {
     critical: 'Crítico',

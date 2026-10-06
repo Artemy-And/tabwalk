@@ -171,6 +171,26 @@ export const issues = pgTable(
   ],
 );
 
+export const dismissalReason = pgEnum('dismissal_reason', ['false_positive', 'wont_fix']);
+
+// a finding someone decided against, for every scan of the site: its rows stay in the
+// scans, but it counts nowhere
+export const dismissals = pgTable(
+  'dismissals',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    siteId: uuid('site_id')
+      .notNull()
+      .references(() => sites.id, { onDelete: 'cascade' }),
+    fingerprint: text('fingerprint').notNull(),
+    reason: dismissalReason('reason').notNull(),
+    note: text('note'),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('dismissals_site_fingerprint_idx').on(t.siteId, t.fingerprint)],
+);
+
 export type User = typeof users.$inferSelect;
 export type Channel = typeof channels.$inferSelect;
 export type ChannelKind = (typeof channelKind.enumValues)[number];

@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useId, useMemo, useState } from 'react';
 import { useI18n } from '../i18n/context';
 import { useRuleHelp } from '../i18n/ruleHelp';
-import type { IssueGroup } from '../lib/api';
+import { api, DISMISSAL_REASONS, type DismissalReason, type IssueGroup } from '../lib/api';
 import { formatDay, standardLabel } from '../lib/format';
-import { Card, ImpactBadge } from './ui';
+import { Button, Card, Field, ImpactBadge } from './ui';
 
 type SortKey = 'pagesAffected' | 'impact' | 'ruleId';
 type SortDir = 'asc' | 'desc';
@@ -56,17 +57,156 @@ function SortButton({
   );
 }
 
+// a dismissal changes the counts of every report and list of the site
+function useRefresh(scanId: string, siteId: string) {
+  const qc = useQueryClient();
+  return () => {
+    for (const key of [
+      ['issues', scanId],
+      ['scan', scanId],
+      ['fixed', scanId],
+      ['pages', scanId],
+      ['site', siteId],
+      ['sites'],
+    ]) {
+      void qc.invalidateQueries({ queryKey: key });
+    }
+  };
+}
+
+interface RowActions {
+  siteId: string;
+  scanId: string;
+  // the row leaves the list, so the page says what happened and takes focus
+  onChange: (notice: string) => void;
+}
+
+function DismissForm({
+  issue,
+  title,
+  actions,
+}: {
+  issue: IssueGroup;
+  title: string;
+  actions: RowActions;
+}) {
+  const { t } = useI18n();
+  const id = useId();
+  const [reason, setReason] = useState<DismissalReason>('false_positive');
+  const [note, setNote] = useState('');
+  const refresh = useRefresh(actions.scanId, actions.siteId);
+  const dismiss = useMutation({
+    mutationFn: () =>
+      api.dismiss(actions.siteId, {
+        fingerprint: issue.fingerprint,
+        reason,
+        note: note.trim() || undefined,
+      }),
+    onSuccess: () => {
+      actions.onChange(t.issues.dismissedNotice(title));
+      refresh();
+    },
+  });
+
+  return (
+    <details className="mt-1">
+      <summary className="cursor-pointer text-sm text-muted">{t.issues.dismiss}</summary>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          dismiss.mutate();
+        }}
+        className="mt-2 flex max-w-xl flex-col gap-3"
+      >
+        <fieldset className="flex flex-col gap-1.5">
+          <legend className="mb-1 text-sm font-semibold text-ink">{t.issues.dismissReason}</legend>
+          {DISMISSAL_REASONS.map((value) => (
+            <label key={value} className="flex items-center gap-2 text-[15px]">
+              <input
+                type="radio"
+                name={`${id}-reason`}
+                value={value}
+                checked={reason === value}
+                onChange={() => setReason(value)}
+              />
+              {t.issues.reasons[value]}
+            </label>
+          ))}
+        </fieldset>
+        <Field
+          label={t.issues.dismissNote}
+          value={note}
+          maxLength={500}
+          onChange={(e) => setNote(e.target.value)}
+        />
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="submit" variant="secondary" disabled={dismiss.isPending}>
+            {dismiss.isPending ? t.issues.dismissing : t.issues.dismissSubmit}
+          </Button>
+          {dismiss.isError && (
+            <p role="alert" className="text-sm text-critical">
+              {dismiss.error.message}
+            </p>
+          )}
+        </div>
+      </form>
+    </details>
+  );
+}
+
+function Dismissed({
+  issue,
+  title,
+  actions,
+}: {
+  issue: IssueGroup;
+  title: string;
+  actions: RowActions;
+}) {
+  const { t, locale } = useI18n();
+  const refresh = useRefresh(actions.scanId, actions.siteId);
+  const reopen = useMutation({
+    mutationFn: () => api.reopen(actions.siteId, issue.fingerprint),
+    onSuccess: () => {
+      actions.onChange(t.issues.reopenedNotice(title));
+      refresh();
+    },
+  });
+  if (!issue.dismissal) return null;
+  const { reason, note, createdAt, by } = issue.dismissal;
+
+  return (
+    <div className="mt-2 flex flex-col items-start gap-2">
+      <p className="text-sm text-muted">
+        {t.issues.dismissedAs(t.issues.reasonShort[reason], formatDay(createdAt, locale), by)}
+      </p>
+      {note && <p className="max-w-2xl text-sm whitespace-pre-line">{note}</p>}
+      <Button variant="secondary" onClick={() => reopen.mutate()} disabled={reopen.isPending}>
+        {reopen.isPending ? t.issues.reopening : t.issues.reopen}
+      </Button>
+      {reopen.isError && (
+        <p role="alert" className="text-sm text-critical">
+          {reopen.error.message}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function IssuesTable({
   issues,
   variant = 'current',
   emptyMessage,
   scanDate,
+  actions,
 }: {
   issues: IssueGroup[];
-  variant?: 'current' | 'fixed' | 'recommendations';
+  variant?: 'current' | 'fixed' | 'recommendations' | 'dismissed';
   emptyMessage?: string;
   // the scan's own date: a problem first seen before it gets a "first seen" line
   scanDate?: string;
+  // dismissing and reopening, when the scan still has its site
+  actions?: RowActions;
 }) {
   const { t, locale } = useI18n();
   const ruleHelp = useRuleHelp();
@@ -74,6 +214,7 @@ export function IssuesTable({
     current: t.issues.caption,
     fixed: t.issues.fixedCaption,
     recommendations: t.issues.recommendationsCaption,
+    dismissed: t.issues.dismissedCaption,
   };
   const [sortKey, setSortKey] = useState<SortKey>('impact');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
@@ -198,6 +339,20 @@ export function IssuesTable({
                       </p>
                     )}
                   </details>
+                  {actions && variant === 'dismissed' && (
+                    <Dismissed
+                      issue={issue}
+                      title={ruleHelp(issue.ruleId, issue.help)}
+                      actions={actions}
+                    />
+                  )}
+                  {actions && (variant === 'current' || variant === 'recommendations') && (
+                    <DismissForm
+                      issue={issue}
+                      title={ruleHelp(issue.ruleId, issue.help)}
+                      actions={actions}
+                    />
+                  )}
                 </td>
                 <td className={`${TD} font-mono text-[13px] text-muted`}>
                   {issue.helpUrl ? (

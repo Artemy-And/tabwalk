@@ -279,6 +279,14 @@ page has **Problems to ignore**: rule IDs (`color-contrast`) and CSS selectors
 its report says what it left out. The GitHub Action takes the same lists as
 `ignore-rules` and `ignore-selectors`.
 
+### Dismissing a finding
+
+In a report, **Dismiss** under a finding marks it as a false positive or as
+won't fix, with an optional note. It stays in the data and is listed under
+**Dismissed** with who dismissed it and when, but it no longer counts for any
+scan of the site: not in totals, trends, comparisons or notifications.
+**Reopen** brings it back.
+
 ### Notifications
 
 Under **Settings**, add a Slack, Discord or ntfy channel, a webhook that gets

@@ -212,6 +212,7 @@ export const zh: Messages = {
       new: '自上次检测以来新增',
       fixed: '已修复',
       recommendations: '建议',
+      dismissed: '已排除',
     },
   },
   pages: {
@@ -263,6 +264,26 @@ export const zh: Messages = {
     newTag: '新增',
     fixedNote: '本次检测中未发现',
     firstSeen: (date) => `首次发现于 ${date}`,
+    dismissedCaption:
+      '已排除的发现仍保留在数据中，但不会计入任何地方：总数、趋势、对比和通知都不包含它们。',
+    dismiss: '排除',
+    dismissReason: '原因',
+    reasons: {
+      false_positive: '不是问题：Tabwalk 判断有误',
+      wont_fix: '不会修复：我们接受现状',
+    },
+    reasonShort: {
+      false_positive: '误报',
+      wont_fix: '不会修复',
+    },
+    dismissNote: '备注（可选）',
+    dismissSubmit: '排除',
+    dismissing: '正在排除…',
+    dismissedAs: (reason, date, who) => (who ? `${reason}，${date}，${who}` : `${reason}，${date}`),
+    reopen: '重新打开',
+    reopening: '正在重新打开…',
+    dismissedNotice: (problem) => `已排除：${problem}。它现在位于“已排除”中，不再计入。`,
+    reopenedNotice: (problem) => `已重新打开：${problem}。它会重新计入。`,
   },
   impact: {
     critical: '严重',

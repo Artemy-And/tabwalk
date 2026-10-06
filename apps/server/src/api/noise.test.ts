@@ -152,3 +152,92 @@ test('a site keeps the rules and the elements to ignore', { skip }, async () => 
   assert.equal(bad.status, 400);
   assert.match(((await bad.json()) as { error: string }).error, /letters, digits and dashes/);
 });
+
+interface ScanDetail {
+  summary: { uniqueProblems: number; critical: number };
+  comparison: { new: number; fixed: number } | null;
+}
+
+interface DismissedRow {
+  fingerprint: string;
+  isNew: boolean;
+  dismissal: { reason: string; note: string | null; by: string | null } | null;
+}
+
+test('a dismissed finding stays in the report but counts nowhere', { skip }, async () => {
+  const site = await seedSite();
+  await seedScan(site.id, '2026-09-01T10:00:00Z', [
+    { fingerprint: 'd-aaa' },
+    { fingerprint: 'd-bbb' },
+  ]);
+  const scan = await seedScan(site.id, '2026-09-08T10:00:00Z', [
+    { fingerprint: 'd-aaa' },
+    { fingerprint: 'd-ccc', impact: 'critical' },
+  ]);
+  const detail = async () => (await (await get(`/api/scans/${scan.id}`)).json()) as ScanDetail;
+
+  const before = await detail();
+  assert.equal(before.summary.uniqueProblems, 2);
+  assert.equal(before.comparison?.new, 1);
+  assert.equal(before.comparison?.fixed, 1);
+
+  const put = await send('PUT', `/api/sites/${site.id}/dismissals`, {
+    fingerprint: 'd-ccc',
+    reason: 'false_positive',
+    note: ' decorative image ',
+  });
+  assert.equal(put.status, 200);
+
+  const after = await detail();
+  assert.equal(after.summary.uniqueProblems, 1);
+  assert.equal(after.summary.critical, 0);
+  assert.equal(after.comparison?.new, 0);
+  assert.equal(after.comparison?.fixed, 1);
+
+  const rows = (await (await get(`/api/scans/${scan.id}/issues`)).json()) as DismissedRow[];
+  const ccc = rows.find((row) => row.fingerprint === 'd-ccc');
+  assert.equal(ccc?.dismissal?.reason, 'false_positive');
+  assert.equal(ccc?.dismissal?.note, 'decorative image');
+  assert.equal(ccc?.dismissal?.by, 'noise@example.com');
+  assert.equal(ccc?.isNew, false);
+
+  const history = (await (await get(`/api/sites/${site.id}/scans`)).json()) as {
+    id: string;
+    uniqueProblems: number;
+  }[];
+  assert.equal(history.find((row) => row.id === scan.id)?.uniqueProblems, 1);
+
+  const all = (await (await get('/api/sites')).json()) as {
+    id: string;
+    summary: { uniqueProblems: number } | null;
+  }[];
+  assert.equal(all.find((row) => row.id === site.id)?.summary?.uniqueProblems, 1);
+
+  const pages = (await (await get(`/api/scans/${scan.id}/pages`)).json()) as {
+    problems: number;
+  }[];
+  assert.equal(pages[0]?.problems, 1);
+
+  const csv = await (await get(`/api/scans/${scan.id}/issues.csv`)).text();
+  assert.ok(csv.includes(',false positive,decorative image,'));
+
+  const { scanNews } = await import('../notify/notify.js');
+  const news = await scanNews(scan.id);
+  assert.equal(news?.news.problems, 1);
+  assert.deepEqual(news?.news.newProblems, []);
+
+  const reopened = await send('DELETE', `/api/sites/${site.id}/dismissals/d-ccc`);
+  assert.equal(reopened.status, 204);
+  assert.equal((await detail()).summary.uniqueProblems, 2);
+
+  const bad = await send('PUT', `/api/sites/${site.id}/dismissals`, {
+    fingerprint: 'd-ccc',
+    reason: 'meh',
+  });
+  assert.equal(bad.status, 400);
+  const missing = await send('PUT', '/api/sites/00000000-0000-4000-8000-000000000000/dismissals', {
+    fingerprint: 'd-ccc',
+    reason: 'wont_fix',
+  });
+  assert.equal(missing.status, 404);
+});

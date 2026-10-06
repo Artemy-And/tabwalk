@@ -1,4 +1,5 @@
 import { and, desc, eq, lt, sql } from 'drizzle-orm';
+import { notDismissed } from '../db/dismissed.js';
 import { db } from '../db/index.js';
 import { channels, issues, scans, sites } from '../db/schema.js';
 import { env } from '../env.js';
@@ -7,7 +8,7 @@ import { deliver } from './send.js';
 
 const IMPACT_ORDER: Record<string, number> = { critical: 0, serious: 1, moderate: 2, minor: 3 };
 
-async function problemsOf(scanId: string): Promise<Map<string, NewProblem>> {
+async function problemsOf(scanId: string, siteId: string): Promise<Map<string, NewProblem>> {
   const rows = await db
     .select({
       fingerprint: issues.fingerprint,
@@ -17,7 +18,7 @@ async function problemsOf(scanId: string): Promise<Map<string, NewProblem>> {
       pages: sql<number>`count(distinct ${issues.pageId})::int`,
     })
     .from(issues)
-    .where(and(eq(issues.scanId, scanId), eq(issues.kind, 'violation')))
+    .where(and(eq(issues.scanId, scanId), eq(issues.kind, 'violation'), notDismissed(siteId)))
     .groupBy(issues.fingerprint, issues.impact, issues.help, issues.ruleId);
   return new Map(rows.map(({ fingerprint, ...problem }) => [fingerprint, problem]));
 }
@@ -45,8 +46,8 @@ export async function scanNews(scanId: string): Promise<{ orgId: string; news: S
     ),
     orderBy: desc(scans.createdAt),
   });
-  const current = await problemsOf(scan.id);
-  const before = previous ? new Set((await problemsOf(previous.id)).keys()) : null;
+  const current = await problemsOf(scan.id, site.id);
+  const before = previous ? new Set((await problemsOf(previous.id, site.id)).keys()) : null;
   const newProblems = [...current]
     .filter(([fingerprint]) => !before?.has(fingerprint))
     .map(([, problem]) => problem)

@@ -5,9 +5,21 @@ import { logger } from 'hono/logger';
 import { z } from 'zod';
 import { authRoutes } from '../auth/routes.js';
 import { type AuthEnv, requireUser } from '../auth/session.js';
+import { notDismissed } from '../db/dismissed.js';
 import { db } from '../db/index.js';
 import { defaultOrgId } from '../db/org.js';
-import { issues, pages, type Scan, scanSchedule, scans, sites, tabOrders } from '../db/schema.js';
+import {
+  dismissalReason,
+  dismissals,
+  issues,
+  pages,
+  type Scan,
+  scanSchedule,
+  scans,
+  sites,
+  tabOrders,
+  users,
+} from '../db/schema.js';
 import { env } from '../env.js';
 import { notificationRoutes } from '../notify/routes.js';
 import { enqueueScan, nextScanAt } from '../queue/schedule.js';
@@ -116,12 +128,27 @@ function previousDoneScan(scan: Scan) {
   });
 }
 
-async function fingerprints(scanId: string): Promise<Set<string>> {
+async function fingerprints(scanId: string, siteId: string): Promise<Set<string>> {
   const rows = await db
     .selectDistinct({ fingerprint: issues.fingerprint })
     .from(issues)
-    .where(and(eq(issues.scanId, scanId), ne(issues.kind, 'recommendation')));
+    .where(and(eq(issues.scanId, scanId), ne(issues.kind, 'recommendation'), notDismissed(siteId)));
   return new Set(rows.map((r) => r.fingerprint));
+}
+
+async function dismissalsOf(siteId: string) {
+  const rows = await db
+    .select({
+      fingerprint: dismissals.fingerprint,
+      reason: dismissals.reason,
+      note: dismissals.note,
+      createdAt: dismissals.createdAt,
+      by: users.email,
+    })
+    .from(dismissals)
+    .leftJoin(users, eq(users.id, dismissals.userId))
+    .where(eq(dismissals.siteId, siteId));
+  return new Map(rows.map(({ fingerprint, ...dismissal }) => [fingerprint, dismissal]));
 }
 
 // when each finding of the scan first turned up on its site, counting this scan and older ones
@@ -145,19 +172,27 @@ async function firstSeen(scan: Scan): Promise<Map<string, Date>> {
 }
 
 async function issuesWithNewFlag(scan: Scan) {
-  const [rows, previous, seen] = await Promise.all([
+  const [rows, previous, seen, dismissed] = await Promise.all([
     groupedIssues(scan.id),
     previousDoneScan(scan),
     firstSeen(scan),
+    dismissalsOf(scan.siteId),
   ]);
-  const before = previous ? await fingerprints(previous.id) : null;
+  const before = previous ? await fingerprints(previous.id, scan.siteId) : null;
 
-  return rows.map((row) => ({
-    ...row,
-    isNew: before && row.kind !== 'recommendation' ? !before.has(row.fingerprint) : false,
-    compared: before !== null,
-    firstSeenAt: seen.get(row.fingerprint) ?? scan.createdAt,
-  }));
+  return rows.map((row) => {
+    const dismissal = dismissed.get(row.fingerprint) ?? null;
+    return {
+      ...row,
+      isNew:
+        before && !dismissal && row.kind !== 'recommendation'
+          ? !before.has(row.fingerprint)
+          : false,
+      compared: before !== null,
+      firstSeenAt: seen.get(row.fingerprint) ?? scan.createdAt,
+      dismissal,
+    };
+  });
 }
 
 async function pageUrlsByIssue(scanId: string): Promise<Map<string, string[]>> {
@@ -181,6 +216,8 @@ const KIND_LABEL = {
 } as const;
 
 const KIND_ORDER = { violation: 0, incomplete: 1, recommendation: 2 } as const;
+
+const DISMISSAL_LABEL = { false_positive: 'false positive', wont_fix: "won't fix" } as const;
 
 const IMPACT_ORDER: Record<string, number> = { critical: 0, serious: 1, moderate: 2, minor: 3 };
 
@@ -270,7 +307,7 @@ app.get('/api/sites', async (c) => {
       ...summaryColumns,
     })
     .from(ranked)
-    .leftJoin(issues, eq(issues.scanId, ranked.id))
+    .leftJoin(issues, and(eq(issues.scanId, ranked.id), notDismissed(ranked.siteId)))
     .where(lte(ranked.rank, TREND_LENGTH))
     .groupBy(ranked.id, ranked.siteId, ranked.createdAt)
     .orderBy(desc(ranked.createdAt));
@@ -397,7 +434,7 @@ app.get('/api/sites/:id/scans', zValidator('param', uuidParam), async (c) => {
   const rows = await db
     .select({ ...getTableColumns(scans), ...summaryColumns })
     .from(scans)
-    .leftJoin(issues, eq(issues.scanId, scans.id))
+    .leftJoin(issues, and(eq(issues.scanId, scans.id), notDismissed(scans.siteId)))
     .where(eq(scans.siteId, id))
     .groupBy(scans.id)
     .orderBy(desc(scans.createdAt))
@@ -414,6 +451,50 @@ app.post('/api/sites/:id/scans', zValidator('param', uuidParam), async (c) => {
   return c.json(await enqueueScan(id), 202);
 });
 
+// a dismissal holds for the finding in every scan of the site, earlier ones included
+app.put(
+  '/api/sites/:id/dismissals',
+  zValidator('param', uuidParam),
+  json(
+    z.object({
+      fingerprint: z.string().min(1).max(100),
+      reason: z.enum(dismissalReason.enumValues),
+      note: z.string().trim().max(500, 'A note can be at most 500 characters').optional(),
+    }),
+  ),
+  async (c) => {
+    const { id } = c.req.valid('param');
+    const site = await db.query.sites.findFirst({ where: eq(sites.id, id), columns: { id: true } });
+    if (!site) return c.json({ error: 'Site not found' }, 404);
+
+    const body = c.req.valid('json');
+    const decision = {
+      reason: body.reason,
+      note: body.note || null,
+      userId: c.get('user').id,
+      createdAt: new Date(),
+    };
+    const [row] = await db
+      .insert(dismissals)
+      .values({ siteId: id, fingerprint: body.fingerprint, ...decision })
+      .onConflictDoUpdate({ target: [dismissals.siteId, dismissals.fingerprint], set: decision })
+      .returning();
+    return c.json(row);
+  },
+);
+
+app.delete(
+  '/api/sites/:id/dismissals/:fingerprint',
+  zValidator('param', z.object({ id: z.string().uuid(), fingerprint: z.string().min(1).max(100) })),
+  async (c) => {
+    const { id, fingerprint } = c.req.valid('param');
+    await db
+      .delete(dismissals)
+      .where(and(eq(dismissals.siteId, id), eq(dismissals.fingerprint, fingerprint)));
+    return c.body(null, 204);
+  },
+);
+
 app.get('/api/scans/:id', zValidator('param', uuidParam), async (c) => {
   const { id } = c.req.valid('param');
 
@@ -425,7 +506,10 @@ app.get('/api/scans/:id', zValidator('param', uuidParam), async (c) => {
     columns: { id: true, name: true, url: true },
   });
 
-  const [summary] = await db.select(summaryColumns).from(issues).where(eq(issues.scanId, id));
+  const [summary] = await db
+    .select(summaryColumns)
+    .from(issues)
+    .where(and(eq(issues.scanId, id), notDismissed(scan.siteId)));
 
   const [pageStats] = await db
     .select({ total: sql<number>`count(*)::int` })
@@ -435,7 +519,10 @@ app.get('/api/scans/:id', zValidator('param', uuidParam), async (c) => {
   const previous = scan.status === 'done' ? await previousDoneScan(scan) : undefined;
   let comparison: { previousScanId: string; new: number; fixed: number } | null = null;
   if (previous) {
-    const [current, before] = await Promise.all([fingerprints(id), fingerprints(previous.id)]);
+    const [current, before] = await Promise.all([
+      fingerprints(id, scan.siteId),
+      fingerprints(previous.id, scan.siteId),
+    ]);
     comparison = {
       previousScanId: previous.id,
       new: [...current].filter((f) => !before.has(f)).length,
@@ -496,6 +583,8 @@ app.get('/api/scans/:id/issues.csv', zValidator('param', uuidParam), async (c) =
       'Elements',
       'New since last scan',
       'First seen',
+      'Dismissed',
+      'Dismissal note',
       'Selector',
       'HTML',
       'How to fix',
@@ -515,6 +604,8 @@ app.get('/api/scans/:id/issues.csv', zValidator('param', uuidParam), async (c) =
       row.occurrences,
       row.compared && row.kind !== 'recommendation' ? (row.isNew ? 'yes' : 'no') : '',
       row.firstSeenAt.toISOString().slice(0, 10),
+      row.dismissal ? DISMISSAL_LABEL[row.dismissal.reason] : '',
+      row.dismissal?.note,
       selectorOf(row.sampleTarget),
       row.sampleHtml,
       row.sampleSummary,
@@ -538,14 +629,26 @@ app.get('/api/scans/:id/fixed', zValidator('param', uuidParam), async (c) => {
   const previous = await previousDoneScan(scan);
   if (!previous) return c.json([]);
 
-  const [current, rows] = await Promise.all([fingerprints(id), groupedIssues(previous.id)]);
+  const [current, rows, dismissed] = await Promise.all([
+    fingerprints(id, scan.siteId),
+    groupedIssues(previous.id),
+    dismissalsOf(scan.siteId),
+  ]);
   return c.json(
-    rows.filter((row) => row.kind !== 'recommendation' && !current.has(row.fingerprint)),
+    rows.filter(
+      (row) =>
+        row.kind !== 'recommendation' &&
+        !current.has(row.fingerprint) &&
+        !dismissed.has(row.fingerprint),
+    ),
   );
 });
 
 app.get('/api/scans/:id/pages', zValidator('param', uuidParam), async (c) => {
   const { id } = c.req.valid('param');
+  const scan = await db.query.scans.findFirst({ where: eq(scans.id, id) });
+  if (!scan) return c.json({ error: 'Scan not found' }, 404);
+
   const rows = await db
     .select({
       id: pages.id,
@@ -554,7 +657,10 @@ app.get('/api/scans/:id/pages', zValidator('param', uuidParam), async (c) => {
       error: pages.error,
       problems: sql<number>`(
         select count(*) from issues i
-        where i.page_id = pages.id and i.kind = 'violation'
+        where i.page_id = pages.id and i.kind = 'violation' and not exists (
+          select 1 from dismissals d
+          where d.site_id = ${scan.siteId} and d.fingerprint = i.fingerprint
+        )
       )::int`,
       tabStops: sql<number | null>`(
         select jsonb_array_length(t.stops) from tab_orders t where t.page_id = pages.id
