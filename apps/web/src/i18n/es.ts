@@ -163,6 +163,21 @@ export const es: Messages = {
     saving: 'Guardando…',
     saved: 'Guardado.',
   },
+  crawl: {
+    heading: 'Qué páginas analizar',
+    intro:
+      'Tabwalk empieza por la dirección del sitio y su sitemap, y después sigue los enlaces de cada página que abre.',
+    maxPagesLabel: 'Páginas por análisis',
+    maxPagesHint: (cap) => `De 1 a ${cap}. Si lo dejas vacío, ${cap}.`,
+    includeLabel: 'Analizar solo estas rutas',
+    includeHint: 'Una por línea, como /blog/ o /docs/*. Si lo dejas vacío, todo el sitio.',
+    excludeLabel: 'Omitir estas rutas',
+    excludeHint: 'Una por línea, como /tag/ o *?page=*',
+    note: 'La dirección del sitio siempre se analiza. Los cambios se aplican desde el próximo análisis.',
+    save: 'Guardar',
+    saving: 'Guardando…',
+    saved: 'Guardado.',
+  },
   scan: {
     loading: 'Cargando resultados…',
     notFound: 'Análisis no encontrado.',

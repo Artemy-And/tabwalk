@@ -160,6 +160,21 @@ export const en = {
     saving: 'Saving…',
     saved: 'Saved.',
   },
+  crawl: {
+    heading: 'Pages to check',
+    intro:
+      'Tabwalk starts at the site address and its sitemap, then follows the links on every page it opens.',
+    maxPagesLabel: 'Pages per scan',
+    maxPagesHint: (cap: number) => `From 1 to ${cap}. Leave it empty for ${cap}.`,
+    includeLabel: 'Only check these paths',
+    includeHint: 'One per line, like /blog/ or /docs/*. Leave it empty for the whole site.',
+    excludeLabel: 'Skip these paths',
+    excludeHint: 'One per line, like /tag/ or *?page=*',
+    note: 'The site address itself is always checked. Changes apply from the next scan.',
+    save: 'Save',
+    saving: 'Saving…',
+    saved: 'Saved.',
+  },
   scan: {
     loading: 'Loading results…',
     notFound: 'Scan not found.',

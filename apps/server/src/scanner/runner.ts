@@ -89,7 +89,7 @@ export async function runScan(scanId: string): Promise<void> {
   let browser: Browser | null = null;
 
   try {
-    const limit = env.MAX_PAGES_PER_SCAN;
+    const limit = Math.min(site.maxPages ?? env.MAX_PAGES_PER_SCAN, env.MAX_PAGES_PER_SCAN);
     console.log(`[scan ${scanId}] ${site.url}: checking up to ${limit} pages`);
 
     browser = await launchBrowser(env.CHROMIUM_EXECUTABLE);
@@ -99,6 +99,7 @@ export async function runScan(scanId: string): Promise<void> {
     await crawl(site.url, {
       limit,
       concurrency: env.SCAN_CONCURRENCY,
+      rules: { include: site.crawlInclude, exclude: site.crawlExclude },
       visit: async (url) => {
         const outcome = await scanOnePage(browser as Browser, scanId, url);
         if (!outcome) return [];

@@ -8,13 +8,26 @@ import { type AuthEnv, requireUser } from '../auth/session.js';
 import { db } from '../db/index.js';
 import { defaultOrgId } from '../db/org.js';
 import { issues, pages, type Scan, scanSchedule, scans, sites, tabOrders } from '../db/schema.js';
+import { env } from '../env.js';
 import { notificationRoutes } from '../notify/routes.js';
 import { enqueueScan, nextScanAt } from '../queue/schedule.js';
 import { toCsv } from './csv.js';
+import { json } from './validate.js';
 
 const uuidParam = z.object({ id: z.string().uuid() });
 
 const scheduleField = z.enum(scanSchedule.enumValues);
+
+const pathsField = z
+  .array(
+    z
+      .string()
+      .trim()
+      .min(1)
+      .max(300, 'A path can be at most 300 characters')
+      .regex(/^\S+$/, 'A path cannot contain spaces'),
+  )
+  .max(50, 'Up to 50 paths');
 
 const TREND_LENGTH = 8;
 
@@ -285,7 +298,11 @@ async function siteWithNextScan(id: string) {
     columns: { createdAt: true },
   });
 
-  return { ...site, nextScanAt: nextScanAt(site.schedule, last?.createdAt ?? null) };
+  return {
+    ...site,
+    nextScanAt: nextScanAt(site.schedule, last?.createdAt ?? null),
+    pageCap: env.MAX_PAGES_PER_SCAN,
+  };
 }
 
 app.get('/api/sites/:id', zValidator('param', uuidParam), async (c) => {
@@ -297,12 +314,28 @@ app.get('/api/sites/:id', zValidator('param', uuidParam), async (c) => {
 app.patch(
   '/api/sites/:id',
   zValidator('param', uuidParam),
-  zValidator('json', z.object({ schedule: scheduleField })),
+  json(
+    z
+      .object({
+        schedule: scheduleField.optional(),
+        // null goes back to the server's MAX_PAGES_PER_SCAN
+        maxPages: z
+          .number()
+          .int()
+          .min(1)
+          .max(env.MAX_PAGES_PER_SCAN, `At most ${env.MAX_PAGES_PER_SCAN} pages on this server`)
+          .nullable()
+          .optional(),
+        crawlInclude: pathsField.optional(),
+        crawlExclude: pathsField.optional(),
+      })
+      .refine((body) => Object.values(body).some((v) => v !== undefined), 'Nothing to change'),
+  ),
   async (c) => {
     const { id } = c.req.valid('param');
     const updated = await db
       .update(sites)
-      .set({ schedule: c.req.valid('json').schedule })
+      .set(c.req.valid('json'))
       .where(eq(sites.id, id))
       .returning({ id: sites.id });
     if (updated.length === 0) return c.json({ error: 'Site not found' }, 404);

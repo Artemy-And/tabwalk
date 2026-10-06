@@ -1,14 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
+import { type SubmitEvent, useState } from 'react';
 import {
   Badge,
   Breadcrumbs,
   Button,
   Card,
+  Field,
   LiveStatus,
   PageHeader,
   SelectField,
   StatusBadge,
+  TextareaField,
 } from '../components/ui';
 import { useI18n } from '../i18n/context';
 import {
@@ -18,6 +21,7 @@ import {
   SCHEDULES,
   type ScanSchedule,
   type SiteDetail,
+  type SiteUpdate,
 } from '../lib/api';
 import { formatDate, hostOf, isWithin } from '../lib/format';
 
@@ -31,7 +35,7 @@ function ScheduleCard({ site }: { site: SiteDetail }) {
   const qc = useQueryClient();
 
   const save = useMutation({
-    mutationFn: (schedule: ScanSchedule) => api.setSchedule(site.id, schedule),
+    mutationFn: (schedule: ScanSchedule) => api.updateSite(site.id, { schedule }),
     onMutate: (schedule) => {
       qc.setQueryData(['site-info', site.id], { ...site, schedule });
       return site;
@@ -67,6 +71,103 @@ function ScheduleCard({ site }: { site: SiteDetail }) {
       </p>
       {save.isError && (
         <p role="alert" className="text-sm text-critical md:pb-2.5">
+          {save.error.message}
+        </p>
+      )}
+    </Card>
+  );
+}
+
+// any whitespace separates paths, since a path cannot contain it
+const paths = (text: string) => text.split(/\s+/).filter(Boolean);
+
+function CrawlCard({ site }: { site: SiteDetail }) {
+  const { t } = useI18n();
+  const qc = useQueryClient();
+  const [maxPages, setMaxPages] = useState(site.maxPages === null ? '' : String(site.maxPages));
+  const [include, setInclude] = useState(site.crawlInclude.join('\n'));
+  const [exclude, setExclude] = useState(site.crawlExclude.join('\n'));
+
+  const save = useMutation({
+    mutationFn: (body: SiteUpdate) => api.updateSite(site.id, body),
+    onSuccess: (updated) => {
+      qc.setQueryData(['site-info', site.id], updated);
+      setInclude(updated.crawlInclude.join('\n'));
+      setExclude(updated.crawlExclude.join('\n'));
+    },
+  });
+
+  function onSubmit(e: SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+    save.mutate({
+      maxPages: maxPages === '' ? null : Number(maxPages),
+      crawlInclude: paths(include),
+      crawlExclude: paths(exclude),
+    });
+  }
+
+  function edit(set: (value: string) => void) {
+    return (e: { target: { value: string } }) => {
+      set(e.target.value);
+      save.reset();
+    };
+  }
+
+  return (
+    <Card className="p-5">
+      <h2 id="crawl-heading" className="text-[17px] font-semibold">
+        {t.crawl.heading}
+      </h2>
+      <p className="mt-1 max-w-[700px] text-[15px] text-muted">{t.crawl.intro}</p>
+      <form
+        aria-labelledby="crawl-heading"
+        onSubmit={onSubmit}
+        className="mt-4 flex flex-col gap-4"
+      >
+        <div className="grid gap-4 md:grid-cols-[200px_1fr_1fr]">
+          <Field
+            label={t.crawl.maxPagesLabel}
+            type="number"
+            inputMode="numeric"
+            min={1}
+            max={site.pageCap}
+            step={1}
+            placeholder={String(site.pageCap)}
+            value={maxPages}
+            onChange={edit(setMaxPages)}
+            hint={t.crawl.maxPagesHint(site.pageCap)}
+          />
+          <TextareaField
+            label={t.crawl.includeLabel}
+            rows={3}
+            spellCheck={false}
+            autoCapitalize="none"
+            value={include}
+            onChange={edit(setInclude)}
+            hint={t.crawl.includeHint}
+          />
+          <TextareaField
+            label={t.crawl.excludeLabel}
+            rows={3}
+            spellCheck={false}
+            autoCapitalize="none"
+            value={exclude}
+            onChange={edit(setExclude)}
+            hint={t.crawl.excludeHint}
+          />
+        </div>
+        <p className="text-[15px] text-muted">{t.crawl.note}</p>
+        <div className="flex flex-wrap items-center gap-4">
+          <Button type="submit" disabled={save.isPending}>
+            {save.isPending ? t.crawl.saving : t.crawl.save}
+          </Button>
+          <p aria-live="polite" className="text-[15px] text-muted">
+            {save.isSuccess ? t.crawl.saved : ''}
+          </p>
+        </div>
+      </form>
+      {save.isError && (
+        <p role="alert" className="mt-3 text-sm text-critical">
           {save.error.message}
         </p>
       )}
@@ -125,6 +226,7 @@ export function SitePage() {
       />
 
       <ScheduleCard site={site.data} />
+      <CrawlCard site={site.data} />
 
       {start.isSuccess && <LiveStatus>{t.site.queued}</LiveStatus>}
       {start.isError && (

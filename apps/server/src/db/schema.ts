@@ -72,6 +72,10 @@ export const sites = pgTable(
     name: text('name').notNull(),
     url: text('url').notNull(),
     schedule: scanSchedule('schedule').notNull().default('weekly'),
+    // null takes MAX_PAGES_PER_SCAN, which also caps it
+    maxPages: integer('max_pages'),
+    crawlInclude: jsonb('crawl_include').$type<string[]>().notNull().default([]),
+    crawlExclude: jsonb('crawl_exclude').$type<string[]>().notNull().default([]),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('sites_org_idx').on(t.orgId)],

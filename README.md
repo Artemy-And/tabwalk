@@ -246,7 +246,7 @@ All of it lives in `.env`:
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `MAX_PAGES_PER_SCAN` | 50 | Page cap per scan |
+| `MAX_PAGES_PER_SCAN` | 50 | Page cap per scan. A site can set a lower one on its page |
 | `SCAN_CONCURRENCY` | 3 | Tabs at once. Each costs 300–500 MB |
 | `PAGE_TIMEOUT_MS` | 30000 | Per-page load timeout |
 | `CHROMIUM_EXECUTABLE` | — | Your own Chromium, if the bundled one won't start |
@@ -259,6 +259,15 @@ Tabwalk starts at the site's address, reads the sitemaps listed in `robots.txt`
 reaches the page cap. Links are read after the page's scripts have run, so a
 single-page app without a sitemap is checked page by page. Links to files such
 as PDFs and images are skipped.
+
+On a site's page in the dashboard, **Pages to check** narrows the crawl with
+paths, one per line. `*` stands for anything, and the site's own address is
+always checked:
+
+| Field | Example | Effect |
+|---|---|---|
+| Only check these paths | `/blog/` | Only addresses that start with `/blog/` |
+| Skip these paths | `/tag/` and `*?page=*` | No tag pages and no paginated lists |
 
 ### Notifications
 

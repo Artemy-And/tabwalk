@@ -64,12 +64,21 @@ export interface Site {
   name: string;
   url: string;
   schedule: ScanSchedule;
+  maxPages: number | null;
+  crawlInclude: string[];
+  crawlExclude: string[];
   createdAt: string;
 }
 
 export interface SiteDetail extends Site {
   nextScanAt: string | null;
+  // MAX_PAGES_PER_SCAN: the default page limit and the highest a site can set
+  pageCap: number;
 }
+
+export type SiteUpdate = Partial<
+  Pick<Site, 'schedule' | 'maxPages' | 'crawlInclude' | 'crawlExclude'>
+>;
 
 export interface ScanSummary {
   uniqueProblems: number;
@@ -194,8 +203,8 @@ export const api = {
   createSite: (body: { name: string; url: string; schedule: ScanSchedule }) =>
     request<Site>('/sites', { method: 'POST', body: JSON.stringify(body) }),
   getSite: (id: string) => request<SiteDetail>(`/sites/${id}`),
-  setSchedule: (id: string, schedule: ScanSchedule) =>
-    request<SiteDetail>(`/sites/${id}`, { method: 'PATCH', body: JSON.stringify({ schedule }) }),
+  updateSite: (id: string, body: SiteUpdate) =>
+    request<SiteDetail>(`/sites/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   deleteSite: (id: string) => request<undefined>(`/sites/${id}`, { method: 'DELETE' }),
   listScans: (siteId: string) => request<ScanRow[]>(`/sites/${siteId}/scans`),
   startScan: (siteId: string) => request<Scan>(`/sites/${siteId}/scans`, { method: 'POST' }),

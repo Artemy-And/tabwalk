@@ -163,6 +163,21 @@ export const de: Messages = {
     saving: 'Wird gespeichert…',
     saved: 'Gespeichert.',
   },
+  crawl: {
+    heading: 'Welche Seiten geprüft werden',
+    intro:
+      'Tabwalk beginnt bei der Adresse der Website und ihrer Sitemap und folgt dann den Links auf jeder Seite, die es öffnet.',
+    maxPagesLabel: 'Seiten pro Prüfung',
+    maxPagesHint: (cap) => `Von 1 bis ${cap}. Leer gelassen: ${cap}.`,
+    includeLabel: 'Nur diese Pfade prüfen',
+    includeHint: 'Einer pro Zeile, etwa /blog/ oder /docs/*. Leer gelassen: die ganze Website.',
+    excludeLabel: 'Diese Pfade überspringen',
+    excludeHint: 'Einer pro Zeile, etwa /tag/ oder *?page=*',
+    note: 'Die Adresse der Website selbst wird immer geprüft. Änderungen gelten ab der nächsten Prüfung.',
+    save: 'Speichern',
+    saving: 'Wird gespeichert…',
+    saved: 'Gespeichert.',
+  },
   scan: {
     loading: 'Ergebnisse werden geladen…',
     notFound: 'Prüfung nicht gefunden.',

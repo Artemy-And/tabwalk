@@ -5,6 +5,7 @@ import type {
   ReactElement,
   ReactNode,
   SelectHTMLAttributes,
+  TextareaHTMLAttributes,
 } from 'react';
 import { useId } from 'react';
 import { useI18n } from '../i18n/context';
@@ -98,6 +99,34 @@ export function Field({
       {error && (
         <span id={errorId} className="text-[13px] text-critical">
           {error}
+        </span>
+      )}
+    </div>
+  );
+}
+
+export function TextareaField({
+  label,
+  hint,
+  ...props
+}: TextareaHTMLAttributes<HTMLTextAreaElement> & { label: string; hint?: string }) {
+  const id = useId();
+  const hintId = `${id}-hint`;
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-sm font-semibold text-ink">
+        {label}
+      </label>
+      <textarea
+        id={id}
+        aria-describedby={hint ? hintId : undefined}
+        className="min-h-[88px] rounded-lg border border-line-strong bg-surface px-3 py-2.5 font-mono text-[14px] text-ink"
+        {...props}
+      />
+      {hint && (
+        <span id={hintId} className="text-[13px] text-muted">
+          {hint}
         </span>
       )}
     </div>
