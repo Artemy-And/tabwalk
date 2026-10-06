@@ -154,3 +154,20 @@ test('the login headers a plain fetch needs', () => {
   );
   assert.deepEqual(loginHeaders(null), {});
 });
+
+test('each new problem gets one picture, and a later page with the same problems none', async () => {
+  const pictured = new Set<string>();
+  const first = await checkPage(browser, url, 10_000, { pictured });
+  const problems = new Set(
+    first.findings.filter((f) => f.kind !== 'recommendation').map((f) => f.fingerprint),
+  );
+  assert.equal(first.shots.length, problems.size);
+  for (const shot of first.shots) {
+    assert.ok(problems.has(shot.fingerprint));
+    assert.equal(shot.image.subarray(8, 12).toString('ascii'), 'WEBP');
+    assert.ok(shot.width > 0 && shot.height > 0);
+  }
+
+  const again = await checkPage(browser, url, 10_000, { pictured });
+  assert.equal(again.shots.length, 0);
+});

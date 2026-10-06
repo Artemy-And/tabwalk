@@ -151,6 +151,8 @@ export interface IssueGroup {
   isNew?: boolean;
   firstSeenAt?: string;
   dismissal?: Dismissal | null;
+  // whether the scan kept a picture of the first element with this problem
+  shot?: boolean;
 }
 
 export type DismissalReason = 'false_positive' | 'wont_fix';
@@ -261,4 +263,6 @@ export const api = {
   listPages: (scanId: string) => request<PageRow[]>(`/scans/${scanId}/pages`),
   getPage: (id: string) => request<PageDetail>(`/pages/${id}`),
   tabOrderUrl: (pageId: string) => `${BASE}/pages/${pageId}/tab-order.webp`,
+  shotUrl: (scanId: string, fingerprint: string) =>
+    `${BASE}/scans/${scanId}/shots/${encodeURIComponent(fingerprint)}`,
 };

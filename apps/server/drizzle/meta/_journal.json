@@ -78,6 +78,13 @@
       "when": 1791303816364,
       "tag": "0010_site_login",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791305515899,
+      "tag": "0011_issue_shots",
+      "breakpoints": true
     }
   ]
 }

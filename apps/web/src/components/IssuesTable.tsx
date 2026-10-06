@@ -198,6 +198,7 @@ export function IssuesTable({
   variant = 'current',
   emptyMessage,
   scanDate,
+  scanId,
   actions,
 }: {
   issues: IssueGroup[];
@@ -205,6 +206,8 @@ export function IssuesTable({
   emptyMessage?: string;
   // the scan's own date: a problem first seen before it gets a "first seen" line
   scanDate?: string;
+  // where the pictures of this scan's elements come from
+  scanId?: string;
   // dismissing and reopening, when the scan still has its site
   actions?: RowActions;
 }) {
@@ -328,8 +331,16 @@ export function IssuesTable({
                   )}
                   <details className="mt-1">
                     <summary className="cursor-pointer text-sm text-muted">
-                      {t.issues.showMarkup}
+                      {t.issues.showElement}
                     </summary>
+                    {issue.shot && scanId && (
+                      <img
+                        src={api.shotUrl(scanId, issue.fingerprint)}
+                        alt={t.issues.shotAlt}
+                        loading="lazy"
+                        className="mt-2 block max-w-full rounded-lg border border-line"
+                      />
+                    )}
                     <pre className="mt-2 max-w-2xl overflow-x-auto rounded-lg border border-line bg-surface-alt p-3 font-mono text-[13px] leading-relaxed">
                       <code>{issue.sampleHtml}</code>
                     </pre>

@@ -304,7 +304,8 @@ export const de: Messages = {
     sortAnnouncement: (column, ascending) =>
       `Tabelle sortiert nach ${column}, ${ascending ? 'aufsteigend' : 'absteigend'}`,
     sortAction: (ascending) => `${ascending ? 'aufsteigend' : 'absteigend'} sortieren`,
-    showMarkup: 'Markup anzeigen',
+    showElement: 'Element anzeigen',
+    shotAlt: 'Das Element auf der Seite, pink umrandet',
     opensInNewTab: ' (öffnet in neuem Tab)',
     newTag: 'Neu',
     fixedNote: 'In dieser Prüfung nicht gefunden',

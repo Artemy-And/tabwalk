@@ -5,6 +5,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -172,6 +173,23 @@ export const issues = pgTable(
     index('issues_scan_fingerprint_idx').on(t.scanId, t.fingerprint),
     index('issues_page_idx').on(t.pageId),
   ],
+);
+
+// a picture of the first element with each problem, kept for the latest scan of a site only
+export const issueShots = pgTable(
+  'issue_shots',
+  {
+    scanId: uuid('scan_id')
+      .notNull()
+      .references(() => scans.id, { onDelete: 'cascade' }),
+    fingerprint: text('fingerprint').notNull(),
+    html: text('html').notNull(),
+    target: jsonb('target').$type<string[]>().notNull(),
+    image: bytea('image').notNull(),
+    width: integer('width').notNull(),
+    height: integer('height').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.scanId, t.fingerprint] })],
 );
 
 export const dismissalReason = pgEnum('dismissal_reason', ['false_positive', 'wont_fix']);

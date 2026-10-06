@@ -298,7 +298,8 @@ export const en = {
     sortAnnouncement: (column: string, ascending: boolean) =>
       `Table sorted by ${column}, ${ascending ? 'ascending' : 'descending'}`,
     sortAction: (ascending: boolean) => `sort ${ascending ? 'ascending' : 'descending'}`,
-    showMarkup: 'Show markup',
+    showElement: 'Show the element',
+    shotAlt: 'The element on the page, outlined in pink',
     opensInNewTab: ' (opens in a new tab)',
     newTag: 'New',
     fixedNote: 'Not found in this scan',

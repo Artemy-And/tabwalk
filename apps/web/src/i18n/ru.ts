@@ -322,7 +322,8 @@ export const ru: Messages = {
     sortAnnouncement: (column, ascending) =>
       `Таблица отсортирована ${column}, ${ascending ? 'по возрастанию' : 'по убыванию'}`,
     sortAction: (ascending) => `сортировать ${ascending ? 'по возрастанию' : 'по убыванию'}`,
-    showMarkup: 'Показать разметку',
+    showElement: 'Показать элемент',
+    shotAlt: 'Элемент на странице, обведён розовым',
     opensInNewTab: ' (откроется в новой вкладке)',
     newTag: 'Новая',
     fixedNote: 'В этой проверке не найдена',

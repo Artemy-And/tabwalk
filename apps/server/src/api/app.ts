@@ -11,6 +11,7 @@ import { defaultOrgId } from '../db/org.js';
 import {
   dismissalReason,
   dismissals,
+  issueShots,
   issues,
   pages,
   type Scan,
@@ -234,18 +235,30 @@ async function firstSeen(scan: Scan): Promise<Map<string, Date>> {
 }
 
 async function issuesWithNewFlag(scan: Scan) {
-  const [rows, previous, seen, dismissed] = await Promise.all([
+  const [rows, previous, seen, dismissed, pictured] = await Promise.all([
     groupedIssues(scan.id),
     previousDoneScan(scan),
     firstSeen(scan),
     dismissalsOf(scan.siteId),
+    db
+      .select({
+        fingerprint: issueShots.fingerprint,
+        html: issueShots.html,
+        target: issueShots.target,
+      })
+      .from(issueShots)
+      .where(eq(issueShots.scanId, scan.id)),
   ]);
+  const shots = new Map(pictured.map(({ fingerprint, ...element }) => [fingerprint, element]));
   const before = previous ? await fingerprints(previous.id, scan.siteId) : null;
 
   return rows.map((row) => {
     const dismissal = dismissed.get(row.fingerprint) ?? null;
+    const shot = shots.get(row.fingerprint);
     return {
       ...row,
+      // the example a report shows is the element in its picture
+      ...(shot ? { sampleHtml: shot.html, sampleTarget: JSON.stringify(shot.target) } : {}),
       isNew:
         before && !dismissal && row.kind !== 'recommendation'
           ? !before.has(row.fingerprint)
@@ -253,6 +266,7 @@ async function issuesWithNewFlag(scan: Scan) {
       compared: before !== null,
       firstSeenAt: seen.get(row.fingerprint) ?? scan.createdAt,
       dismissal,
+      shot: shot !== undefined,
     };
   });
 }
@@ -761,6 +775,23 @@ app.get('/api/pages/:id', zValidator('param', uuidParam), async (c) => {
   });
   return c.json({ ...row, tabOrder: tabOrder ?? null });
 });
+
+app.get(
+  '/api/scans/:id/shots/:fingerprint',
+  zValidator('param', z.object({ id: z.string().uuid(), fingerprint: z.string().min(1).max(100) })),
+  async (c) => {
+    const { id, fingerprint } = c.req.valid('param');
+    const shot = await db.query.issueShots.findFirst({
+      where: and(eq(issueShots.scanId, id), eq(issueShots.fingerprint, fingerprint)),
+      columns: { image: true },
+    });
+    if (!shot) return c.json({ error: 'No picture of this problem' }, 404);
+    return c.body(new Uint8Array(shot.image), 200, {
+      'content-type': 'image/webp',
+      'cache-control': 'private, max-age=86400',
+    });
+  },
+);
 
 app.get('/api/pages/:id/tab-order.webp', zValidator('param', uuidParam), async (c) => {
   const order = await db.query.tabOrders.findFirst({

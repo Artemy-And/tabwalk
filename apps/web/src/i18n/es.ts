@@ -304,7 +304,8 @@ export const es: Messages = {
     sortAnnouncement: (column, ascending) =>
       `Tabla ordenada por ${column}, ${ascending ? 'ascendente' : 'descendente'}`,
     sortAction: (ascending) => `ordenar ${ascending ? 'ascendente' : 'descendente'}`,
-    showMarkup: 'Mostrar marcado',
+    showElement: 'Mostrar el elemento',
+    shotAlt: 'El elemento en la página, marcado en rosa',
     opensInNewTab: ' (se abre en una pestaña nueva)',
     newTag: 'Nuevo',
     fixedNote: 'No encontrado en este análisis',

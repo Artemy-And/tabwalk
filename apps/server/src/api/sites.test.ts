@@ -281,3 +281,39 @@ test('a site keeps its login, and the dashboard only learns what kind it is', {
   });
   assert.equal(owned.status, 400);
 });
+
+test('a pictured problem shows the element in its picture as the example', { skip }, async () => {
+  const site = await seedSite();
+  const scan = await seedScan(site.id, '2026-09-15T10:00:00Z', [
+    { fingerprint: 'pic' },
+    { fingerprint: 'nopic' },
+  ]);
+  const image = Buffer.from('RIFF0000WEBP');
+  await db.insert(schema.issueShots).values({
+    scanId: scan.id,
+    fingerprint: 'pic',
+    html: '<img src="hero.png">',
+    target: ['main > img'],
+    image,
+    width: 120,
+    height: 80,
+  });
+
+  const rows = (await (await get(`/api/scans/${scan.id}/issues`)).json()) as {
+    fingerprint: string;
+    shot: boolean;
+    sampleHtml: string;
+    sampleTarget: string;
+  }[];
+  const pictured = rows.find((row) => row.fingerprint === 'pic');
+  assert.equal(pictured?.shot, true);
+  assert.equal(pictured?.sampleHtml, '<img src="hero.png">');
+  assert.deepEqual(JSON.parse(pictured?.sampleTarget ?? 'null'), ['main > img']);
+  assert.equal(rows.find((row) => row.fingerprint === 'nopic')?.shot, false);
+
+  const picture = await get(`/api/scans/${scan.id}/shots/pic`);
+  assert.equal(picture.status, 200);
+  assert.equal(picture.headers.get('content-type'), 'image/webp');
+  assert.deepEqual(Buffer.from(await picture.arrayBuffer()), image);
+  assert.equal((await get(`/api/scans/${scan.id}/shots/nopic`)).status, 404);
+});

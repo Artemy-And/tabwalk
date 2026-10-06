@@ -1,7 +1,7 @@
 import { and, eq, isNotNull, sql } from 'drizzle-orm';
 import type { Browser } from 'playwright';
 import { db } from '../db/index.js';
-import { issues, pages, scans, sites, tabOrders } from '../db/schema.js';
+import { issueShots, issues, pages, scans, sites, tabOrders } from '../db/schema.js';
 import { env } from '../env.js';
 import { notifyScan } from '../notify/notify.js';
 import { checkPage, type IgnoreRules, launchBrowser, NotAPageError } from './check.js';
@@ -15,10 +15,10 @@ async function scanOnePage(
   browser: Browser,
   scanId: string,
   url: string,
-  options: { ignore: IgnoreRules; login: SiteLogin | null },
+  options: { ignore: IgnoreRules; login: SiteLogin | null; pictured: Set<string> },
 ): Promise<PageOutcome> {
   try {
-    const { title, findings, tabOrder, links } = await checkPage(
+    const { title, findings, tabOrder, links, shots } = await checkPage(
       browser,
       url,
       env.PAGE_TIMEOUT_MS,
@@ -35,6 +35,14 @@ async function scanOnePage(
       .returning();
 
     if (!pageRow) throw new Error('Failed to store the page');
+
+    if (shots.length > 0) {
+      // two pages may picture the same new problem at once; the first one stays
+      await db
+        .insert(issueShots)
+        .values(shots.map((shot) => ({ scanId, ...shot })))
+        .onConflictDoNothing();
+    }
 
     if (tabOrder) {
       await db
@@ -109,6 +117,7 @@ export async function runScan(scanId: string): Promise<void> {
 
     browser = await launchBrowser(env.CHROMIUM_EXECUTABLE);
 
+    const pictured = new Set<string>();
     let ok = 0;
     let failed = 0;
     await crawl(site.url, {
@@ -120,6 +129,7 @@ export async function runScan(scanId: string): Promise<void> {
         const outcome = await scanOnePage(browser as Browser, scanId, url, {
           ignore,
           login: site.login,
+          pictured,
         });
         if (!outcome) return [];
         if (outcome.ok) ok += 1;
@@ -160,6 +170,11 @@ export async function runScan(scanId: string): Promise<void> {
       sql`${tabOrders.pageId} in (
         select p.id from pages p join scans s on s.id = p.scan_id
         where s.site_id = ${site.id} and s.id <> ${scanId}
+      )`,
+    );
+    await db.delete(issueShots).where(
+      sql`${issueShots.scanId} in (
+        select s.id from scans s where s.site_id = ${site.id} and s.id <> ${scanId}
       )`,
     );
 

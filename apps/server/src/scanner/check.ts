@@ -3,6 +3,7 @@ import { axeChecker } from './checkers/axe.js';
 import { drawTabOrder, keyboardChecker, type TabOrder } from './checkers/keyboard.js';
 import { USER_AGENT } from './crawl.js';
 import { fingerprint } from './fingerprint.js';
+import { type ElementShot, shootElements } from './shots.js';
 import type { Checker, CheckFinding, SiteLogin } from './types.js';
 
 const CHECKERS: Checker[] = [axeChecker, keyboardChecker];
@@ -16,6 +17,7 @@ export interface PageResult {
   title: string | null;
   findings: PageFinding[];
   tabOrder: TabOrder | null;
+  shots: ElementShot[];
   links: string[];
 }
 
@@ -72,7 +74,13 @@ export async function checkPage(
   browser: Browser,
   url: string,
   timeoutMs: number,
-  options: { tabOrder?: boolean; ignore?: IgnoreRules; login?: SiteLogin | null } = {},
+  options: {
+    tabOrder?: boolean;
+    ignore?: IgnoreRules;
+    login?: SiteLogin | null;
+    // fingerprints the scan already has a picture of; the ones this page adds go in too
+    pictured?: Set<string>;
+  } = {},
 ): Promise<PageResult> {
   const ignore = options.ignore ?? { rules: [], selectors: [] };
   const login = options.login;
@@ -143,7 +151,9 @@ export async function checkPage(
 
     const tabOrder = options.tabOrder ? await drawTabOrder(page).catch(() => null) : null;
 
-    return { title, findings: kept, tabOrder, links };
+    const shots = options.pictured ? await shootElements(page, kept, options.pictured) : [];
+
+    return { title, findings: kept, tabOrder, links, shots };
   } finally {
     await context.close().catch(() => {});
   }

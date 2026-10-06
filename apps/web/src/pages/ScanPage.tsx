@@ -225,6 +225,7 @@ export function ScanPage() {
                   }
                   emptyMessage={filter === 'all' ? undefined : t.issues.emptyFilter}
                   scanDate={s.createdAt}
+                  scanId={scanId}
                   actions={s.site ? { siteId: s.site.id, scanId, onChange: setNotice } : undefined}
                 />
               )}

@@ -49,8 +49,10 @@ to the page behind it.
 
 Every page also gets a picture of its Tab order: a screenshot with each stop
 outlined, numbered and joined to the next one, plus the same stops as a list.
-Open a page from the scan report to see it. Pictures are kept for the latest
-scan of each site.
+Open a page from the scan report to see it. Each problem in the report also
+gets a picture of the first element that has it, outlined, under **Show the
+element**; keyboard problems are pictured with the element focused. Pictures
+are kept for the latest scan of each site.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/tab-order-dark.png">
