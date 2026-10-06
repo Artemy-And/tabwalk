@@ -111,9 +111,14 @@ export function ScanPage() {
         title={siteName}
         actions={
           done && (
-            <ButtonLink variant="secondary" href={api.issuesCsvUrl(scanId)} download>
-              {t.scan.exportCsv}
-            </ButtonLink>
+            <>
+              <ButtonLink variant="secondary" href={`/scans/${scanId}/report`}>
+                {t.report.open}
+              </ButtonLink>
+              <ButtonLink variant="secondary" href={api.issuesCsvUrl(scanId)} download>
+                {t.scan.exportCsv}
+              </ButtonLink>
+            </>
           )
         }
         subtitle={

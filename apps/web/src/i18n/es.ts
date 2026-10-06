@@ -256,6 +256,26 @@ export const es: Messages = {
       dismissed: 'Descartados',
     },
   },
+  report: {
+    open: 'Informe PDF',
+    print: 'Imprimir o guardar como PDF',
+    back: 'Volver al análisis',
+    kicker: 'Informe de accesibilidad',
+    scanned: (date) => `Analizado el ${date}`,
+    problemsHeading: 'Problemas',
+    reviewIntro:
+      'Comprobaciones que un script no puede decidir por sí solo. Alguien tiene que revisarlas a mano.',
+    dismissedIntro: 'Hallazgos que el equipo decidió descartar. No se cuentan arriba.',
+    pagesHeading: 'Páginas analizadas',
+    where: (pages, elements) =>
+      `${pages} ${plural(pages, { one: 'página', other: 'páginas' })}, ${elements} ${plural(elements, { one: 'elemento', other: 'elementos' })}`,
+    example: 'Ejemplo',
+    howToFix: 'Cómo corregirlo',
+    recommendations: (n) =>
+      `Además, ${n} ${plural(n, { one: 'recomendación', other: 'recomendaciones' })} más allá de WCAG, en el panel.`,
+    none: 'No se encontraron problemas.',
+    notDone: 'Este análisis aún no ha terminado, así que todavía no hay informe.',
+  },
   pages: {
     heading: 'Páginas',
     caption: 'Páginas revisadas en este análisis. Abre una para ver su orden de tabulación.',

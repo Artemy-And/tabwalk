@@ -38,12 +38,12 @@ export function RootLayout() {
     <div className="flex min-h-screen flex-col">
       <a
         href="#main"
-        className="visually-hidden focus:not-sr-only absolute left-2 top-2 z-50 rounded bg-surface px-3 py-2 text-ink"
+        className="visually-hidden focus:not-sr-only absolute left-2 top-2 z-50 rounded bg-surface px-3 py-2 text-ink print:hidden"
       >
         {t.layout.skipToContent}
       </a>
 
-      <header className="sticky top-0 z-40 border-b border-line-soft bg-surface/85 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-line-soft bg-surface/85 backdrop-blur print:hidden">
         <div className="mx-auto flex min-h-[68px] max-w-[1280px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 sm:gap-x-10 sm:px-10">
           <Link
             to="/"
@@ -75,7 +75,10 @@ export function RootLayout() {
         </div>
       </header>
 
-      <main id="main" className="mx-auto w-full max-w-[1280px] grow px-4 py-8 sm:px-10">
+      <main
+        id="main"
+        className="mx-auto w-full max-w-[1280px] grow px-4 py-8 sm:px-10 print:max-w-none print:p-0"
+      >
         {content}
       </main>
     </div>

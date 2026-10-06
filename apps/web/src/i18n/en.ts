@@ -251,6 +251,25 @@ export const en = {
       dismissed: 'Dismissed',
     },
   },
+  report: {
+    open: 'PDF report',
+    print: 'Print or save as PDF',
+    back: 'Back to the scan',
+    kicker: 'Accessibility report',
+    scanned: (date: string) => `Scanned ${date}`,
+    problemsHeading: 'Problems',
+    reviewIntro: 'Checks a script cannot decide on its own. Someone has to look at these by hand.',
+    dismissedIntro: 'Findings the team decided against. They are not counted above.',
+    pagesHeading: 'Pages checked',
+    where: (pages: number, elements: number) =>
+      `${pages} ${plural(pages, { one: 'page', other: 'pages' })}, ${elements} ${plural(elements, { one: 'element', other: 'elements' })}`,
+    example: 'Example',
+    howToFix: 'How to fix',
+    recommendations: (n: number) =>
+      `Also ${n} ${plural(n, { one: 'recommendation', other: 'recommendations' })} beyond WCAG, listed in the dashboard.`,
+    none: 'No problems found.',
+    notDone: 'This scan has not finished, so there is no report yet.',
+  },
   pages: {
     heading: 'Pages',
     caption: 'Pages checked in this scan. Open one to see its tab order.',

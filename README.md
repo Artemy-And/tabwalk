@@ -71,6 +71,11 @@ Next to the WCAG criterion, each problem lists the matching clauses of
 EN 301 549 (the standard behind the European Accessibility Act), RGAA (France)
 and Section 508 (US federal sites), in the dashboard and in the CSV export.
 
+For people who will not open the dashboard, **PDF report** on a scan gives a
+page made for printing: the summary, each problem with its picture, an example
+and how to fix it, then what needs a human, what was dismissed and the pages
+checked. Print it, or save it as a PDF from the browser's print dialog.
+
 ## Quick start
 
 ```bash

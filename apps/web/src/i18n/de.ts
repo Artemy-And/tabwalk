@@ -256,6 +256,26 @@ export const de: Messages = {
       dismissed: 'Verworfen',
     },
   },
+  report: {
+    open: 'PDF-Bericht',
+    print: 'Drucken oder als PDF speichern',
+    back: 'Zurück zur Prüfung',
+    kicker: 'Bericht zur Barrierefreiheit',
+    scanned: (date) => `Geprüft am ${date}`,
+    problemsHeading: 'Probleme',
+    reviewIntro:
+      'Prüfungen, die ein Skript nicht allein entscheiden kann. Jemand muss sie von Hand ansehen.',
+    dismissedIntro: 'Befunde, gegen die sich das Team entschieden hat. Sie zählen oben nicht mit.',
+    pagesHeading: 'Geprüfte Seiten',
+    where: (pages, elements) =>
+      `${pages} ${plural(pages, { one: 'Seite', other: 'Seiten' })}, ${elements} ${plural(elements, { one: 'Element', other: 'Elemente' })}`,
+    example: 'Beispiel',
+    howToFix: 'So beheben Sie es',
+    recommendations: (n) =>
+      `Dazu ${n} ${plural(n, { one: 'Empfehlung', other: 'Empfehlungen' })} über WCAG hinaus, aufgeführt im Dashboard.`,
+    none: 'Keine Probleme gefunden.',
+    notDone: 'Diese Prüfung ist noch nicht abgeschlossen, daher gibt es noch keinen Bericht.',
+  },
   pages: {
     heading: 'Seiten',
     caption: 'In diesem Scan geprüfte Seiten. Öffnen Sie eine, um ihre Tab-Reihenfolge zu sehen.',

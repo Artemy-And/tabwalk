@@ -36,7 +36,8 @@
 }
 
 @layer base {
-  @media (prefers-color-scheme: dark) {
+  /* a printed or saved PDF report is always light */
+  @media screen and (prefers-color-scheme: dark) {
     :root {
       --color-ink: #f2f3f5;
       --color-muted: #9aa1ad;
@@ -77,6 +78,16 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+  }
+
+  @media print {
+    :root {
+      color-scheme: light;
+    }
+
+    body {
+      background: #ffffff;
+    }
   }
 
   a {

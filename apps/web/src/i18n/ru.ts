@@ -274,6 +274,25 @@ export const ru: Messages = {
       dismissed: 'Отклонённые',
     },
   },
+  report: {
+    open: 'PDF-отчёт',
+    print: 'Печать или сохранить в PDF',
+    back: 'Назад к проверке',
+    kicker: 'Отчёт о доступности',
+    scanned: (date) => `Проверено ${date}`,
+    problemsHeading: 'Проблемы',
+    reviewIntro: 'То, что скрипт не может решить сам. Это нужно посмотреть вручную.',
+    dismissedIntro: 'Находки, которые команда решила не исправлять. Выше они не считаются.',
+    pagesHeading: 'Проверенные страницы',
+    where: (pages, elements) =>
+      `${pages} ${plural(pages, { one: 'страница', few: 'страницы', other: 'страниц' })}, ${elements} ${plural(elements, { one: 'элемент', few: 'элемента', other: 'элементов' })}`,
+    example: 'Пример',
+    howToFix: 'Как исправить',
+    recommendations: (n) =>
+      `И ещё ${n} ${plural(n, { one: 'рекомендация', few: 'рекомендации', other: 'рекомендаций' })} сверх WCAG, они в дашборде.`,
+    none: 'Проблем не найдено.',
+    notDone: 'Проверка ещё не закончилась, отчёта пока нет.',
+  },
   pages: {
     heading: 'Страницы',
     caption: 'Страницы, проверенные в этом скане. Откройте страницу, чтобы увидеть порядок Tab.',
