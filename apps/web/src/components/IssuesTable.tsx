@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useI18n } from '../i18n/context';
 import { useRuleHelp } from '../i18n/ruleHelp';
 import type { IssueGroup } from '../lib/api';
-import { standardLabel } from '../lib/format';
+import { formatDay, standardLabel } from '../lib/format';
 import { Card, ImpactBadge } from './ui';
 
 type SortKey = 'pagesAffected' | 'impact' | 'ruleId';
@@ -60,12 +60,15 @@ export function IssuesTable({
   issues,
   variant = 'current',
   emptyMessage,
+  scanDate,
 }: {
   issues: IssueGroup[];
   variant?: 'current' | 'fixed' | 'recommendations';
   emptyMessage?: string;
+  // the scan's own date: a problem first seen before it gets a "first seen" line
+  scanDate?: string;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const ruleHelp = useRuleHelp();
   const captions = {
     current: t.issues.caption,
@@ -171,6 +174,14 @@ export function IssuesTable({
                   <p className="mt-1 font-mono text-[13px] break-all text-muted">
                     {selectorOf(issue.sampleTarget)}
                   </p>
+                  {variant === 'current' &&
+                    issue.firstSeenAt &&
+                    scanDate &&
+                    issue.firstSeenAt < scanDate && (
+                      <p className="mt-1 text-sm text-muted">
+                        {t.issues.firstSeen(formatDay(issue.firstSeenAt, locale))}
+                      </p>
+                    )}
                   {variant === 'fixed' && (
                     <p className="mt-1 text-sm text-good">{t.issues.fixedNote}</p>
                   )}

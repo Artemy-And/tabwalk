@@ -255,6 +255,7 @@ export const en = {
     opensInNewTab: ' (opens in a new tab)',
     newTag: 'New',
     fixedNote: 'Not found in this scan',
+    firstSeen: (date: string) => `First seen ${date}`,
   },
   impact: {
     critical: 'Critical',

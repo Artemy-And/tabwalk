@@ -5,6 +5,10 @@ export function formatDate(iso: string, locale: string): string {
   });
 }
 
+export function formatDay(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale, { dateStyle: 'medium' });
+}
+
 const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
   ['year', 365 * 24 * 3600],
   ['month', 30 * 24 * 3600],

@@ -109,14 +109,39 @@ async function fingerprints(scanId: string): Promise<Set<string>> {
   return new Set(rows.map((r) => r.fingerprint));
 }
 
+// when each finding of the scan first turned up on its site, counting this scan and older ones
+async function firstSeen(scan: Scan): Promise<Map<string, Date>> {
+  const rows = await db
+    .select({
+      fingerprint: issues.fingerprint,
+      at: sql<Date>`min(${scans.createdAt})`.mapWith(scans.createdAt),
+    })
+    .from(issues)
+    .innerJoin(scans, eq(scans.id, issues.scanId))
+    .where(
+      and(
+        eq(scans.siteId, scan.siteId),
+        lte(scans.createdAt, scan.createdAt),
+        sql`${issues.fingerprint} in (select ${issues.fingerprint} from ${issues} where ${issues.scanId} = ${scan.id})`,
+      ),
+    )
+    .groupBy(issues.fingerprint);
+  return new Map(rows.map((row) => [row.fingerprint, row.at]));
+}
+
 async function issuesWithNewFlag(scan: Scan) {
-  const [rows, previous] = await Promise.all([groupedIssues(scan.id), previousDoneScan(scan)]);
+  const [rows, previous, seen] = await Promise.all([
+    groupedIssues(scan.id),
+    previousDoneScan(scan),
+    firstSeen(scan),
+  ]);
   const before = previous ? await fingerprints(previous.id) : null;
 
   return rows.map((row) => ({
     ...row,
     isNew: before && row.kind !== 'recommendation' ? !before.has(row.fingerprint) : false,
     compared: before !== null,
+    firstSeenAt: seen.get(row.fingerprint) ?? scan.createdAt,
   }));
 }
 
@@ -453,6 +478,7 @@ app.get('/api/scans/:id/issues.csv', zValidator('param', uuidParam), async (c) =
       'Pages',
       'Elements',
       'New since last scan',
+      'First seen',
       'Selector',
       'HTML',
       'How to fix',
@@ -471,6 +497,7 @@ app.get('/api/scans/:id/issues.csv', zValidator('param', uuidParam), async (c) =
       row.pagesAffected,
       row.occurrences,
       row.compared && row.kind !== 'recommendation' ? (row.isNew ? 'yes' : 'no') : '',
+      row.firstSeenAt.toISOString().slice(0, 10),
       selectorOf(row.sampleTarget),
       row.sampleHtml,
       row.sampleSummary,

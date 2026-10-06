@@ -278,6 +278,7 @@ export const ru: Messages = {
     opensInNewTab: ' (откроется в новой вкладке)',
     newTag: 'Новая',
     fixedNote: 'В этой проверке не найдена',
+    firstSeen: (date) => `Впервые найдена ${date}`,
   },
   impact: {
     critical: 'Критическая',

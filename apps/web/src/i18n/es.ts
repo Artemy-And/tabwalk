@@ -260,6 +260,7 @@ export const es: Messages = {
     opensInNewTab: ' (se abre en una pestaña nueva)',
     newTag: 'Nuevo',
     fixedNote: 'No encontrado en este análisis',
+    firstSeen: (date) => `Detectado por primera vez el ${date}`,
   },
   impact: {
     critical: 'Crítico',

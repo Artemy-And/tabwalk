@@ -126,6 +126,7 @@ export interface IssueGroup {
   sampleTarget: string;
   sampleSummary: string | null;
   isNew?: boolean;
+  firstSeenAt?: string;
 }
 
 export interface PageRow {

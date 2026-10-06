@@ -245,6 +245,7 @@ export const zh: Messages = {
     opensInNewTab: '（在新标签页中打开）',
     newTag: '新增',
     fixedNote: '本次检测中未发现',
+    firstSeen: (date) => `首次发现于 ${date}`,
   },
   impact: {
     critical: '严重',

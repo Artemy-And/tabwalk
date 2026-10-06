@@ -191,6 +191,7 @@ export function ScanPage() {
                         : 'current'
                   }
                   emptyMessage={filter === 'all' ? undefined : t.issues.emptyFilter}
+                  scanDate={s.createdAt}
                 />
               )}
             </>
