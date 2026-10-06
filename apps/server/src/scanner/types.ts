@@ -13,7 +13,12 @@ export interface CheckFinding {
   failureSummary: string | null;
 }
 
+export interface CheckOptions {
+  // problems inside elements that match these CSS selectors are left out
+  ignoreSelectors?: string[];
+}
+
 export interface Checker {
   readonly name: string;
-  run(page: Page): Promise<CheckFinding[]>;
+  run(page: Page, options?: CheckOptions): Promise<CheckFinding[]>;
 }

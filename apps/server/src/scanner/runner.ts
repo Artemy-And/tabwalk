@@ -4,19 +4,24 @@ import { db } from '../db/index.js';
 import { issues, pages, scans, sites, tabOrders } from '../db/schema.js';
 import { env } from '../env.js';
 import { notifyScan } from '../notify/notify.js';
-import { checkPage, launchBrowser, NotAPageError } from './check.js';
+import { checkPage, type IgnoreRules, launchBrowser, NotAPageError } from './check.js';
 import { crawl } from './crawl.js';
 
 type PageOutcome = { ok: boolean; links: string[] } | null;
 
 // null when the address turned out to be a file, which is not a page to report
-async function scanOnePage(browser: Browser, scanId: string, url: string): Promise<PageOutcome> {
+async function scanOnePage(
+  browser: Browser,
+  scanId: string,
+  url: string,
+  ignore: IgnoreRules,
+): Promise<PageOutcome> {
   try {
     const { title, findings, tabOrder, links } = await checkPage(
       browser,
       url,
       env.PAGE_TIMEOUT_MS,
-      { tabOrder: true },
+      { tabOrder: true, ignore },
     );
 
     const [pageRow] = await db
@@ -81,9 +86,18 @@ export async function runScan(scanId: string): Promise<void> {
   const site = await db.query.sites.findFirst({ where: eq(sites.id, scan.siteId) });
   if (!site) throw new Error(`Site ${scan.siteId} not found`);
 
+  const ignore: IgnoreRules = { rules: site.ignoreRules, selectors: site.ignoreSelectors };
+
   await db
     .update(scans)
-    .set({ status: 'running', startedAt: new Date(), error: null, pagesScanned: 0, pagesFailed: 0 })
+    .set({
+      status: 'running',
+      startedAt: new Date(),
+      error: null,
+      pagesScanned: 0,
+      pagesFailed: 0,
+      ignored: ignore,
+    })
     .where(eq(scans.id, scanId));
 
   let browser: Browser | null = null;
@@ -101,7 +115,7 @@ export async function runScan(scanId: string): Promise<void> {
       concurrency: env.SCAN_CONCURRENCY,
       rules: { include: site.crawlInclude, exclude: site.crawlExclude },
       visit: async (url) => {
-        const outcome = await scanOnePage(browser as Browser, scanId, url);
+        const outcome = await scanOnePage(browser as Browser, scanId, url, ignore);
         if (!outcome) return [];
         if (outcome.ok) ok += 1;
         else failed += 1;

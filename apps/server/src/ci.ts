@@ -28,13 +28,15 @@ Starts at <url> and the site's sitemap, follows links from page to page, checks
 every page and exits with code 1 when a problem at or above --fail-on is found.
 
 Options:
-  --max-pages <n>     pages to check, default 50
-  --include <paths>   check only pages under these paths, like /blog/,/docs/*
-  --exclude <paths>   skip pages under these paths, like /tag/,*?page=*
-  --fail-on <level>   critical | serious | moderate | minor | none, default critical
-  --report <path>     JSON report file, default tabwalk-report.json
-  --concurrency <n>   pages checked at once, default 3
-  --timeout <ms>      page load timeout, default 30000
+  --max-pages <n>           pages to check, default 50
+  --include <paths>         check only pages under these paths, like /blog/,/docs/*
+  --exclude <paths>         skip pages under these paths, like /tag/,*?page=*
+  --ignore-rules <ids>      leave out these rules, like color-contrast,region
+  --ignore-selectors <css>  leave out problems inside these elements, one selector per flag
+  --fail-on <level>         critical | serious | moderate | minor | none, default critical
+  --report <path>           JSON report file, default tabwalk-report.json
+  --concurrency <n>         pages checked at once, default 3
+  --timeout <ms>            page load timeout, default 30000
 `;
 
 function fail(message: string): never {
@@ -78,6 +80,8 @@ const { values, positionals } = parseArgs({
     'max-pages': { type: 'string', default: '50' },
     include: { type: 'string', multiple: true },
     exclude: { type: 'string', multiple: true },
+    'ignore-rules': { type: 'string', multiple: true },
+    'ignore-selectors': { type: 'string', multiple: true },
     'fail-on': { type: 'string', default: 'critical' },
     report: { type: 'string', default: 'tabwalk-report.json' },
     concurrency: { type: 'string', default: '3' },
@@ -120,7 +124,29 @@ const timeoutMs = positiveInt('timeout', values.timeout);
 const include = patterns(values.include, process.env.INPUT_INCLUDE);
 const exclude = patterns(values.exclude, process.env.INPUT_EXCLUDE);
 
+// one selector per flag or per line, since a comma belongs to the selector
+function lines(flags: string[] | undefined, input: string | undefined): string[] {
+  return [...(flags ?? []), ...(input ?? '').split('\n')]
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+const ignore = {
+  rules: patterns(values['ignore-rules'], process.env['INPUT_IGNORE-RULES']).map((rule) =>
+    rule.toLowerCase(),
+  ),
+  selectors: lines(values['ignore-selectors'], process.env['INPUT_IGNORE-SELECTORS']),
+};
+const ignoredNote = (code: (text: string) => string) =>
+  [
+    ignore.rules.length > 0 ? `rules ${ignore.rules.map(code).join(', ')}` : '',
+    ignore.selectors.length > 0 ? `elements inside ${ignore.selectors.map(code).join(', ')}` : '',
+  ]
+    .filter(Boolean)
+    .join('; ');
+
 console.log(`Checking up to ${plural(maxPages, 'page')} of ${siteUrl}`);
+if (ignoredNote(String)) console.log(`Not reported, as asked: ${ignoredNote(String)}`);
 
 const browser = await launchBrowser(process.env.CHROMIUM_EXECUTABLE);
 const groups = new Map<string, Group>();
@@ -133,7 +159,7 @@ await crawl(siteUrl, {
   rules: { include, exclude },
   visit: async (url) => {
     try {
-      const { findings, links } = await checkPage(browser, url, timeoutMs);
+      const { findings, links } = await checkPage(browser, url, timeoutMs, { ignore });
       checked += 1;
       for (const f of findings) {
         const key = `${f.kind}:${f.fingerprint}`;
@@ -198,6 +224,7 @@ await writeFile(
       failedPages,
       failOn,
       failed: blocking.length > 0,
+      ignored: ignore,
       summary,
       violations,
       incomplete,
@@ -223,6 +250,8 @@ console.log(`Report written to ${values.report}`);
 
 if (process.env.GITHUB_STEP_SUMMARY) {
   const parts = [`## Accessibility: ${siteUrl}`, headline];
+  const ignored = ignoredNote((text) => `\`${text}\``);
+  if (ignored) parts.push(`Not reported, as asked: ${ignored}`);
   if (violations.length > 0) parts.push(table(violations));
   if (incomplete.length > 0) {
     parts.push(

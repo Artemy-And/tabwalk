@@ -76,6 +76,9 @@ export const sites = pgTable(
     maxPages: integer('max_pages'),
     crawlInclude: jsonb('crawl_include').$type<string[]>().notNull().default([]),
     crawlExclude: jsonb('crawl_exclude').$type<string[]>().notNull().default([]),
+    // rule ids and CSS selectors whose problems a scan leaves out
+    ignoreRules: jsonb('ignore_rules').$type<string[]>().notNull().default([]),
+    ignoreSelectors: jsonb('ignore_selectors').$type<string[]>().notNull().default([]),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('sites_org_idx').on(t.orgId)],
@@ -96,6 +99,8 @@ export const scans = pgTable(
     pagesScanned: integer('pages_scanned').notNull().default(0),
     pagesFailed: integer('pages_failed').notNull().default(0),
     error: text('error'),
+    // what the site told this scan to leave out, so the report can say so
+    ignored: jsonb('ignored').$type<{ rules: string[]; selectors: string[] }>(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('scans_site_created_idx').on(t.siteId, t.createdAt)],

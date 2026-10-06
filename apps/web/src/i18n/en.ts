@@ -175,6 +175,22 @@ export const en = {
     saving: 'Saving…',
     saved: 'Saved.',
   },
+  ignore: {
+    heading: 'Problems to ignore',
+    intro:
+      'For code you cannot change, like a chat widget from another company. Ignored problems are not stored, and every report lists what it left out.',
+    rulesLabel: 'Rules',
+    rulesHint: 'One rule ID per line, like color-contrast. A report shows it in the Rule column.',
+    selectorsLabel: 'Elements',
+    selectorsHint:
+      'One CSS selector per line, like #chat-widget. Problems inside these elements are left out.',
+    note: 'Changes apply from the next scan.',
+    badSelector: (selector: string) =>
+      `“${selector}” is not a CSS selector the browser understands.`,
+    save: 'Save',
+    saving: 'Saving…',
+    saved: 'Saved.',
+  },
   scan: {
     loading: 'Loading results…',
     notFound: 'Scan not found.',
@@ -194,6 +210,9 @@ export const en = {
     findingsHeading: 'Findings',
     loadingFindings: 'Loading findings…',
     exportCsv: 'Export CSV',
+    ignored: (what: string) => `Not reported in this scan, as set for the site: ${what}.`,
+    ignoredRules: (list: string) => `rules ${list}`,
+    ignoredSelectors: (list: string) => `everything inside ${list}`,
     filters: {
       label: 'Show',
       all: 'All',

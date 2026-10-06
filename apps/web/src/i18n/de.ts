@@ -178,6 +178,22 @@ export const de: Messages = {
     saving: 'Wird gespeichert…',
     saved: 'Gespeichert.',
   },
+  ignore: {
+    heading: 'Probleme ignorieren',
+    intro:
+      'Für Code, den Sie nicht ändern können, etwa ein Chat-Widget eines anderen Anbieters. Ignorierte Probleme werden nicht gespeichert, und jeder Bericht nennt, was er ausgelassen hat.',
+    rulesLabel: 'Regeln',
+    rulesHint:
+      'Eine Regel-ID pro Zeile, etwa color-contrast. Ein Bericht zeigt sie in der Spalte „Regel“.',
+    selectorsLabel: 'Elemente',
+    selectorsHint:
+      'Ein CSS-Selektor pro Zeile, etwa #chat-widget. Probleme in diesen Elementen werden ausgelassen.',
+    note: 'Änderungen gelten ab der nächsten Prüfung.',
+    badSelector: (selector) => `„${selector}“ ist kein CSS-Selektor, den der Browser versteht.`,
+    save: 'Speichern',
+    saving: 'Wird gespeichert…',
+    saved: 'Gespeichert.',
+  },
   scan: {
     loading: 'Ergebnisse werden geladen…',
     notFound: 'Prüfung nicht gefunden.',
@@ -198,6 +214,9 @@ export const de: Messages = {
     findingsHeading: 'Befunde',
     loadingFindings: 'Befunde werden geladen…',
     exportCsv: 'Als CSV exportieren',
+    ignored: (what) => `In dieser Prüfung laut Einstellungen der Website ausgelassen: ${what}.`,
+    ignoredRules: (list) => `Regeln ${list}`,
+    ignoredSelectors: (list) => `alles in ${list}`,
     filters: {
       label: 'Anzeigen',
       all: 'Alle',

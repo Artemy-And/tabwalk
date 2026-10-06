@@ -20,6 +20,12 @@ inputs:
   exclude:
     description: 'Skip pages under these paths, one per line or comma-separated, like /tag/ or *?page=*'
     default: ''
+  ignore-rules:
+    description: 'Leave out these rules, one per line or comma-separated, like color-contrast'
+    default: ''
+  ignore-selectors:
+    description: 'Leave out problems inside elements that match these CSS selectors, one per line, like #chat-widget'
+    default: ''
   fail-on:
     description: Lowest impact that fails the job - critical, serious, moderate, minor or none
     default: critical

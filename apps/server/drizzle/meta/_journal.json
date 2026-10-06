@@ -57,6 +57,13 @@
       "when": 1791281147039,
       "tag": "0007_site_crawl_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791295625459,
+      "tag": "0008_ignore_rules",
+      "breakpoints": true
     }
   ]
 }

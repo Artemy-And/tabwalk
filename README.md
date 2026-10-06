@@ -131,6 +131,8 @@ jobs:
 | `max-pages` | 50 | Page cap |
 | `include` | — | Check only pages under these paths, one per line, like `/blog/` or `/docs/*` |
 | `exclude` | — | Skip pages under these paths, one per line, like `/tag/` or `*?page=*` |
+| `ignore-rules` | — | Leave out these rules, one per line, like `color-contrast` |
+| `ignore-selectors` | — | Leave out problems inside elements matching these CSS selectors, one per line, like `#chat-widget` |
 | `fail-on` | `critical` | Lowest impact that fails the job: `critical`, `serious`, `moderate`, `minor` or `none` |
 | `report` | `tabwalk-report.json` | JSON report path in the workspace |
 
@@ -268,6 +270,14 @@ always checked:
 |---|---|---|
 | Only check these paths | `/blog/` | Only addresses that start with `/blog/` |
 | Skip these paths | `/tag/` and `*?page=*` | No tag pages and no paginated lists |
+
+### Ignoring problems
+
+For code you can't change, like a chat widget from another company, a site's
+page has **Problems to ignore**: rule IDs (`color-contrast`) and CSS selectors
+(`#chat-widget`). A scan leaves those problems out and doesn't store them, and
+its report says what it left out. The GitHub Action takes the same lists as
+`ignore-rules` and `ignore-selectors`.
 
 ### Notifications
 

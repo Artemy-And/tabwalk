@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from 'playwright';
-import type { Checker, CheckFinding } from '../types.js';
+import type { Checker, CheckFinding, CheckOptions } from '../types.js';
 
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
@@ -54,8 +54,23 @@ function toFindings(results: AxeResult[], kind: CheckFinding['kind']): CheckFind
 export const axeChecker: Checker = {
   name: 'axe-core',
 
-  async run(page: Page): Promise<CheckFinding[]> {
-    const results = await new AxeBuilder({ page }).withTags([...TAGS, 'best-practice']).analyze();
+  async run(page: Page, options: CheckOptions = {}): Promise<CheckFinding[]> {
+    const builder = new AxeBuilder({ page }).withTags([...TAGS, 'best-practice']);
+    // axe gives up on the whole page when one selector does not parse
+    const selectors = await page.evaluate(
+      (list) =>
+        list.filter((selector) => {
+          try {
+            document.querySelector(selector);
+            return true;
+          } catch {
+            return false;
+          }
+        }),
+      options.ignoreSelectors ?? [],
+    );
+    for (const selector of selectors) builder.exclude(selector);
+    const results = await builder.analyze();
 
     const violations = results.violations as unknown as AxeResult[];
     const incomplete = results.incomplete as unknown as AxeResult[];

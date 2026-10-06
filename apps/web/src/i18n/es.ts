@@ -178,6 +178,22 @@ export const es: Messages = {
     saving: 'Guardando…',
     saved: 'Guardado.',
   },
+  ignore: {
+    heading: 'Problemas que ignorar',
+    intro:
+      'Para código que no puedes cambiar, como un widget de chat de otra empresa. Los problemas ignorados no se guardan, y cada informe indica qué dejó fuera.',
+    rulesLabel: 'Reglas',
+    rulesHint:
+      'Un ID de regla por línea, como color-contrast. El informe lo muestra en la columna «Regla».',
+    selectorsLabel: 'Elementos',
+    selectorsHint:
+      'Un selector CSS por línea, como #chat-widget. Los problemas dentro de estos elementos se omiten.',
+    note: 'Los cambios se aplican desde el próximo análisis.',
+    badSelector: (selector) => `«${selector}» no es un selector CSS que el navegador entienda.`,
+    save: 'Guardar',
+    saving: 'Guardando…',
+    saved: 'Guardado.',
+  },
   scan: {
     loading: 'Cargando resultados…',
     notFound: 'Análisis no encontrado.',
@@ -198,6 +214,9 @@ export const es: Messages = {
     findingsHeading: 'Hallazgos',
     loadingFindings: 'Cargando hallazgos…',
     exportCsv: 'Exportar CSV',
+    ignored: (what) => `Omitido en este análisis según la configuración del sitio: ${what}.`,
+    ignoredRules: (list) => `reglas ${list}`,
+    ignoredSelectors: (list) => `todo lo que hay dentro de ${list}`,
     filters: {
       label: 'Mostrar',
       all: 'Todos',

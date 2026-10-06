@@ -67,6 +67,8 @@ export interface Site {
   maxPages: number | null;
   crawlInclude: string[];
   crawlExclude: string[];
+  ignoreRules: string[];
+  ignoreSelectors: string[];
   createdAt: string;
 }
 
@@ -77,7 +79,10 @@ export interface SiteDetail extends Site {
 }
 
 export type SiteUpdate = Partial<
-  Pick<Site, 'schedule' | 'maxPages' | 'crawlInclude' | 'crawlExclude'>
+  Pick<
+    Site,
+    'schedule' | 'maxPages' | 'crawlInclude' | 'crawlExclude' | 'ignoreRules' | 'ignoreSelectors'
+  >
 >;
 
 export interface ScanSummary {
@@ -98,6 +103,8 @@ export interface Scan {
   pagesScanned: number;
   pagesFailed: number;
   error: string | null;
+  // what the site told the scan to leave out; null for scans from before 0.4
+  ignored: { rules: string[]; selectors: string[] } | null;
   createdAt: string;
 }
 

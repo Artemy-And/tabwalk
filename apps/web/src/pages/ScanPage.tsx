@@ -73,6 +73,10 @@ export function ScanPage() {
   const s = scan.data;
   const siteName = s.site?.name ?? t.scan.unknownSite;
   const date = formatDate(s.finishedAt ?? s.createdAt, locale);
+  const ignoredParts = [
+    s.ignored?.rules.length ? t.scan.ignoredRules(s.ignored.rules.join(', ')) : null,
+    s.ignored?.selectors.length ? t.scan.ignoredSelectors(s.ignored.selectors.join(', ')) : null,
+  ].filter((part) => part !== null);
 
   return (
     <div className="flex flex-col gap-6">
@@ -132,6 +136,12 @@ export function ScanPage() {
           />
           <StatCard value={s.pages} label={t.scan.pages(s.pages)} />
         </div>
+      )}
+
+      {done && ignoredParts.length > 0 && (
+        <p className="max-w-[700px] text-[15px] text-muted">
+          {t.scan.ignored(ignoredParts.join('; '))}
+        </p>
       )}
 
       {done && (

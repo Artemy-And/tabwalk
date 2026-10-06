@@ -43,6 +43,12 @@ after(async () => {
 });
 
 const get = (path: string) => app.request(path, { headers: { cookie } });
+const send = (method: string, path: string, body?: unknown) =>
+  app.request(path, {
+    method,
+    headers: { 'content-type': 'application/json', cookie },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
 
 interface Finding {
   fingerprint: string;
@@ -129,4 +135,20 @@ test('each finding says when it first turned up on the site', { skip }, async ()
   const csv = await (await get(`/api/scans/${second.id}/issues.csv`)).text();
   assert.ok(csv.includes(',New since last scan,First seen,'));
   assert.ok(csv.includes(',no,2026-09-01,') && csv.includes(',yes,2026-09-08,'));
+});
+
+test('a site keeps the rules and the elements to ignore', { skip }, async () => {
+  const site = await seedSite();
+  const saved = await send('PATCH', `/api/sites/${site.id}`, {
+    ignoreRules: [' Color-Contrast ', 'region'],
+    ignoreSelectors: ['#chat-widget', '.cookie-banner > button'],
+  });
+  assert.equal(saved.status, 200);
+  const body = (await saved.json()) as { ignoreRules: string[]; ignoreSelectors: string[] };
+  assert.deepEqual(body.ignoreRules, ['color-contrast', 'region']);
+  assert.deepEqual(body.ignoreSelectors, ['#chat-widget', '.cookie-banner > button']);
+
+  const bad = await send('PATCH', `/api/sites/${site.id}`, { ignoreRules: ['color contrast'] });
+  assert.equal(bad.status, 400);
+  assert.match(((await bad.json()) as { error: string }).error, /letters, digits and dashes/);
 });

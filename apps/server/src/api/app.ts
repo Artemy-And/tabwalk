@@ -29,6 +29,21 @@ const pathsField = z
   )
   .max(50, 'Up to 50 paths');
 
+const rulesField = z
+  .array(
+    z
+      .string()
+      .trim()
+      .toLowerCase()
+      .regex(/^[a-z0-9-]+$/, 'A rule ID has letters, digits and dashes, like color-contrast'),
+  )
+  .max(50, 'Up to 50 rules');
+
+// whether a selector parses is up to the browser; the scanner skips the ones that don't
+const selectorsField = z
+  .array(z.string().trim().min(1).max(300, 'A selector can be at most 300 characters'))
+  .max(50, 'Up to 50 selectors');
+
 const TREND_LENGTH = 8;
 
 const summaryColumns = {
@@ -353,6 +368,8 @@ app.patch(
           .optional(),
         crawlInclude: pathsField.optional(),
         crawlExclude: pathsField.optional(),
+        ignoreRules: rulesField.optional(),
+        ignoreSelectors: selectorsField.optional(),
       })
       .refine((body) => Object.values(body).some((v) => v !== undefined), 'Nothing to change'),
   ),

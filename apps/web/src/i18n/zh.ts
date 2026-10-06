@@ -170,6 +170,20 @@ export const zh: Messages = {
     saving: '正在保存…',
     saved: '已保存。',
   },
+  ignore: {
+    heading: '忽略的问题',
+    intro:
+      '用于你无法修改的代码，例如其他公司提供的聊天组件。被忽略的问题不会保存，每份报告都会列出它省略了什么。',
+    rulesLabel: '规则',
+    rulesHint: '每行一个规则 ID，例如 color-contrast。报告的“规则”列中可以找到它。',
+    selectorsLabel: '元素',
+    selectorsHint: '每行一个 CSS 选择器，例如 #chat-widget。这些元素内部的问题将被省略。',
+    note: '修改从下一次检测开始生效。',
+    badSelector: (selector) => `“${selector}”不是浏览器能识别的 CSS 选择器。`,
+    save: '保存',
+    saving: '正在保存…',
+    saved: '已保存。',
+  },
   scan: {
     loading: '正在加载结果…',
     notFound: '未找到该检测。',
@@ -187,6 +201,9 @@ export const zh: Messages = {
     findingsHeading: '检测结果',
     loadingFindings: '正在加载检测结果…',
     exportCsv: '导出 CSV',
+    ignored: (what) => `根据网站设置，本次检测未报告：${what}。`,
+    ignoredRules: (list) => `规则 ${list}`,
+    ignoredSelectors: (list) => `${list} 内的全部内容`,
     filters: {
       label: '显示',
       all: '全部',

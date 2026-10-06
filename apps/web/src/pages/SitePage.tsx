@@ -78,39 +78,60 @@ function ScheduleCard({ site }: { site: SiteDetail }) {
   );
 }
 
-// any whitespace separates paths, since a path cannot contain it
-const paths = (text: string) => text.split(/\s+/).filter(Boolean);
+// any whitespace separates paths and rule IDs, since neither can contain it
+const words = (text: string) => text.split(/\s+/).filter(Boolean);
 
-function CrawlCard({ site }: { site: SiteDetail }) {
-  const { t } = useI18n();
+// a selector can hold spaces, so selectors go one per line
+const lines = (text: string) =>
+  text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+function parses(selector: string): boolean {
+  try {
+    document.createDocumentFragment().querySelector(selector);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// saves part of a site's settings and puts the answer back in the form
+function useSiteUpdate(site: SiteDetail, onSaved: (updated: SiteDetail) => void) {
   const qc = useQueryClient();
-  const [maxPages, setMaxPages] = useState(site.maxPages === null ? '' : String(site.maxPages));
-  const [include, setInclude] = useState(site.crawlInclude.join('\n'));
-  const [exclude, setExclude] = useState(site.crawlExclude.join('\n'));
-
   const save = useMutation({
     mutationFn: (body: SiteUpdate) => api.updateSite(site.id, body),
     onSuccess: (updated) => {
       qc.setQueryData(['site-info', site.id], updated);
-      setInclude(updated.crawlInclude.join('\n'));
-      setExclude(updated.crawlExclude.join('\n'));
+      onSaved(updated);
     },
+  });
+  // typing again takes back an earlier "Saved."
+  const edit = (set: (value: string) => void) => (e: { target: { value: string } }) => {
+    set(e.target.value);
+    save.reset();
+  };
+  return { save, edit };
+}
+
+function CrawlCard({ site }: { site: SiteDetail }) {
+  const { t } = useI18n();
+  const [maxPages, setMaxPages] = useState(site.maxPages === null ? '' : String(site.maxPages));
+  const [include, setInclude] = useState(site.crawlInclude.join('\n'));
+  const [exclude, setExclude] = useState(site.crawlExclude.join('\n'));
+  const { save, edit } = useSiteUpdate(site, (updated) => {
+    setInclude(updated.crawlInclude.join('\n'));
+    setExclude(updated.crawlExclude.join('\n'));
   });
 
   function onSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     save.mutate({
       maxPages: maxPages === '' ? null : Number(maxPages),
-      crawlInclude: paths(include),
-      crawlExclude: paths(exclude),
+      crawlInclude: words(include),
+      crawlExclude: words(exclude),
     });
-  }
-
-  function edit(set: (value: string) => void) {
-    return (e: { target: { value: string } }) => {
-      set(e.target.value);
-      save.reset();
-    };
   }
 
   return (
@@ -175,6 +196,80 @@ function CrawlCard({ site }: { site: SiteDetail }) {
   );
 }
 
+function IgnoreCard({ site }: { site: SiteDetail }) {
+  const { t } = useI18n();
+  const [rules, setRules] = useState(site.ignoreRules.join('\n'));
+  const [selectors, setSelectors] = useState(site.ignoreSelectors.join('\n'));
+  const [problem, setProblem] = useState<string | null>(null);
+  const { save, edit } = useSiteUpdate(site, (updated) => {
+    setRules(updated.ignoreRules.join('\n'));
+    setSelectors(updated.ignoreSelectors.join('\n'));
+  });
+
+  function onSubmit(e: SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const list = lines(selectors);
+    const broken = list.find((selector) => !parses(selector));
+    setProblem(broken === undefined ? null : t.ignore.badSelector(broken));
+    if (broken !== undefined) return;
+    save.mutate({
+      ignoreRules: words(rules).map((rule) => rule.toLowerCase()),
+      ignoreSelectors: list,
+    });
+  }
+
+  const error = problem ?? (save.isError ? save.error.message : null);
+
+  return (
+    <Card className="p-5">
+      <h2 id="ignore-heading" className="text-[17px] font-semibold">
+        {t.ignore.heading}
+      </h2>
+      <p className="mt-1 max-w-[700px] text-[15px] text-muted">{t.ignore.intro}</p>
+      <form
+        aria-labelledby="ignore-heading"
+        onSubmit={onSubmit}
+        className="mt-4 flex flex-col gap-4"
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          <TextareaField
+            label={t.ignore.rulesLabel}
+            rows={3}
+            spellCheck={false}
+            autoCapitalize="none"
+            value={rules}
+            onChange={edit(setRules)}
+            hint={t.ignore.rulesHint}
+          />
+          <TextareaField
+            label={t.ignore.selectorsLabel}
+            rows={3}
+            spellCheck={false}
+            autoCapitalize="none"
+            value={selectors}
+            onChange={edit(setSelectors)}
+            hint={t.ignore.selectorsHint}
+          />
+        </div>
+        <p className="text-[15px] text-muted">{t.ignore.note}</p>
+        <div className="flex flex-wrap items-center gap-4">
+          <Button type="submit" disabled={save.isPending}>
+            {save.isPending ? t.ignore.saving : t.ignore.save}
+          </Button>
+          <p aria-live="polite" className="text-[15px] text-muted">
+            {save.isSuccess ? t.ignore.saved : ''}
+          </p>
+        </div>
+      </form>
+      {error && (
+        <p role="alert" className="mt-3 text-sm text-critical">
+          {error}
+        </p>
+      )}
+    </Card>
+  );
+}
+
 export function SitePage() {
   const { siteId } = useParams({ from: '/sites/$siteId' });
   const { t, locale } = useI18n();
@@ -227,6 +322,7 @@ export function SitePage() {
 
       <ScheduleCard site={site.data} />
       <CrawlCard site={site.data} />
+      <IgnoreCard site={site.data} />
 
       {start.isSuccess && <LiveStatus>{t.site.queued}</LiveStatus>}
       {start.isError && (
