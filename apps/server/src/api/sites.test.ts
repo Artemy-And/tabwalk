@@ -241,3 +241,43 @@ test('a dismissed finding stays in the report but counts nowhere', { skip }, asy
   });
   assert.equal(missing.status, 404);
 });
+
+test('a site keeps its login, and the dashboard only learns what kind it is', {
+  skip,
+}, async () => {
+  const site = await seedSite();
+  const saved = await send('PATCH', `/api/sites/${site.id}`, {
+    login: {
+      username: ' staging ',
+      password: 'hunter2',
+      headers: [{ name: 'Authorization', value: 'Bearer abc' }],
+      cookies: [{ name: 'session', value: 'xyz' }],
+    },
+  });
+  assert.equal(saved.status, 200);
+  const text = await saved.text();
+  for (const secret of ['hunter2', 'Bearer abc', 'xyz']) {
+    assert.ok(!text.includes(secret), `the answer holds ${secret}`);
+  }
+  assert.deepEqual((JSON.parse(text) as { login: unknown }).login, {
+    username: 'staging',
+    hasPassword: true,
+    headers: ['Authorization'],
+    cookies: ['session'],
+  });
+  assert.ok(!(await (await get(`/api/sites/${site.id}`)).text()).includes('hunter2'));
+
+  // the scanner reads the real thing from the database
+  const stored = await db.query.sites.findFirst({ where: (s, { eq }) => eq(s.id, site.id) });
+  assert.equal(stored?.login?.password, 'hunter2');
+
+  const cleared = await send('PATCH', `/api/sites/${site.id}`, {
+    login: { username: '', headers: [], cookies: [] },
+  });
+  assert.equal(((await cleared.json()) as { login: unknown }).login, null);
+
+  const owned = await send('PATCH', `/api/sites/${site.id}`, {
+    login: { headers: [{ name: 'Host', value: 'example.com' }] },
+  });
+  assert.equal(owned.status, 400);
+});

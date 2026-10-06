@@ -27,6 +27,9 @@ export interface CrawlOptions {
   limit: number;
   concurrency: number;
   rules?: CrawlRules;
+  // login headers for robots.txt, the sitemaps and the start page, sent to the site's own
+  // addresses only
+  headers?: Record<string, string>;
   // opens one page and resolves to the links on it
   visit: (url: string) => Promise<string[]>;
 }
@@ -37,10 +40,14 @@ interface Scope {
   exclude: RegExp[];
 }
 
-async function fetchText(url: string, timeoutMs = 15_000): Promise<string | null> {
+async function fetchText(
+  url: string,
+  headers: Record<string, string> = {},
+  timeoutMs = 15_000,
+): Promise<string | null> {
   try {
     const res = await fetch(url, {
-      headers: { 'user-agent': USER_AGENT },
+      headers: { ...headers, 'user-agent': USER_AGENT },
       signal: AbortSignal.timeout(timeoutMs),
       redirect: 'follow',
     });
@@ -156,10 +163,10 @@ function inScope(raw: string, scope: Scope): string | null {
 }
 
 // redirects such as http → https or example.com → www.example.com move the whole site
-async function landingUrl(start: string): Promise<string> {
+async function landingUrl(start: string, headers: Record<string, string>): Promise<string> {
   try {
     const res = await fetch(start, {
-      headers: { 'user-agent': USER_AGENT },
+      headers: { ...headers, 'user-agent': USER_AGENT },
       signal: AbortSignal.timeout(15_000),
       redirect: 'follow',
     });
@@ -170,10 +177,16 @@ async function landingUrl(start: string): Promise<string> {
   }
 }
 
-async function fromSitemaps(scope: Scope, limit: number): Promise<string[]> {
+async function fromSitemaps(
+  scope: Scope,
+  limit: number,
+  headers: Record<string, string>,
+): Promise<string[]> {
+  // a sitemap kept on a CDN gets no login headers
+  const headersFor = (url: string) => (scope.origins.has(new URL(url).origin) ? headers : {});
   const queue: string[] = [];
   for (const origin of scope.origins) {
-    const robots = await fetchText(`${origin}/robots.txt`);
+    const robots = await fetchText(`${origin}/robots.txt`, headers);
     if (robots) queue.push(...sitemapsInRobots(robots));
   }
   if (queue.length === 0) {
@@ -189,7 +202,7 @@ async function fromSitemaps(scope: Scope, limit: number): Promise<string[]> {
     if (!next || read.has(next)) continue;
     read.add(next);
 
-    const xml = await fetchText(next);
+    const xml = await fetchText(next, headersFor(next));
     // a single-page app answers every path, /sitemap.xml included, with its own HTML
     if (!xml || !/<(urlset|sitemapindex)\b/i.test(xml)) continue;
 
@@ -215,7 +228,8 @@ export async function crawl(siteUrl: string, options: CrawlOptions): Promise<str
   const start = normalize(siteUrl);
   if (!start) throw new Error(`Invalid site URL: ${siteUrl}`);
 
-  const landing = await landingUrl(start);
+  const headers = options.headers ?? {};
+  const landing = await landingUrl(start, headers);
   const scope: Scope = {
     origins: new Set([new URL(start).origin, new URL(landing).origin]),
     include: compilePatterns(options.rules?.include ?? []),
@@ -234,7 +248,7 @@ export async function crawl(siteUrl: string, options: CrawlOptions): Promise<str
 
   // the site's own address is checked whatever the rules say
   add(start);
-  for (const url of await fromSitemaps(scope, options.limit)) add(url);
+  for (const url of await fromSitemaps(scope, options.limit, headers)) add(url);
 
   let active = 0;
   let waiting: (() => void)[] = [];

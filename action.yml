@@ -26,6 +26,19 @@ inputs:
   ignore-selectors:
     description: 'Leave out problems inside elements that match these CSS selectors, one per line, like #chat-widget'
     default: ''
+  # pass the four below from secrets: they go to the site only and never into the log
+  http-username:
+    description: 'HTTP Basic login, like the one most staging sites have'
+    default: ''
+  http-password:
+    description: 'Password for http-username'
+    default: ''
+  headers:
+    description: 'Headers sent to the site only, one "Name: value" per line, like "Authorization: Bearer …"'
+    default: ''
+  cookies:
+    description: 'Cookies set before the first page opens, one name=value per line or a whole Cookie header'
+    default: ''
   fail-on:
     description: Lowest impact that fails the job - critical, serious, moderate, minor or none
     default: critical

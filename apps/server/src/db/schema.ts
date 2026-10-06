@@ -10,6 +10,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
+import type { SiteLogin } from '../scanner/types.js';
 
 export const organizations = pgTable('organizations', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -79,6 +80,8 @@ export const sites = pgTable(
     // rule ids and CSS selectors whose problems a scan leaves out
     ignoreRules: jsonb('ignore_rules').$type<string[]>().notNull().default([]),
     ignoreSelectors: jsonb('ignore_selectors').$type<string[]>().notNull().default([]),
+    // kept as entered, like notification webhooks, and never sent back to the dashboard
+    login: jsonb('login').$type<SiteLogin>(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('sites_org_idx').on(t.orgId)],

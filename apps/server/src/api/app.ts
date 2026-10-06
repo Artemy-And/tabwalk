@@ -23,6 +23,7 @@ import {
 import { env } from '../env.js';
 import { notificationRoutes } from '../notify/routes.js';
 import { enqueueScan, nextScanAt } from '../queue/schedule.js';
+import type { SiteLogin } from '../scanner/types.js';
 import { toCsv } from './csv.js';
 import { json } from './validate.js';
 
@@ -50,6 +51,67 @@ const rulesField = z
       .regex(/^[a-z0-9-]+$/, 'A rule ID has letters, digits and dashes, like color-contrast'),
   )
   .max(50, 'Up to 50 rules');
+
+// headers the browser sets itself and a site login must not replace
+const BROWSER_HEADERS = ['host', 'content-length', 'connection', 'transfer-encoding'];
+
+const loginField = z
+  .object({
+    username: z.string().trim().max(200).optional(),
+    password: z.string().max(500).optional(),
+    headers: z
+      .array(
+        z.object({
+          name: z
+            .string()
+            .trim()
+            .regex(/^[A-Za-z0-9-]+$/, 'A header name has letters, digits and dashes')
+            .refine((name) => !BROWSER_HEADERS.includes(name.toLowerCase()), {
+              message: 'The browser sets this header itself',
+            }),
+          value: z.string().trim().min(1).max(4000),
+        }),
+      )
+      .max(20, 'Up to 20 headers')
+      .optional(),
+    cookies: z
+      .array(
+        z.object({
+          name: z
+            .string()
+            .trim()
+            .regex(/^[^\s;=]+$/, 'A cookie name has no spaces, semicolons or equals signs'),
+          value: z
+            .string()
+            .trim()
+            .max(4000)
+            .regex(/^[^;]*$/, 'A cookie value has no semicolons'),
+        }),
+      )
+      .max(50, 'Up to 50 cookies')
+      .optional(),
+  })
+  // a password needs its user name, and a login with nothing in it is no login
+  .transform(({ username, password, headers, cookies }): SiteLogin | null => {
+    const login: SiteLogin = {
+      ...(username ? { username, password } : {}),
+      ...(headers?.length ? { headers } : {}),
+      ...(cookies?.length ? { cookies } : {}),
+    };
+    return Object.keys(login).length > 0 ? login : null;
+  })
+  .nullable();
+
+// the dashboard learns what kind of login a site has, never the secrets in it
+function loginSummary(login: SiteLogin | null) {
+  if (!login) return null;
+  return {
+    username: login.username ?? null,
+    hasPassword: Boolean(login.password),
+    headers: (login.headers ?? []).map((header) => header.name),
+    cookies: (login.cookies ?? []).map((cookie) => cookie.name),
+  };
+}
 
 // whether a selector parses is up to the browser; the scanner skips the ones that don't
 const selectorsField = z
@@ -361,7 +423,8 @@ app.post(
       .values({ orgId, name: body.name, url: body.url, schedule: body.schedule })
       .returning();
 
-    return c.json(created, 201);
+    if (!created) return c.json({ error: 'Could not add the site' }, 500);
+    return c.json({ ...created, login: loginSummary(created.login) }, 201);
   },
 );
 
@@ -377,6 +440,7 @@ async function siteWithNextScan(id: string) {
 
   return {
     ...site,
+    login: loginSummary(site.login),
     nextScanAt: nextScanAt(site.schedule, last?.createdAt ?? null),
     pageCap: env.MAX_PAGES_PER_SCAN,
   };
@@ -407,6 +471,7 @@ app.patch(
         crawlExclude: pathsField.optional(),
         ignoreRules: rulesField.optional(),
         ignoreSelectors: selectorsField.optional(),
+        login: loginField.optional(),
       })
       .refine((body) => Object.values(body).some((v) => v !== undefined), 'Nothing to change'),
   ),

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
-import { type SubmitEvent, useState } from 'react';
+import { type SubmitEvent, useEffect, useRef, useState } from 'react';
 import {
   Badge,
   Breadcrumbs,
@@ -270,6 +270,175 @@ function IgnoreCard({ site }: { site: SiteDetail }) {
   );
 }
 
+// "name<separator>value" entries, one per line or split further; null when all of them parse,
+// else the number of the first line that does not
+function parsePairs(text: string, separator: string, split?: RegExp) {
+  const pairs: { name: string; value: string }[] = [];
+  for (const [index, row] of text.split('\n').entries()) {
+    for (const part of split ? row.split(split) : [row]) {
+      const entry = part.trim();
+      if (!entry) continue;
+      const at = entry.indexOf(separator);
+      if (at <= 0) return { pairs, bad: index + 1 };
+      pairs.push({ name: entry.slice(0, at).trim(), value: entry.slice(at + 1).trim() });
+    }
+  }
+  return { pairs, bad: null };
+}
+
+function LoginCard({ site }: { site: SiteDetail }) {
+  const { t } = useI18n();
+  const [editing, setEditing] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [headers, setHeaders] = useState('');
+  const [cookies, setCookies] = useState('');
+  const [problem, setProblem] = useState<string | null>(null);
+  const [backToSummary, setBackToSummary] = useState(0);
+  const summaryRef = useRef<HTMLParagraphElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // secrets are typed in fresh every time and leave the page once saved
+  function close() {
+    setEditing(false);
+    setUsername('');
+    setPassword('');
+    setHeaders('');
+    setCookies('');
+    setProblem(null);
+    setBackToSummary((n) => n + 1);
+  }
+
+  const { save, edit } = useSiteUpdate(site, close);
+
+  // the form takes focus when it opens and gives it back to the summary when it closes
+  useEffect(() => {
+    if (editing) formRef.current?.querySelector('input')?.focus();
+  }, [editing]);
+  useEffect(() => {
+    if (backToSummary > 0) summaryRef.current?.focus();
+  }, [backToSummary]);
+
+  function onSubmit(e: SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const header = parsePairs(headers, ':');
+    const cookie = parsePairs(cookies, '=', /;/);
+    const bad =
+      header.bad !== null
+        ? t.login.badHeader(header.bad)
+        : cookie.bad !== null
+          ? t.login.badCookie(cookie.bad)
+          : null;
+    setProblem(bad);
+    if (bad !== null) return;
+    save.mutate({
+      login: {
+        username: username.trim() || undefined,
+        password: password || undefined,
+        headers: header.pairs,
+        cookies: cookie.pairs,
+      },
+    });
+  }
+
+  const parts = site.login
+    ? [
+        site.login.username ? t.login.partBasic(site.login.username) : null,
+        site.login.headers.length ? t.login.partHeaders(site.login.headers.join(', ')) : null,
+        site.login.cookies.length ? t.login.partCookies(site.login.cookies.join(', ')) : null,
+      ].filter((part) => part !== null)
+    : [];
+  const error = problem ?? (save.isError ? save.error.message : null);
+
+  return (
+    <Card className="p-5">
+      <h2 id="login-heading" className="text-[17px] font-semibold">
+        {t.login.heading}
+      </h2>
+      <p className="mt-1 max-w-[700px] text-[15px] text-muted">{t.login.intro}</p>
+      <p ref={summaryRef} tabIndex={-1} className="mt-3 text-[15px]">
+        {parts.length > 0 ? t.login.summary(parts.join('; ')) : t.login.none}
+      </p>
+
+      {!editing && (
+        <div className="mt-3 flex flex-wrap gap-3">
+          <Button variant="secondary" onClick={() => setEditing(true)}>
+            {site.login ? t.login.replace : t.login.add}
+          </Button>
+          {site.login && (
+            <Button
+              variant="danger"
+              onClick={() => save.mutate({ login: null })}
+              disabled={save.isPending}
+            >
+              {save.isPending ? t.login.removing : t.login.remove}
+            </Button>
+          )}
+        </div>
+      )}
+
+      {editing && (
+        <form
+          ref={formRef}
+          aria-labelledby="login-heading"
+          onSubmit={onSubmit}
+          className="mt-4 flex flex-col gap-4"
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field
+              label={t.login.usernameLabel}
+              autoComplete="off"
+              value={username}
+              onChange={edit(setUsername)}
+              hint={t.login.basicHint}
+            />
+            <Field
+              label={t.login.passwordLabel}
+              type="password"
+              autoComplete="off"
+              value={password}
+              onChange={edit(setPassword)}
+            />
+            <TextareaField
+              label={t.login.headersLabel}
+              rows={3}
+              spellCheck={false}
+              autoCapitalize="none"
+              value={headers}
+              onChange={edit(setHeaders)}
+              hint={t.login.headersHint}
+            />
+            <TextareaField
+              label={t.login.cookiesLabel}
+              rows={3}
+              spellCheck={false}
+              autoCapitalize="none"
+              value={cookies}
+              onChange={edit(setCookies)}
+              hint={t.login.cookiesHint}
+            />
+          </div>
+          <p className="max-w-[700px] text-[15px] text-muted">{t.login.note}</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button type="submit" disabled={save.isPending}>
+              {save.isPending ? t.login.saving : t.login.save}
+            </Button>
+            <Button variant="secondary" onClick={close}>
+              {t.login.cancel}
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {error && (
+        <p role="alert" className="mt-3 text-sm text-critical">
+          {error}
+        </p>
+      )}
+    </Card>
+  );
+}
+
 export function SitePage() {
   const { siteId } = useParams({ from: '/sites/$siteId' });
   const { t, locale } = useI18n();
@@ -323,6 +492,7 @@ export function SitePage() {
       <ScheduleCard site={site.data} />
       <CrawlCard site={site.data} />
       <IgnoreCard site={site.data} />
+      <LoginCard site={site.data} />
 
       {start.isSuccess && <LiveStatus>{t.site.queued}</LiveStatus>}
       {start.isError && (

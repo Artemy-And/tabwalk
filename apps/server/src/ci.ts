@@ -2,6 +2,7 @@ import { appendFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import { checkPage, launchBrowser, NotAPageError, type PageFinding } from './scanner/check.js';
 import { crawl } from './scanner/crawl.js';
+import { loginHeaders, type SiteLogin } from './scanner/types.js';
 
 const IMPACTS = ['critical', 'serious', 'moderate', 'minor'] as const;
 type ImpactLevel = (typeof IMPACTS)[number];
@@ -33,6 +34,10 @@ Options:
   --exclude <paths>         skip pages under these paths, like /tag/,*?page=*
   --ignore-rules <ids>      leave out these rules, like color-contrast,region
   --ignore-selectors <css>  leave out problems inside these elements, one selector per flag
+  --http-username <user>    HTTP Basic login, like the one most staging sites have
+  --http-password <pass>    its password
+  --header "Name: value"    sent to the site only, like "Authorization: Bearer …"; repeat for more
+  --cookie name=value       set before the first page opens; repeat for more
   --fail-on <level>         critical | serious | moderate | minor | none, default critical
   --report <path>           JSON report file, default tabwalk-report.json
   --concurrency <n>         pages checked at once, default 3
@@ -82,6 +87,10 @@ const { values, positionals } = parseArgs({
     exclude: { type: 'string', multiple: true },
     'ignore-rules': { type: 'string', multiple: true },
     'ignore-selectors': { type: 'string', multiple: true },
+    'http-username': { type: 'string' },
+    'http-password': { type: 'string' },
+    header: { type: 'string', multiple: true },
+    cookie: { type: 'string', multiple: true },
     'fail-on': { type: 'string', default: 'critical' },
     report: { type: 'string', default: 'tabwalk-report.json' },
     concurrency: { type: 'string', default: '3' },
@@ -145,7 +154,41 @@ const ignoredNote = (code: (text: string) => string) =>
     .filter(Boolean)
     .join('; ');
 
+// a malformed entry is reported without its value, which may be a secret
+function pairs(entries: string[], separator: string, what: string) {
+  return entries.map((entry) => {
+    const at = entry.indexOf(separator);
+    if (at <= 0) fail(`Each ${what} must look like "name${separator}value"`);
+    return { name: entry.slice(0, at).trim(), value: entry.slice(at + 1).trim() };
+  });
+}
+
+const login: SiteLogin = {
+  username: values['http-username'] || process.env['INPUT_HTTP-USERNAME'] || undefined,
+  password: values['http-password'] || process.env['INPUT_HTTP-PASSWORD'] || undefined,
+  headers: pairs(lines(values.header, process.env.INPUT_HEADERS), ':', 'header'),
+  // a whole Cookie header pasted from a browser splits into its cookies
+  cookies: pairs(
+    lines(values.cookie, process.env.INPUT_COOKIES).flatMap((line) =>
+      line
+        .split(';')
+        .map((part) => part.trim())
+        .filter(Boolean),
+    ),
+    '=',
+    'cookie',
+  ),
+};
+const signIn = [
+  login.username ? 'HTTP Basic' : '',
+  login.headers?.length ? plural(login.headers.length, 'header') : '',
+  login.cookies?.length ? plural(login.cookies.length, 'cookie') : '',
+]
+  .filter(Boolean)
+  .join(', ');
+
 console.log(`Checking up to ${plural(maxPages, 'page')} of ${siteUrl}`);
+if (signIn) console.log(`Signing in with ${signIn}`);
 if (ignoredNote(String)) console.log(`Not reported, as asked: ${ignoredNote(String)}`);
 
 const browser = await launchBrowser(process.env.CHROMIUM_EXECUTABLE);
@@ -157,9 +200,10 @@ await crawl(siteUrl, {
   limit: maxPages,
   concurrency,
   rules: { include, exclude },
+  headers: loginHeaders(login),
   visit: async (url) => {
     try {
-      const { findings, links } = await checkPage(browser, url, timeoutMs, { ignore });
+      const { findings, links } = await checkPage(browser, url, timeoutMs, { ignore, login });
       checked += 1;
       for (const f of findings) {
         const key = `${f.kind}:${f.fingerprint}`;

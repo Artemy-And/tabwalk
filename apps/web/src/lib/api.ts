@@ -69,7 +69,23 @@ export interface Site {
   crawlExclude: string[];
   ignoreRules: string[];
   ignoreSelectors: string[];
+  login: LoginSummary | null;
   createdAt: string;
+}
+
+// what kind of login a site has; the secrets themselves never come back
+export interface LoginSummary {
+  username: string | null;
+  hasPassword: boolean;
+  headers: string[];
+  cookies: string[];
+}
+
+export interface LoginInput {
+  username?: string;
+  password?: string;
+  headers?: { name: string; value: string }[];
+  cookies?: { name: string; value: string }[];
 }
 
 export interface SiteDetail extends Site {
@@ -83,7 +99,7 @@ export type SiteUpdate = Partial<
     Site,
     'schedule' | 'maxPages' | 'crawlInclude' | 'crawlExclude' | 'ignoreRules' | 'ignoreSelectors'
   >
->;
+> & { login?: LoginInput | null };
 
 export interface ScanSummary {
   uniqueProblems: number;

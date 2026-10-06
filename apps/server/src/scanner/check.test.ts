@@ -4,6 +4,7 @@ import type { AddressInfo } from 'node:net';
 import { after, before, test } from 'node:test';
 import { type Browser, chromium } from 'playwright';
 import { checkPage, type PageFinding } from './check.js';
+import { loginHeaders, type SiteLogin } from './types.js';
 
 // an image without alt text and a button without a focus style, once more inside a chat widget
 const PAGE = `<!doctype html><html lang="en"><head><title>Shop</title><style>
@@ -61,4 +62,95 @@ test('an ignored rule is left out, the others stay', async () => {
   });
   assert.equal(targets(findings, 'image-alt').length, 0);
   assert.equal(targets(findings, 'focus-visible').length, 2);
+});
+
+// a staging site that opens only with the right login, whose page pulls a script from elsewhere
+let staging: Server;
+let elsewhere: Server;
+let stagingUrl: string;
+const seenElsewhere: { authorization?: string; token?: string; cookie?: string }[] = [];
+
+before(async () => {
+  elsewhere = createServer((req, res) => {
+    seenElsewhere.push({
+      authorization: req.headers.authorization,
+      token: req.headers['x-staging-token'] as string | undefined,
+      cookie: req.headers.cookie,
+    });
+    res.writeHead(200, { 'content-type': 'text/javascript' });
+    res.end('void 0;');
+  });
+  await new Promise<void>((resolve) => elsewhere.listen(0, resolve));
+  // another host name, so not even a cookie for 127.0.0.1 may go there
+  const script = `http://localhost:${(elsewhere.address() as AddressInfo).port}/lib.js`;
+
+  const basic = `Basic ${Buffer.from('user:secret').toString('base64')}`;
+  staging = createServer((req, res) => {
+    const allowed =
+      req.headers.authorization === basic ||
+      req.headers['x-staging-token'] === 'abc' ||
+      (req.headers.cookie ?? '').includes('session=abc');
+    if (!allowed) {
+      res.writeHead(401, {
+        'www-authenticate': 'Basic realm="staging"',
+        'content-type': 'text/html',
+      });
+      res.end('<p>Unauthorized</p>');
+      return;
+    }
+    res.writeHead(200, { 'content-type': 'text/html' });
+    res.end(
+      `<!doctype html><html lang="en"><title>Staging</title><main><h1>Staging</h1>` +
+        `<img src="data:," width="10" height="10"></main><script src="${script}"></script></html>`,
+    );
+  });
+  await new Promise<void>((resolve) => staging.listen(0, resolve));
+  stagingUrl = `http://127.0.0.1:${(staging.address() as AddressInfo).port}/`;
+});
+
+after(async () => {
+  await new Promise<void>((resolve) => staging.close(() => resolve()));
+  await new Promise<void>((resolve) => elsewhere.close(() => resolve()));
+});
+
+test('a page behind a login fails with a clear reason when there is none', async () => {
+  await assert.rejects(checkPage(browser, stagingUrl, 10_000), /asks for a login/);
+});
+
+const logins: [string, SiteLogin][] = [
+  ['HTTP Basic', { username: 'user', password: 'secret' }],
+  ['a header', { headers: [{ name: 'X-Staging-Token', value: 'abc' }] }],
+  ['a cookie', { cookies: [{ name: 'session', value: 'abc' }] }],
+];
+
+for (const [label, login] of logins) {
+  test(`${label} opens the page, and the script from elsewhere never sees it`, async () => {
+    seenElsewhere.length = 0;
+    const { findings } = await checkPage(browser, stagingUrl, 10_000, { login });
+    assert.ok(findings.some((f) => f.ruleId === 'image-alt'));
+    assert.ok(seenElsewhere.length > 0, 'the script was loaded');
+    for (const seen of seenElsewhere) {
+      assert.deepEqual(seen, { authorization: undefined, token: undefined, cookie: undefined });
+    }
+  });
+}
+
+test('the login headers a plain fetch needs', () => {
+  assert.deepEqual(
+    loginHeaders({
+      username: 'user',
+      password: 'secret',
+      headers: [{ name: 'X-Staging-Token', value: 'abc' }],
+      cookies: [
+        { name: 'session', value: 'abc' },
+        { name: 'theme', value: 'dark' },
+      ],
+    }),
+    {
+      authorization: `Basic ${Buffer.from('user:secret').toString('base64')}`,
+      'x-staging-token': 'abc',
+      cookie: 'session=abc; theme=dark',
+    },
+  );
+  assert.deepEqual(loginHeaders(null), {});
 });

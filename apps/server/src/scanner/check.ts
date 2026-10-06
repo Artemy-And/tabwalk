@@ -3,7 +3,7 @@ import { axeChecker } from './checkers/axe.js';
 import { drawTabOrder, keyboardChecker, type TabOrder } from './checkers/keyboard.js';
 import { USER_AGENT } from './crawl.js';
 import { fingerprint } from './fingerprint.js';
-import type { Checker, CheckFinding } from './types.js';
+import type { Checker, CheckFinding, SiteLogin } from './types.js';
 
 const CHECKERS: Checker[] = [axeChecker, keyboardChecker];
 
@@ -72,10 +72,32 @@ export async function checkPage(
   browser: Browser,
   url: string,
   timeoutMs: number,
-  options: { tabOrder?: boolean; ignore?: IgnoreRules } = {},
+  options: { tabOrder?: boolean; ignore?: IgnoreRules; login?: SiteLogin | null } = {},
 ): Promise<PageResult> {
   const ignore = options.ignore ?? { rules: [], selectors: [] };
-  const context = await browser.newContext({ userAgent: USER_AGENT, reducedMotion: 'reduce' });
+  const login = options.login;
+  // the page's own address; scripts and images from elsewhere never see the login
+  const origin = new URL(url).origin;
+  const context = await browser.newContext({
+    userAgent: USER_AGENT,
+    reducedMotion: 'reduce',
+    ...(login?.username
+      ? { httpCredentials: { username: login.username, password: login.password ?? '', origin } }
+      : {}),
+  });
+  if (login?.cookies?.length) {
+    await context.addCookies(
+      login.cookies.map(({ name, value }) => ({ name, value, url: origin })),
+    );
+  }
+  if (login?.headers?.length) {
+    const extra = Object.fromEntries(login.headers.map(({ name, value }) => [name, value]));
+    await context.route('**/*', (route) => {
+      const request = route.request();
+      if (new URL(request.url()).origin !== origin) return route.continue();
+      return route.continue({ headers: { ...request.headers(), ...extra } });
+    });
+  }
   const page = await context.newPage();
 
   try {
@@ -87,6 +109,10 @@ export async function checkPage(
         }
         throw err;
       });
+    // checking the "Unauthorized" page itself would tell nobody anything
+    if (response?.status() === 401) {
+      throw new Error('The page asks for a login (HTTP 401)');
+    }
     const type = response?.headers()['content-type'];
     if (type && !/html/i.test(type)) throw new NotAPageError(`Not a web page: ${type}`);
     await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});

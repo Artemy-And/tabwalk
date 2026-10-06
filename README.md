@@ -133,6 +133,9 @@ jobs:
 | `exclude` | — | Skip pages under these paths, one per line, like `/tag/` or `*?page=*` |
 | `ignore-rules` | — | Leave out these rules, one per line, like `color-contrast` |
 | `ignore-selectors` | — | Leave out problems inside elements matching these CSS selectors, one per line, like `#chat-widget` |
+| `http-username`, `http-password` | — | HTTP Basic login, as most staging sites have. Pass them from secrets |
+| `headers` | — | Headers sent to the site only, one `Name: value` per line, like `Authorization: Bearer …` |
+| `cookies` | — | Cookies set before the first page opens, one `name=value` per line |
 | `fail-on` | `critical` | Lowest impact that fails the job: `critical`, `serious`, `moderate`, `minor` or `none` |
 | `report` | `tabwalk-report.json` | JSON report path in the workspace |
 
@@ -287,6 +290,16 @@ won't fix, with an optional note. It stays in the data and is listed under
 scan of the site: not in totals, trends, comparisons or notifications.
 **Reopen** brings it back.
 
+### Pages behind a login
+
+**Signing in** on a site's page takes an HTTP Basic user and password, headers
+such as `Authorization: Bearer …`, and cookies copied from a browser. They go to
+the site's own address only, never to scripts or images from other addresses.
+Tabwalk keeps them in its Postgres as entered, like notification webhooks, and
+never shows them in the dashboard again, so use an account that can only read.
+A page that answers HTTP 401 is reported as needing a login instead of being
+checked. Logging in through a form is not supported yet.
+
 ### Notifications
 
 Under **Settings**, add a Slack, Discord or ntfy channel, a webhook that gets
@@ -337,8 +350,8 @@ Phase 2 adds the AI layer: plain-language reports, the `incomplete` bucket
 turned into a manual-review checklist, alt-text judged by a vision model, and
 suggested code fixes (suggested — never applied automatically).
 
-Known MVP gaps: one organization where every account sees every site, and pages
-behind a login are not scanned.
+Known MVP gaps: one organization where every account sees every site, and no
+login through a form: pages behind a login need HTTP Basic, a header or a cookie.
 
 ## Community
 

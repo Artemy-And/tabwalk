@@ -6,6 +6,7 @@ import { gzipSync } from 'node:zlib';
 import { chromium } from 'playwright';
 import { checkPage, NotAPageError } from './check.js';
 import { allowedBy, compilePatterns, crawl, isFile, normalize, sitemapsInRobots } from './crawl.js';
+import { loginHeaders } from './types.js';
 
 interface Route {
   type?: string;
@@ -14,11 +15,18 @@ interface Route {
 
 let routes: Record<string, Route> = {};
 let redirectLocalhost = false;
+// when set, every path answers 401 to a request without this Authorization header
+let requiredAuth: string | null = null;
 let server: Server;
 let base: string;
 
 before(async () => {
   server = createServer((req, res) => {
+    if (requiredAuth && req.headers.authorization !== requiredAuth) {
+      res.writeHead(401, { 'www-authenticate': 'Basic realm="staging"' });
+      res.end();
+      return;
+    }
     if (redirectLocalhost && req.headers.host?.startsWith('localhost')) {
       res.writeHead(301, { location: `${base}${req.url}` });
       res.end();
@@ -42,6 +50,7 @@ after(() => new Promise<void>((resolve) => server.close(() => resolve())));
 beforeEach(() => {
   routes = { '/': { body: '<!doctype html><title>Home</title>' } };
   redirectLocalhost = false;
+  requiredAuth = null;
 });
 
 // stands in for the browser: each path links to the paths listed for it
@@ -217,4 +226,21 @@ test('a page reports the links it renders, and a file is not a page', async (t) 
 
   await assert.rejects(checkPage(browser, `${base}/price-list`, 10_000), NotAPageError);
   await assert.rejects(checkPage(browser, `${base}/export`, 10_000), NotAPageError);
+});
+
+test('login headers let the crawl read the sitemap of a closed site', async () => {
+  requiredAuth = `Basic ${Buffer.from('user:secret').toString('base64')}`;
+  routes['/robots.txt'] = { type: 'text/plain', body: `Sitemap: ${base}/sitemap.xml\n` };
+  routes['/sitemap.xml'] = {
+    type: 'application/xml',
+    body: `<urlset><url><loc>${base}/private</loc></url></urlset>`,
+  };
+  const { visit } = linksBetween({});
+
+  const closed = await crawl(`${base}/`, { limit: 10, concurrency: 1, visit });
+  assert.deepEqual(closed, [`${base}/`]);
+
+  const headers = loginHeaders({ username: 'user', password: 'secret' });
+  const open = await crawl(`${base}/`, { limit: 10, concurrency: 1, visit, headers });
+  assert.deepEqual(open, [`${base}/`, `${base}/private`]);
 });

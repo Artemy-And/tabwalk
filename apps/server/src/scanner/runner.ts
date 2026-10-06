@@ -6,6 +6,7 @@ import { env } from '../env.js';
 import { notifyScan } from '../notify/notify.js';
 import { checkPage, type IgnoreRules, launchBrowser, NotAPageError } from './check.js';
 import { crawl } from './crawl.js';
+import { loginHeaders, type SiteLogin } from './types.js';
 
 type PageOutcome = { ok: boolean; links: string[] } | null;
 
@@ -14,14 +15,14 @@ async function scanOnePage(
   browser: Browser,
   scanId: string,
   url: string,
-  ignore: IgnoreRules,
+  options: { ignore: IgnoreRules; login: SiteLogin | null },
 ): Promise<PageOutcome> {
   try {
     const { title, findings, tabOrder, links } = await checkPage(
       browser,
       url,
       env.PAGE_TIMEOUT_MS,
-      { tabOrder: true, ignore },
+      { tabOrder: true, ...options },
     );
 
     const [pageRow] = await db
@@ -114,8 +115,12 @@ export async function runScan(scanId: string): Promise<void> {
       limit,
       concurrency: env.SCAN_CONCURRENCY,
       rules: { include: site.crawlInclude, exclude: site.crawlExclude },
+      headers: loginHeaders(site.login),
       visit: async (url) => {
-        const outcome = await scanOnePage(browser as Browser, scanId, url, ignore);
+        const outcome = await scanOnePage(browser as Browser, scanId, url, {
+          ignore,
+          login: site.login,
+        });
         if (!outcome) return [];
         if (outcome.ok) ok += 1;
         else failed += 1;
