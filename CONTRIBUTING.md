@@ -47,8 +47,7 @@ Run Tabwalk against its own dashboard before you open a UI pull request.
 Interface strings live in `apps/web/src/i18n/`, one file per language. To add a language, copy
 `en.ts`, translate it and register it in `context.ts`. Rule descriptions come from the official
 axe-core translations: add the language to `apps/web/scripts/axe-rule-help.mjs` and run
-`pnpm --filter @tabwalk/web i18n:rules`. Where axe-core has no text for a rule, as for almost
-every rule in Dutch, `apps/web/scripts/rule-help/<language>.json` fills it in.
+`pnpm --filter @tabwalk/web i18n:rules`.
 
 ## Code of conduct
 
