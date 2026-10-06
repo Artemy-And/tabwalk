@@ -144,10 +144,50 @@ jobs:
 | `headers` | — | Headers sent to the site only, one `Name: value` per line, like `Authorization: Bearer …` |
 | `cookies` | — | Cookies set before the first page opens, one `name=value` per line |
 | `fail-on` | `critical` | Lowest impact that fails the job: `critical`, `serious`, `moderate`, `minor` or `none` |
+| `baseline` | — | A report from an earlier run. Only problems it does not have fail the job |
+| `comment` | `false` | Comment on the pull request with the results |
+| `github-token` | `github.token` | Token to comment with |
 | `report` | `tabwalk-report.json` | JSON report path in the workspace |
 
 The job summary lists every problem; results that need a human are listed too
-but never fail the job. The same check runs locally:
+but never fail the job.
+
+### Fail only on new problems
+
+A site with problems already can still keep new ones out. Commit a report as
+the baseline, and the job fails only on problems the baseline does not have.
+The summary lists the new problems first, then the known ones and the ones no
+longer found. With `comment: true` the same summary goes to the pull request
+as one comment, edited on every run:
+
+```yaml
+name: Accessibility
+on: [pull_request]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  tabwalk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Artemy-And/tabwalk@v0.3.0
+        with:
+          url: https://staging.example.com
+          fail-on: serious
+          baseline: .github/tabwalk-baseline.json
+          comment: true
+```
+
+To make the baseline, run the check once and commit its `tabwalk-report.json`
+as `.github/tabwalk-baseline.json`; commit a newer report whenever you accept
+the problems it has. Until the file is there, every problem counts. Pull
+requests from forks get a read-only token, so they get the job summary but no
+comment.
+
+The same check runs locally:
 
 ```bash
 docker run --rm -v "$PWD:/out" -w /out --user root \

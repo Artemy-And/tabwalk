@@ -42,6 +42,15 @@ inputs:
   fail-on:
     description: Lowest impact that fails the job - critical, serious, moderate, minor or none
     default: critical
+  baseline:
+    description: 'A report from an earlier run, like a committed tabwalk-report.json. Only problems it does not have fail the job'
+    default: ''
+  comment:
+    description: 'Comment on the pull request with the results, editing the same comment on every run. Needs "permissions: pull-requests: write"'
+    default: 'false'
+  github-token:
+    description: Token to comment with
+    default: ${{ github.token }}
   report:
     description: Where to write the JSON report, relative to the workspace
     default: tabwalk-report.json

@@ -1,27 +1,26 @@
 import { appendFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
-import { checkPage, launchBrowser, NotAPageError, type PageFinding } from './scanner/check.js';
+import { commentMarker, GitHubError, pullRequestNumber, upsertComment } from './ci/github.js';
+import {
+  type Baseline,
+  BaselineError,
+  blockingOf,
+  compare,
+  type Group,
+  headline,
+  IMPACTS,
+  impactOf,
+  markdown,
+  type Outcome,
+  plural,
+  rank,
+  readBaseline,
+  summarize,
+  type Threshold,
+} from './ci/report.js';
+import { checkPage, launchBrowser, NotAPageError } from './scanner/check.js';
 import { crawl } from './scanner/crawl.js';
 import { loginHeaders, type SiteLogin } from './scanner/types.js';
-
-const IMPACTS = ['critical', 'serious', 'moderate', 'minor'] as const;
-type ImpactLevel = (typeof IMPACTS)[number];
-type Threshold = ImpactLevel | 'none';
-
-interface Group {
-  kind: PageFinding['kind'];
-  ruleId: string;
-  impact: ImpactLevel;
-  help: string;
-  helpUrl: string | null;
-  wcagTags: string[];
-  standards: string[];
-  fingerprint: string;
-  target: string[];
-  html: string;
-  pages: string[];
-  elements: number;
-}
 
 const USAGE = `Usage: ci <url> [options]
 
@@ -39,6 +38,8 @@ Options:
   --header "Name: value"    sent to the site only, like "Authorization: Bearer …"; repeat for more
   --cookie name=value       set before the first page opens; repeat for more
   --fail-on <level>         critical | serious | moderate | minor | none, default critical
+  --baseline <path>         a report from an earlier run: only problems it lacks fail
+  --comment                 comment on the pull request the run is for (GitHub Actions)
   --report <path>           JSON report file, default tabwalk-report.json
   --concurrency <n>         pages checked at once, default 3
   --timeout <ms>            page load timeout, default 30000
@@ -55,30 +56,6 @@ function positiveInt(name: string, raw: string): number {
   return n;
 }
 
-function impactOf(raw: string | null): ImpactLevel {
-  return IMPACTS.includes(raw as ImpactLevel) ? (raw as ImpactLevel) : 'minor';
-}
-
-function rank(impact: ImpactLevel): number {
-  return IMPACTS.indexOf(impact);
-}
-
-function cell(text: string): string {
-  return text.replace(/\|/g, '\\|').replace(/\s+/g, ' ').trim();
-}
-
-function table(groups: Group[]): string {
-  const rows = groups.map((g) => {
-    const rule = g.helpUrl ? `[${g.ruleId}](${g.helpUrl})` : g.ruleId;
-    const label =
-      g.kind === 'incomplete' ? 'needs review' : g.kind === 'recommendation' ? 'advice' : g.impact;
-    return `| ${label} | ${cell(g.help)} \`${cell(
-      g.target.join(' '),
-    )}\` | ${rule} | ${g.pages.length} |`;
-  });
-  return ['| Impact | Problem | Rule | Pages |', '| --- | --- | --- | --- |', ...rows].join('\n');
-}
-
 const { values, positionals } = parseArgs({
   allowPositionals: true,
   options: {
@@ -92,6 +69,8 @@ const { values, positionals } = parseArgs({
     header: { type: 'string', multiple: true },
     cookie: { type: 'string', multiple: true },
     'fail-on': { type: 'string', default: 'critical' },
+    baseline: { type: 'string' },
+    comment: { type: 'boolean', default: false },
     report: { type: 'string', default: 'tabwalk-report.json' },
     concurrency: { type: 'string', default: '3' },
     timeout: { type: 'string', default: '30000' },
@@ -116,8 +95,6 @@ const failOn = values['fail-on'] as Threshold;
 if (failOn !== 'none' && !IMPACTS.includes(failOn)) {
   fail(`--fail-on must be one of ${[...IMPACTS, 'none'].join(', ')}, got "${failOn}"`);
 }
-
-const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 // repeated flags, commas or new lines; the GitHub Action passes its inputs as INPUT_* variables
 function patterns(flags: string[] | undefined, input: string | undefined): string[] {
@@ -187,9 +164,25 @@ const signIn = [
   .filter(Boolean)
   .join(', ');
 
+// read before the crawl, so a broken baseline stops the run at once
+const baselinePath = values.baseline || process.env.INPUT_BASELINE || '';
+let baseline: Baseline | null = null;
+try {
+  baseline = baselinePath ? await readBaseline(baselinePath) : null;
+} catch (err) {
+  if (err instanceof BaselineError) fail(err.message);
+  throw err;
+}
+const comment = values.comment || process.env.INPUT_COMMENT?.trim().toLowerCase() === 'true';
+
 console.log(`Checking up to ${plural(maxPages, 'page')} of ${siteUrl}`);
 if (signIn) console.log(`Signing in with ${signIn}`);
 if (ignoredNote(String)) console.log(`Not reported, as asked: ${ignoredNote(String)}`);
+if (baseline?.problems) {
+  console.log(`Comparing with ${plural(baseline.problems.length, 'problem')} in ${baseline.path}`);
+} else if (baseline) {
+  console.log(`No baseline at ${baseline.path} yet, so every problem counts`);
+}
 
 const browser = await launchBrowser(process.env.CHROMIUM_EXECUTABLE);
 const groups = new Map<string, Group>();
@@ -241,21 +234,22 @@ await browser.close();
 const sorted = [...groups.values()].sort(
   (a, b) => rank(a.impact) - rank(b.impact) || b.pages.length - a.pages.length,
 );
-const violations = sorted.filter((g) => g.kind === 'violation');
-const incomplete = sorted.filter((g) => g.kind === 'incomplete');
-const recommendations = sorted.filter((g) => g.kind === 'recommendation');
-const count = (impact: ImpactLevel) => violations.filter((g) => g.impact === impact).length;
-const blocking = failOn === 'none' ? [] : violations.filter((g) => rank(g.impact) <= rank(failOn));
-
-const summary = {
-  uniqueProblems: violations.length,
-  critical: count('critical'),
-  serious: count('serious'),
-  moderate: count('moderate'),
-  minor: count('minor'),
-  incomplete: incomplete.length,
-  recommendations: recommendations.length,
-  elements: violations.reduce((sum, g) => sum + g.elements, 0),
+const { violations, gone } = compare(
+  sorted.filter((g) => g.kind === 'violation'),
+  baseline,
+);
+const outcome: Outcome = {
+  siteUrl,
+  checked,
+  failedPages,
+  failOn,
+  ignored: ignoredNote((text) => `\`${text}\``),
+  violations,
+  incomplete: sorted.filter((g) => g.kind === 'incomplete'),
+  recommendations: sorted.filter((g) => g.kind === 'recommendation'),
+  baseline,
+  gone,
+  blocking: blockingOf(violations, failOn),
 };
 
 await writeFile(
@@ -267,62 +261,79 @@ await writeFile(
       pagesChecked: checked,
       failedPages,
       failOn,
-      failed: blocking.length > 0,
+      failed: outcome.blocking.length > 0,
       ignored: ignore,
-      summary,
+      baseline: baseline && {
+        path: baseline.path,
+        found: baseline.problems !== null,
+        noLongerFound: gone,
+      },
+      summary: summarize(outcome),
       violations,
-      incomplete,
-      recommendations,
+      incomplete: outcome.incomplete,
+      recommendations: outcome.recommendations,
     },
     null,
     2,
   )}\n`,
 );
 
-const headline =
-  `${plural(checked, 'page')} checked · ${plural(summary.uniqueProblems, 'unique problem')} ` +
-  `on ${plural(summary.elements, 'element')} (${summary.critical} critical, ${summary.serious} serious) · ` +
-  `${summary.incomplete} need a human · ${plural(summary.recommendations, 'recommendation')}`;
-
-console.log(headline);
+console.log(headline(outcome));
 for (const g of violations) {
   const pages = plural(g.pages.length, 'page');
-  console.log(`  [${g.impact}] ${g.ruleId} ${g.target.join(' ')}: ${g.help} (${pages})`);
+  const tag = g.new === true ? ' new' : g.new === false ? ' known' : '';
+  console.log(`  [${g.impact}${tag}] ${g.ruleId} ${g.target.join(' ')}: ${g.help} (${pages})`);
 }
+if (gone.length > 0) console.log(`${plural(gone.length, 'baseline problem')} no longer found`);
 if (failedPages.length > 0) console.log(`${plural(failedPages.length, 'page')} failed to load`);
 console.log(`Report written to ${values.report}`);
 
 if (process.env.GITHUB_STEP_SUMMARY) {
-  const parts = [`## Accessibility: ${siteUrl}`, headline];
-  const ignored = ignoredNote((text) => `\`${text}\``);
-  if (ignored) parts.push(`Not reported, as asked: ${ignored}`);
-  if (violations.length > 0) parts.push(table(violations));
-  if (incomplete.length > 0) {
-    parts.push(
-      `<details><summary>${plural(incomplete.length, 'result')} ${incomplete.length === 1 ? 'needs' : 'need'} a human</summary>\n\n${table(
-        incomplete,
-      )}\n\n</details>`,
-    );
-  }
-  if (recommendations.length > 0) {
-    parts.push(
-      `<details><summary>${plural(recommendations.length, 'recommendation')} beyond WCAG</summary>
+  await appendFile(process.env.GITHUB_STEP_SUMMARY, markdown(outcome));
+}
 
-${table(recommendations)}
-
-</details>`,
-    );
-  }
-  if (failedPages.length > 0) {
-    parts.push(
-      `${plural(failedPages.length, 'page')} failed to load: ${failedPages.map((p) => p.url).join(', ')}`,
-    );
-  }
-  parts.push(
-    '> Automated checks catch part of what WCAG asks for. This is not a statement that the site ' +
-      'meets any standard.',
+const warn = (message: string) =>
+  console.log(
+    process.env.GITHUB_ACTIONS === 'true' ? `::warning title=Tabwalk::${message}` : message,
   );
-  await appendFile(process.env.GITHUB_STEP_SUMMARY, `${parts.join('\n\n')}\n`);
+
+// a comment that cannot be posted never fails the check itself
+if (comment) {
+  const number = await pullRequestNumber(process.env.GITHUB_EVENT_PATH);
+  const token = process.env['INPUT_GITHUB-TOKEN'] || process.env.GITHUB_TOKEN;
+  const repository = process.env.GITHUB_REPOSITORY;
+  const server = process.env.GITHUB_SERVER_URL ?? 'https://github.com';
+  if (number === null) {
+    console.log('Not a pull request, so no comment');
+  } else if (!token || !repository) {
+    warn('No GitHub token to comment on the pull request with');
+  } else {
+    const run = process.env.GITHUB_RUN_ID;
+    try {
+      const done = await upsertComment(
+        {
+          apiUrl: process.env.GITHUB_API_URL ?? 'https://api.github.com',
+          repository,
+          number,
+          token,
+        },
+        commentMarker(siteUrl),
+        markdown(outcome, {
+          limit: 25,
+          link: run ? `${server}/${repository}/actions/runs/${run}` : undefined,
+        }),
+      );
+      console.log(`Comment ${done} on pull request #${number}`);
+    } catch (err) {
+      const status = err instanceof GitHubError ? err.status : null;
+      warn(
+        status === 403 || status === 404
+          ? `Could not comment on pull request #${number} (HTTP ${status}). The job needs ` +
+              '"permissions: pull-requests: write"; pull requests from forks only get a read-only token'
+          : `Could not comment on pull request #${number}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
 }
 
 if (checked === 0) {
@@ -332,8 +343,9 @@ if (checked === 0) {
   process.exit(2);
 }
 
-if (blocking.length > 0) {
-  const message = `${blocking.length} accessibility problems at or above "${failOn}"`;
+if (outcome.blocking.length > 0) {
+  const what = baseline?.problems ? 'new accessibility problem' : 'accessibility problem';
+  const message = `${plural(outcome.blocking.length, what)} at or above "${failOn}"`;
   console.log(
     process.env.GITHUB_ACTIONS === 'true' ? `::error title=Tabwalk::${message}` : message,
   );
