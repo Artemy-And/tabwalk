@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { TestedEnvironments } from '../components/Environments';
 import { IssuesTable } from '../components/IssuesTable';
+import { ManualReviewSummary } from '../components/ManualReview';
 import { PagesTable } from '../components/PagesTable';
 import { ScanScenarioSummary } from '../components/ScenarioResults';
 import {
@@ -16,14 +18,23 @@ import { useI18n } from '../i18n/context';
 import { api, type IssueGroup, isScanActive, POLL_INTERVAL_MS } from '../lib/api';
 import { formatDate } from '../lib/format';
 
-type Filter = 'all' | 'critical' | 'review' | 'new' | 'fixed' | 'recommendations' | 'dismissed';
+type Filter =
+  | 'all'
+  | 'critical'
+  | 'review'
+  | 'reviewed'
+  | 'new'
+  | 'fixed'
+  | 'recommendations'
+  | 'dismissed';
 
 // a dismissed finding shows up under Dismissed and nowhere else
 const FILTERS: Record<Exclude<Filter, 'fixed'>, (issue: IssueGroup) => boolean> = {
   all: (issue) => !issue.dismissal && issue.kind !== 'recommendation',
   critical: (issue) =>
     !issue.dismissal && issue.kind === 'violation' && issue.impact === 'critical',
-  review: (issue) => !issue.dismissal && issue.kind === 'incomplete',
+  review: (issue) => !issue.dismissal && issue.kind === 'incomplete' && !issue.review,
+  reviewed: (issue) => !issue.dismissal && issue.kind === 'incomplete' && Boolean(issue.review),
   new: (issue) => !issue.dismissal && issue.isNew === true,
   recommendations: (issue) => !issue.dismissal && issue.kind === 'recommendation',
   dismissed: (issue) => Boolean(issue.dismissal),
@@ -68,6 +79,7 @@ export function ScanPage() {
       all: list.filter(FILTERS.all).length,
       critical: list.filter(FILTERS.critical).length,
       review: list.filter(FILTERS.review).length,
+      reviewed: list.filter(FILTERS.reviewed).length,
       new: list.filter(FILTERS.new).length,
       recommendations: list.filter(FILTERS.recommendations).length,
       dismissed: list.filter(FILTERS.dismissed).length,
@@ -156,6 +168,8 @@ export function ScanPage() {
       )}
 
       {done && <ScanScenarioSummary summary={s.scenarioSummary} />}
+      {done && <ManualReviewSummary summary={s.manualSummary} />}
+      {done && <TestedEnvironments environments={s.environments} />}
 
       {done && ignoredParts.length > 0 && (
         <p className="max-w-[700px] text-[15px] text-muted">
@@ -187,6 +201,11 @@ export function ScanPage() {
                 <FilterChip active={filter === 'review'} onClick={() => setFilter('review')}>
                   {t.scan.filters.review} {counts.review}
                 </FilterChip>
+                {counts.reviewed > 0 && (
+                  <FilterChip active={filter === 'reviewed'} onClick={() => setFilter('reviewed')}>
+                    {t.manualReview.reviewed} {counts.reviewed}
+                  </FilterChip>
+                )}
                 {s.comparison && (
                   <>
                     <FilterChip active={filter === 'new'} onClick={() => setFilter('new')}>

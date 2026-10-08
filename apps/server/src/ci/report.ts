@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import type { PageFinding } from '../scanner/check.js';
+import type { EnvironmentRun, ScanEnvironment } from '../scanner/environments.js';
 import type { ScenarioStepEvidence } from '../scanner/scenarios.js';
 import type { KeyboardCoverage, ScenarioEvidence, StoredScenarioRun } from '../scanner/types.js';
 
@@ -8,6 +9,7 @@ export type ImpactLevel = (typeof IMPACTS)[number];
 export type Threshold = ImpactLevel | 'none';
 
 export interface Group {
+  environments?: ScanEnvironment[];
   kind: PageFinding['kind'];
   ruleId: string;
   impact: ImpactLevel;
@@ -33,6 +35,7 @@ export interface Baseline {
 }
 
 export interface Outcome {
+  environmentRuns?: { url: string; runs: EnvironmentRun[] }[];
   siteUrl: string;
   checked: number;
   keyboardCoverage?: { url: string; coverage: KeyboardCoverage | null }[];
@@ -106,6 +109,8 @@ export function blockingOf(violations: Group[], failOn: Threshold): Group[] {
 
 export function hasScenarioFailures(o: Outcome): boolean {
   return (
+    (o.environmentRuns?.some((page) => page.runs.some((run) => run.status === 'failed')) ??
+      false) ||
     (o.scenarioRuns?.some((page) => page.runs.some((run) => run.status === 'failed')) ?? false) ||
     (o.unmatchedScenarios?.length ?? 0) > 0
   );
@@ -157,7 +162,7 @@ export function headline(o: Outcome): string {
 
 export function verdict(o: Outcome): string {
   if (hasScenarioFailures(o)) {
-    return 'Fails: browser scenarios failed or did not run; the scan is incomplete.';
+    return 'Fails: browser scenarios or environments failed or did not run; the scan is incomplete.';
   }
   const what = o.baseline?.problems ? 'new problem' : 'problem';
   if (o.failOn === 'none') return 'The job does not fail on problems (fail-on: none).';
@@ -173,17 +178,18 @@ function cell(text: string): string {
 
 export function table(groups: Group[], limit = Number.POSITIVE_INFINITY): string {
   const withScenarios = groups.some((g) => (g.scenarios?.length ?? 0) > 0);
+  const withEnvironments = groups.some((g) => (g.environments?.length ?? 0) > 0);
   const rows = groups.slice(0, limit).map((g) => {
     const rule = g.helpUrl ? `[${g.ruleId}](${g.helpUrl})` : g.ruleId;
     const label =
       g.kind === 'incomplete' ? 'needs review' : g.kind === 'recommendation' ? 'advice' : g.impact;
     return `| ${label} | ${cell(g.help)} \`${cell(
       g.target.join(' '),
-    )}\` | ${rule} | ${g.pages.length} |${withScenarios ? ` ${g.scenarios?.map((scenario) => `${cell(scenario.name)} (${cell(scenario.url)})`).join('<br>') || 'Initial state'} |` : ''}`;
+    )}\` | ${rule} | ${g.pages.length} |${withScenarios ? ` ${g.scenarios?.map((scenario) => `${cell(scenario.name)} (${cell(scenario.url)})${scenario.environment ? ` [${scenario.environment}]` : ''}`).join('<br>') || 'Initial state'} |` : ''}${withEnvironments ? ` ${g.environments?.map((environment) => environment.id).join(', ') || 'not recorded'} |` : ''}`;
   });
   const lines = [
-    `| Impact | Problem | Rule | Pages |${withScenarios ? ' Scenarios |' : ''}`,
-    `| --- | --- | --- | --- |${withScenarios ? ' --- |' : ''}`,
+    `| Impact | Problem | Rule | Pages |${withScenarios ? ' Scenarios |' : ''}${withEnvironments ? ' Environments |' : ''}`,
+    `| --- | --- | --- | --- |${withScenarios ? ' --- |' : ''}${withEnvironments ? ' --- |' : ''}`,
     ...rows,
   ];
   const rest = groups.length - rows.length;
@@ -225,7 +231,7 @@ function scenarioMarkdown(o: Outcome): string[] {
               .map((step, index) => `${index + 1}. ${step.status}: ${scenarioStepLabel(step)}`)
               .join('\n');
             return (
-              `**${cell(run.name)}** on ${cell(url)} (path ${cell(run.path)}): **${run.status}**.${reason}` +
+              `**${cell(run.name)}**${run.environment ? ` [${run.environment}]` : ''} on ${cell(url)} (path ${cell(run.path)}): **${run.status}**.${reason}` +
               (steps ? `\n\n${steps}` : '')
             );
           })
@@ -264,6 +270,19 @@ const details = (summary: string, body: string) =>
 export function markdown(o: Outcome, options: { limit?: number; link?: string } = {}): string {
   const { limit } = options;
   const parts = [`## Accessibility: ${o.siteUrl}`, `**${verdict(o)}** ${headline(o)}`];
+  if (o.environmentRuns?.length)
+    parts.push(
+      '### Tested environments\n\n' +
+        o.environmentRuns
+          .flatMap((page) =>
+            page.runs.map(
+              (run) =>
+                `- ${cell(page.url)} — ${run.environment.id} (${run.environment.viewport.width}×${run.environment.viewport.height} CSS px, scale ${run.environment.deviceScaleFactor}, forced colors ${run.environment.forcedColors}): ${run.status}, ${run.elapsedMs} ms; ${run.findings} violation occurrences; keyboard ${run.keyboardCoverage?.status ?? 'not checked'}${run.keyboardCoverage?.reasons.length ? ` (${run.keyboardCoverage.reasons.join(', ')})` : ''}${run.error ? `; ${cell(run.error)}` : ''}`,
+            ),
+          )
+          .join('\n') +
+        '\n\nzoom-200 emulates desktop reflow at 200%, not browser UI zoom. forced-colors uses browser media emulation.',
+    );
   const partial = o.keyboardCoverage?.filter((p) => p.coverage?.status !== 'completed') ?? [];
   if (partial.length > 0) {
     parts.push(

@@ -338,6 +338,53 @@ export const en = {
     incomplete:
       'Some scenarios could not be checked. Review failed steps and paths that were not scanned.',
   },
+  manualReview: {
+    heading: 'Human assessment',
+    statuses: {
+      confirmed: 'Confirmed problem',
+      acceptable: 'Acceptable result',
+      not_applicable: 'Not applicable',
+    },
+    pending: 'Pending review',
+    reviewed: 'Reviewed by a person',
+    assess: 'Assess this finding',
+    edit: 'Edit assessment',
+    note: 'Comment (optional)',
+    save: 'Save assessment',
+    reset: 'Return to pending',
+    savedNotice: 'Assessment saved for this scan.',
+    resetNotice: 'Assessment removed. The finding needs review again.',
+    scope: 'Decisions apply only to this scan. A new scan requires a new assessment.',
+    automatic: 'Automatically detected problems',
+    confirmedHeading: 'Problems confirmed by a person',
+  },
+  environments: {
+    incomplete: 'Some environments could not be checked:',
+    heading: 'Scan environments',
+    labels: {
+      desktop: 'Desktop',
+      mobile: 'Narrow screen',
+      'zoom-200': '200% layout emulation',
+      'forced-colors': 'Forced colors',
+    },
+    intro:
+      'Desktop always runs. Extra environments check the initial state and every matching scenario, increasing scan time. Changes apply to the next scan.',
+    descriptions: {
+      mobile: '390 × 844 CSS px; desktop browser at a narrow width.',
+      'zoom-200': '640 × 360 CSS px at 2× device scale; emulates reflow at 200%.',
+      'forced-colors': '1280 × 720; browser emulation of forced system colors.',
+    },
+    save: 'Save environments',
+    saved: 'Saved for the next scan.',
+    foundIn: 'Found in',
+    picture: 'Picture from',
+    results: 'Environment results',
+    completed: 'Checked',
+    failed: 'Failed',
+    occurrences: 'Violation occurrences',
+    limitations:
+      'Layout and system colors are emulated. Browser zoom controls and operating-system contrast settings still need manual testing.',
+  },
   coverage: {
     heading: 'Keyboard coverage',
     completed: 'Walk completed',

@@ -107,6 +107,7 @@ test('the worker persists successful and failed scenario runs, unmatched states 
     .insert(schema.sites)
     .values({
       orgId,
+      environments: ['mobile'],
       name: 'Worker fixture',
       url: siteUrl,
       schedule: 'off',
@@ -130,10 +131,14 @@ test('the worker persists successful and failed scenario runs, unmatched states 
   assert.ok(storedScan.startedAt);
   assert.ok(storedScan.finishedAt);
   assert.deepEqual(storedScan.scenarioSummary, {
-    completed: 1,
-    failed: 1,
+    completed: 2,
+    failed: 2,
     unmatched: [{ name: 'Unvisited page', path: '/missing' }],
   });
+  assert.deepEqual(
+    storedScan.environments?.map((environment) => environment.id),
+    ['desktop', 'mobile'],
+  );
 
   const storedPages = await db.select().from(schema.pages).where(eq(schema.pages.scanId, scan.id));
   assert.equal(storedPages.length, 1);
@@ -145,6 +150,12 @@ test('the worker persists successful and failed scenario runs, unmatched states 
   assert.equal(page.keyboardCoverage?.status, 'completed');
   assert.equal(page.keyboardCoverage?.visitedStops, 2);
   assert.equal(page.scenarioRuns.length, 2);
+  assert.equal(page.environmentRuns.length, 2);
+  assert.ok(
+    page.environmentRuns.every(
+      (run) => run.status === 'completed' && run.elapsedMs > 0 && run.scenarioRuns.length === 2,
+    ),
+  );
   const completed = page.scenarioRuns.find((run) => run.name === 'Open profile');
   const failed = page.scenarioRuns.find((run) => run.name === 'Wrong return focus');
   assert.ok(completed);
@@ -174,8 +185,14 @@ test('the worker persists successful and failed scenario runs, unmatched states 
   const unnamed = findings.filter(
     (finding) => finding.ruleId === 'button-name' && finding.target.includes('#unnamed'),
   );
-  assert.equal(unnamed.length, 1, 'only the completed modal state creates this finding');
+  assert.equal(
+    unnamed.length,
+    2,
+    'only completed modal states create this finding, once in each environment',
+  );
+  assert.deepEqual(unnamed.map((finding) => finding.environment?.id).sort(), ['desktop', 'mobile']);
   assert.deepEqual(unnamed[0]?.scenario, {
+    environment: 'desktop',
     name: 'Open profile',
     path: '/',
     steps: completed.steps,

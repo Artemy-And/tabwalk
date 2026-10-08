@@ -346,6 +346,54 @@ export const de: Messages = {
     incomplete:
       'Einige Szenarien konnten nicht geprüft werden. Prüfe fehlgeschlagene Schritte und nicht gescannte Seitenpfade.',
   },
+  manualReview: {
+    heading: 'Manuelle Bewertung',
+    statuses: {
+      confirmed: 'Bestätigtes Problem',
+      acceptable: 'Akzeptables Ergebnis',
+      not_applicable: 'Nicht anwendbar',
+    },
+    pending: 'Prüfung ausstehend',
+    reviewed: 'Manuell geprüft',
+    assess: 'Fund bewerten',
+    edit: 'Bewertung bearbeiten',
+    note: 'Kommentar (optional)',
+    save: 'Bewertung speichern',
+    reset: 'Erneut prüfen',
+    savedNotice: 'Bewertung für diesen Scan gespeichert.',
+    resetNotice: 'Bewertung entfernt. Der Fund muss erneut geprüft werden.',
+    scope:
+      'Entscheidungen gelten nur für diesen Scan. Ein neuer Scan erfordert eine neue Bewertung.',
+    automatic: 'Automatisch erkannte Probleme',
+    confirmedHeading: 'Manuell bestätigte Probleme',
+  },
+  environments: {
+    incomplete: 'Einige Umgebungen konnten nicht geprüft werden:',
+    heading: 'Scan-Umgebungen',
+    labels: {
+      desktop: 'Desktop',
+      mobile: 'Schmaler Bildschirm',
+      'zoom-200': '200%-Layout-Emulation',
+      'forced-colors': 'Erzwungene Farben',
+    },
+    intro:
+      'Desktop wird immer geprüft. Zusätzliche Umgebungen prüfen den Ausgangszustand und alle passenden Szenarien und verlängern den Scan. Änderungen gelten ab dem nächsten Scan.',
+    descriptions: {
+      mobile: '390 × 844 CSS px; Desktop-Browser mit schmalem Fenster.',
+      'zoom-200': '640 × 360 CSS px bei 2× Pixeldichte; simuliert Umbruch bei 200%.',
+      'forced-colors': '1280 × 720; Browser-Emulation erzwungener Systemfarben.',
+    },
+    save: 'Umgebungen speichern',
+    saved: 'Für den nächsten Scan gespeichert.',
+    foundIn: 'Gefunden in',
+    picture: 'Bild aus',
+    results: 'Ergebnisse je Umgebung',
+    completed: 'Geprüft',
+    failed: 'Fehlgeschlagen',
+    occurrences: 'Vorkommen von Verstößen',
+    limitations:
+      'Layout und Systemfarben werden emuliert. Browser-Zoom und Kontrasteinstellungen des Betriebssystems müssen manuell geprüft werden.',
+  },
   coverage: {
     heading: 'Umfang der Tastaturprüfung',
     completed: 'Durchlauf abgeschlossen',

@@ -46,7 +46,10 @@ export function ScenarioResults({
       <div className="mt-3 flex flex-col gap-4">
         {runs.map((run) => (
           <div key={run.name} className="break-inside-avoid border-t border-line-soft pt-3">
-            <h3 className="font-semibold">{run.name}</h3>
+            <h3 className="font-semibold">
+              {run.name}
+              {run.environment && ` · ${t.environments.labels[run.environment]}`}
+            </h3>
             <p className="mt-0.5">
               <code className="break-all text-muted">{run.path}</code>
               {' · '}
@@ -83,7 +86,9 @@ export function FindingScenarios({
   return (
     <div className="mt-3 flex flex-col gap-3">
       {scenarios.map((scenario) => {
-        const heading = t.scenarios.foundDuring(scenario.name);
+        const heading =
+          t.scenarios.foundDuring(scenario.name) +
+          (scenario.environment ? ` · ${t.environments.labels[scenario.environment]}` : '');
         const evidence = (
           <>
             <a href={scenario.url} className="mt-1 block font-mono text-xs break-all">
@@ -93,12 +98,12 @@ export function FindingScenarios({
           </>
         );
         return expanded ? (
-          <div key={`${scenario.name}:${scenario.url}`}>
+          <div key={`${scenario.name}:${scenario.url}:${scenario.environment ?? ''}`}>
             <p className="text-sm font-semibold">{heading}</p>
             {evidence}
           </div>
         ) : (
-          <details key={`${scenario.name}:${scenario.url}`}>
+          <details key={`${scenario.name}:${scenario.url}:${scenario.environment ?? ''}`}>
             <summary className="cursor-pointer text-sm text-muted">{heading}</summary>
             {evidence}
           </details>

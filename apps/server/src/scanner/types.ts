@@ -1,4 +1,5 @@
 import type { Page } from 'playwright';
+import type { EnvironmentId } from './environments.js';
 import type { ScenarioRun, ScenarioStepEvidence } from './scenarios.js';
 
 export interface CheckFinding {
@@ -73,12 +74,14 @@ export interface CheckOptions {
 }
 
 export interface ScenarioEvidence {
+  environment?: EnvironmentId;
   name: string;
   path: string;
   steps: ScenarioStepEvidence[];
 }
 
 export interface StoredScenarioRun extends ScenarioRun {
+  environment?: EnvironmentId;
   keyboardCoverage: KeyboardCoverage | null;
   findings: number;
 }

@@ -244,6 +244,7 @@ test('scenarios check independently opened modal states and retain only redacted
   ]);
   for (const finding of modalFindings) {
     assert.deepEqual(finding.scenario, {
+      environment: 'desktop',
       name: finding.scenario?.name,
       path: '/scenario',
       steps: result.scenarioRuns.find((run) => run.name === finding.scenario?.name)?.steps,

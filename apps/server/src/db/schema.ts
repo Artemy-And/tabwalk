@@ -11,6 +11,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
+import type { EnvironmentRun, ExtraEnvironment, ScanEnvironment } from '../scanner/environments.js';
 import type { SiteScenario } from '../scanner/scenarios.js';
 import type {
   KeyboardCoverage,
@@ -91,6 +92,7 @@ export const sites = pgTable(
     // kept as entered, like notification webhooks, and never sent back to the dashboard
     login: jsonb('login').$type<SiteLogin>(),
     scenarios: jsonb('scenarios').$type<SiteScenario[]>().notNull().default([]),
+    environments: jsonb('environments').$type<ExtraEnvironment[]>().notNull().default([]),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('sites_org_idx').on(t.orgId)],
@@ -111,6 +113,7 @@ export const scans = pgTable(
     pagesScanned: integer('pages_scanned').notNull().default(0),
     pagesFailed: integer('pages_failed').notNull().default(0),
     scenarioSummary: jsonb('scenario_summary').$type<ScenarioSummary>(),
+    environments: jsonb('environments').$type<ScanEnvironment[]>(),
     error: text('error'),
     // what the site told this scan to leave out, so the report can say so
     ignored: jsonb('ignored').$type<{ rules: string[]; selectors: string[] }>(),
@@ -131,6 +134,7 @@ export const pages = pgTable(
     error: text('error'),
     keyboardCoverage: jsonb('keyboard_coverage').$type<KeyboardCoverage>(),
     scenarioRuns: jsonb('scenario_runs').$type<StoredScenarioRun[]>().notNull().default([]),
+    environmentRuns: jsonb('environment_runs').$type<EnvironmentRun[]>().notNull().default([]),
     scannedAt: timestamp('scanned_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex('pages_scan_url_idx').on(t.scanId, t.url)],
@@ -179,6 +183,7 @@ export const issues = pgTable(
     html: text('html').notNull(),
     failureSummary: text('failure_summary'),
     scenario: jsonb('scenario').$type<ScenarioEvidence>(),
+    environment: jsonb('environment').$type<ScanEnvironment>(),
   },
   (t) => [
     index('issues_scan_idx').on(t.scanId),
@@ -195,6 +200,11 @@ export const issueShots = pgTable(
       .notNull()
       .references(() => scans.id, { onDelete: 'cascade' }),
     fingerprint: text('fingerprint').notNull(),
+    context: jsonb('context').$type<{
+      url: string;
+      environment: ScanEnvironment;
+      scenario: string | null;
+    }>(),
     html: text('html').notNull(),
     target: jsonb('target').$type<string[]>().notNull(),
     image: bytea('image').notNull(),
@@ -205,6 +215,25 @@ export const issueShots = pgTable(
 );
 
 export const dismissalReason = pgEnum('dismissal_reason', ['false_positive', 'wont_fix']);
+
+export const reviewStatus = pgEnum('review_status', ['confirmed', 'acceptable', 'not_applicable']);
+
+// Decisions belong to one completed scan. A new scan needs a fresh assessment.
+export const findingReviews = pgTable(
+  'finding_reviews',
+  {
+    scanId: uuid('scan_id')
+      .notNull()
+      .references(() => scans.id, { onDelete: 'cascade' }),
+    fingerprint: text('fingerprint').notNull(),
+    status: reviewStatus('status').notNull(),
+    note: text('note'),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+    reviewer: text('reviewer').notNull(),
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.scanId, t.fingerprint] })],
+);
 
 // a finding someone decided against, for every scan of the site: its rows stay in the
 // scans, but it counts nowhere

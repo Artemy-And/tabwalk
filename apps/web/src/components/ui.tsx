@@ -174,8 +174,20 @@ const IMPACT_COLOR: Record<NonNullable<Impact>, string> = {
   minor: 'text-minor border-minor',
 };
 
-export function Badge({ tone, children }: { tone: NonNullable<Impact>; children: ReactNode }) {
-  return <span className={`${BADGE} ${IMPACT_COLOR[tone]}`}>{children}</span>;
+export function Badge({
+  tone,
+  children,
+}: {
+  tone: NonNullable<Impact> | 'review';
+  children: ReactNode;
+}) {
+  return (
+    <span
+      className={`${BADGE} ${tone === 'review' ? 'border-review text-review' : IMPACT_COLOR[tone]}`}
+    >
+      {children}
+    </span>
+  );
 }
 
 function ReviewIcon() {

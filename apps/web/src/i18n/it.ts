@@ -346,6 +346,54 @@ export const it: Messages = {
     incomplete:
       'Non è stato possibile controllare alcuni scenari. Verifica i passaggi falliti e i percorsi delle pagine non analizzate.',
   },
+  manualReview: {
+    heading: 'Valutazione umana',
+    statuses: {
+      confirmed: 'Problema confermato',
+      acceptable: 'Risultato accettabile',
+      not_applicable: 'Non applicabile',
+    },
+    pending: 'Da verificare',
+    reviewed: 'Verificato da una persona',
+    assess: 'Valuta il risultato',
+    edit: 'Modifica valutazione',
+    note: 'Commento (facoltativo)',
+    save: 'Salva valutazione',
+    reset: 'Da verificare di nuovo',
+    savedNotice: 'Valutazione salvata per questa scansione.',
+    resetNotice: 'Valutazione rimossa. Il risultato richiede una verifica.',
+    scope:
+      'Le decisioni valgono solo per questa scansione. Una nuova scansione richiede una nuova valutazione.',
+    automatic: 'Problemi rilevati automaticamente',
+    confirmedHeading: 'Problemi confermati da una persona',
+  },
+  environments: {
+    incomplete: 'Non è stato possibile verificare alcuni ambienti:',
+    heading: 'Ambienti di scansione',
+    labels: {
+      desktop: 'Desktop',
+      mobile: 'Schermo stretto',
+      'zoom-200': 'Layout al 200% emulato',
+      'forced-colors': 'Colori forzati',
+    },
+    intro:
+      'Il desktop viene sempre controllato. Gli ambienti aggiuntivi verificano lo stato iniziale e gli scenari corrispondenti, aumentando la durata. Le modifiche valgono dalla prossima scansione.',
+    descriptions: {
+      mobile: '390 × 844 CSS px; browser desktop con finestra stretta.',
+      'zoom-200': '640 × 360 CSS px con densità 2×; emula il ridisposizionamento al 200%.',
+      'forced-colors': '1280 × 720; emulazione dei colori di sistema forzati.',
+    },
+    save: 'Salva ambienti',
+    saved: 'Salvato per la prossima scansione.',
+    foundIn: 'Rilevato in',
+    picture: 'Immagine da',
+    results: 'Risultati per ambiente',
+    completed: 'Verificato',
+    failed: 'Non riuscito',
+    occurrences: 'Occorrenze di violazioni',
+    limitations:
+      'Layout e colori sono emulati. Zoom del browser e contrasto del sistema operativo richiedono una verifica manuale.',
+  },
   coverage: {
     heading: 'Copertura della tastiera',
     completed: 'Percorso completato',

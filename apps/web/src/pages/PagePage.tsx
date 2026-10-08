@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
+import { EnvironmentResults } from '../components/Environments';
 import { KeyboardCoverageDetails } from '../components/KeyboardCoverage';
 import { ScenarioResults } from '../components/ScenarioResults';
 import { Breadcrumbs, Card, LiveStatus, PageHeader } from '../components/ui';
@@ -89,6 +90,7 @@ export function PagePage() {
       )}
 
       <ScenarioResults runs={p.scenarioRuns} />
+      <EnvironmentResults runs={p.environmentRuns} />
     </div>
   );
 }

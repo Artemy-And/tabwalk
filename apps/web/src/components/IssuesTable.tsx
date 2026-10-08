@@ -4,8 +4,10 @@ import { useI18n } from '../i18n/context';
 import { useRuleHelp } from '../i18n/ruleHelp';
 import { api, DISMISSAL_REASONS, type DismissalReason, type IssueGroup } from '../lib/api';
 import { formatDay, standardLabel } from '../lib/format';
+import { FindingEnvironments } from './Environments';
+import { ManualReviewForm, ReviewDetails } from './ManualReview';
 import { FindingScenarios } from './ScenarioResults';
-import { Button, Card, Field, ImpactBadge } from './ui';
+import { Badge, Button, Card, Field, ImpactBadge } from './ui';
 
 type SortKey = 'pagesAffected' | 'impact' | 'ruleId';
 type SortDir = 'asc' | 'desc';
@@ -305,7 +307,11 @@ export function IssuesTable({
                 }`}
               >
                 <td className={TD}>
-                  <ImpactBadge impact={issue.impact} kind={issue.kind} />
+                  {issue.review ? (
+                    <Badge tone="review">{t.manualReview.statuses[issue.review.status]}</Badge>
+                  ) : (
+                    <ImpactBadge impact={issue.impact} kind={issue.kind} />
+                  )}
                 </td>
                 <td className={TD}>
                   <p className="font-semibold">
@@ -352,6 +358,18 @@ export function IssuesTable({
                     )}
                   </details>
                   <FindingScenarios scenarios={issue.scenarios} />
+                  <FindingEnvironments
+                    environments={issue.environments}
+                    shotContext={issue.shotContext}
+                  />
+                  <ReviewDetails review={issue.review} />
+                  {actions && variant === 'current' && issue.kind === 'incomplete' && (
+                    <ManualReviewForm
+                      key={issue.review?.reviewedAt ?? 'pending'}
+                      issue={issue}
+                      actions={actions}
+                    />
+                  )}
                   {actions && variant === 'dismissed' && (
                     <Dismissed
                       issue={issue}
@@ -359,13 +377,15 @@ export function IssuesTable({
                       actions={actions}
                     />
                   )}
-                  {actions && (variant === 'current' || variant === 'recommendations') && (
-                    <DismissForm
-                      issue={issue}
-                      title={ruleHelp(issue.ruleId, issue.help)}
-                      actions={actions}
-                    />
-                  )}
+                  {actions &&
+                    issue.kind !== 'incomplete' &&
+                    (variant === 'current' || variant === 'recommendations') && (
+                      <DismissForm
+                        issue={issue}
+                        title={ruleHelp(issue.ruleId, issue.help)}
+                        actions={actions}
+                      />
+                    )}
                 </td>
                 <td className={`${TD} font-mono text-[13px] text-muted`}>
                   {issue.helpUrl ? (

@@ -114,6 +114,187 @@ interface IssueRow {
   firstSeenAt: string;
 }
 
+test('site environments validate and scan/page evidence retains exact profile parameters', {
+  skip,
+}, async () => {
+  const site = await seedSite();
+  const profileIds = ['mobile', 'zoom-200', 'forced-colors'];
+  assert.equal(
+    (await send('PATCH', `/api/sites/${site.id}`, { environments: profileIds })).status,
+    200,
+  );
+  const settings = (await (await get(`/api/sites/${site.id}`)).json()) as {
+    environments: string[];
+  };
+  assert.deepEqual(settings.environments, profileIds);
+  for (const environments of [['mobile', 'mobile'], ['desktop'], ['unknown']]) {
+    assert.equal((await send('PATCH', `/api/sites/${site.id}`, { environments })).status, 400);
+  }
+  const { eq } = await import('drizzle-orm');
+  const { scanEnvironments } = await import('../scanner/environments.js');
+  const profiles = scanEnvironments(['mobile']);
+  const scan = await seedScan(site.id, '2026-10-08T10:00:00Z', [
+    { fingerprint: 'profile-finding' },
+  ]);
+  await db.update(schema.scans).set({ environments: profiles }).where(eq(schema.scans.id, scan.id));
+  const runs = profiles.map((environment) => ({
+    environment,
+    status: 'completed' as const,
+    error: null,
+    elapsedMs: 100,
+    findings: 1,
+    keyboardCoverage: null,
+    scenarioRuns: [],
+  }));
+  await db
+    .update(schema.pages)
+    .set({ environmentRuns: runs })
+    .where(eq(schema.pages.scanId, scan.id));
+  await db
+    .update(schema.issues)
+    .set({ environment: profiles[1] })
+    .where(eq(schema.issues.scanId, scan.id));
+  const rows = (await (await get(`/api/scans/${scan.id}/pages`)).json()) as {
+    id: string;
+    environmentRuns: unknown;
+  }[];
+  assert.deepEqual(rows[0]?.environmentRuns, runs);
+  const page = (await (await get(`/api/pages/${rows[0]?.id}`)).json()) as {
+    environmentRuns: unknown;
+  };
+  assert.deepEqual(page.environmentRuns, runs);
+  const detail = (await (await get(`/api/scans/${scan.id}`)).json()) as { environments: unknown };
+  assert.deepEqual(detail.environments, profiles);
+  const issues = (await (await get(`/api/scans/${scan.id}/issues`)).json()) as {
+    environments: unknown;
+  }[];
+  assert.deepEqual(issues[0]?.environments, [profiles[1]]);
+  assert.equal((await send('PATCH', `/api/sites/${site.id}`, { environments: [] })).status, 200);
+});
+
+test('manual decisions are scan scoped, preserve automatic results and export reviewer evidence', {
+  skip,
+}, async () => {
+  const site = await seedSite();
+  const findings: Finding[] = [
+    { fingerprint: 'manual-shared', kind: 'incomplete' },
+    { fingerprint: 'manual-shared', kind: 'violation' },
+    { fingerprint: 'manual-ok', kind: 'incomplete' },
+    { fingerprint: 'manual-na', kind: 'incomplete' },
+  ];
+  const first = await seedScan(site.id, '2026-10-01T10:00:00Z', findings);
+  const second = await seedScan(site.id, '2026-10-08T10:00:00Z', findings);
+  const path = `/api/scans/${first.id}/reviews`;
+  assert.equal((await app.request(path, { method: 'PUT' })).status, 401);
+  assert.equal(
+    (await send('PUT', path, { fingerprint: 'absent', status: 'confirmed' })).status,
+    404,
+  );
+  assert.equal(
+    (await send('PUT', path, { fingerprint: 'manual-ok', status: 'wrong' })).status,
+    400,
+  );
+  assert.equal(
+    (
+      await send('PUT', path, {
+        fingerprint: 'manual-ok',
+        status: 'confirmed',
+        by: 'forged@example.com',
+      })
+    ).status,
+    400,
+  );
+  assert.equal(
+    (
+      await send('PUT', path, {
+        fingerprint: 'manual-ok',
+        status: 'confirmed',
+        note: 'x'.repeat(2001),
+      })
+    ).status,
+    400,
+  );
+  const note = '  Verified with keyboard, "dialog"\n=SUM(1,2)  ';
+  for (const [fingerprint, status] of [
+    ['manual-shared', 'confirmed'],
+    ['manual-ok', 'acceptable'],
+    ['manual-na', 'not_applicable'],
+  ]) {
+    const response = await send('PUT', path, { fingerprint, status, note });
+    assert.equal(response.status, 200);
+    const decision = (await response.json()) as {
+      status: string;
+      note: string;
+      by: string;
+      reviewedAt: string;
+    };
+    assert.equal(decision.status, status);
+    assert.equal(decision.note, note.trim());
+    assert.equal(decision.by, 'noise@example.com');
+    assert.ok(Date.parse(decision.reviewedAt));
+  }
+  const detail = (await (await get(`/api/scans/${first.id}`)).json()) as {
+    summary: { uniqueProblems: number; incomplete: number };
+    manualSummary: unknown;
+  };
+  assert.equal(detail.summary.uniqueProblems, 1);
+  assert.equal(detail.summary.incomplete, 0);
+  assert.deepEqual(detail.manualSummary, {
+    total: 3,
+    pending: 0,
+    confirmed: 1,
+    acceptable: 1,
+    notApplicable: 1,
+  });
+  const rows = (await (await get(`/api/scans/${first.id}/issues`)).json()) as {
+    kind: string;
+    review: unknown;
+  }[];
+  assert.equal(rows.find((row) => row.kind === 'violation')?.review, null);
+  const later = (await (await get(`/api/scans/${second.id}`)).json()) as {
+    summary: { incomplete: number };
+    manualSummary: { pending: number };
+  };
+  assert.equal(later.summary.incomplete, 3);
+  assert.equal(later.manualSummary.pending, 3);
+  const csv = await (await get(`/api/scans/${first.id}/issues.csv`)).text();
+  assert.match(csv, /Human assessment,Review note,Reviewed by,Reviewed at/);
+  assert.match(csv, /confirmed/);
+  assert.match(csv, /noise@example.com/);
+  assert.match(csv, /""dialog""/);
+  assert.equal(
+    (await send('PUT', path, { fingerprint: 'manual-ok', status: 'confirmed', note: '' })).status,
+    200,
+  );
+  assert.equal((await send('DELETE', `${path}/manual-shared`)).status, 204);
+  const reset = (await (await get(`/api/scans/${first.id}`)).json()) as {
+    manualSummary: { pending: number; confirmed: number };
+  };
+  assert.equal(reset.manualSummary.pending, 1);
+  assert.equal(reset.manualSummary.confirmed, 1);
+  const { eq } = await import('drizzle-orm');
+  await db.update(schema.scans).set({ status: 'running' }).where(eq(schema.scans.id, first.id));
+  assert.equal(
+    (await send('PUT', path, { fingerprint: 'manual-ok', status: 'confirmed' })).status,
+    409,
+  );
+  assert.equal((await send('DELETE', `${path}/manual-ok`)).status, 409);
+});
+
+test('automatic findings cannot receive a manual assessment', { skip }, async () => {
+  const site = await seedSite();
+  const scan = await seedScan(site.id, '2026-10-08T10:00:00Z', [{ fingerprint: 'automatic-only' }]);
+  assert.equal(
+    (
+      await send('PUT', `/api/scans/${scan.id}/reviews`, {
+        fingerprint: 'automatic-only',
+        status: 'confirmed',
+      })
+    ).status,
+    404,
+  );
+});
+
 test('each finding says when it first turned up on the site', { skip }, async () => {
   const site = await seedSite();
   const first = await seedScan(site.id, '2026-09-01T10:00:00Z', [

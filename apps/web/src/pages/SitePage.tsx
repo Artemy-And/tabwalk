@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
 import { type SubmitEvent, useEffect, useRef, useState } from 'react';
+import { EnvironmentEditor } from '../components/Environments';
 import { ScenarioEditor } from '../components/ScenarioEditor';
 import {
   Badge,
@@ -495,6 +496,7 @@ export function SitePage() {
       <IgnoreCard site={site.data} />
       <LoginCard site={site.data} />
       <ScenarioEditor key={site.data.id} site={site.data} />
+      <EnvironmentEditor key={`environment-${site.data.id}`} site={site.data} />
 
       {start.isSuccess && <LiveStatus>{t.site.queued}</LiveStatus>}
       {start.isError && (

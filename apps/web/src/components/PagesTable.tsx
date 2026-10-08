@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { useI18n } from '../i18n/context';
 import { api } from '../lib/api';
 import { pathOf } from '../lib/format';
+import { EnvironmentFailures, EnvironmentResults } from './Environments';
 import { KeyboardCoverageLabel } from './KeyboardCoverage';
 import { PageScenarioLabel } from './ScenarioResults';
 import { Card, LiveStatus } from './ui';
@@ -21,6 +22,9 @@ export function PagesTable({ scanId }: { scanId: string }) {
       </h2>
 
       {pages.isLoading && <LiveStatus>{t.pages.loading}</LiveStatus>}
+      {pages.data && (
+        <EnvironmentFailures runs={pages.data.flatMap((page) => page.environmentRuns)} />
+      )}
 
       {pages.data && (
         <Card className="overflow-x-auto">
@@ -54,6 +58,7 @@ export function PagesTable({ scanId }: { scanId: string }) {
                     </Link>
                     {page.title && <p className="mt-0.5 text-sm text-muted">{page.title}</p>}
                     <PageScenarioLabel runs={page.scenarioRuns} />
+                    <EnvironmentResults runs={page.environmentRuns} />
                     {page.error && (
                       <p className="mt-0.5 text-sm text-critical">{t.pages.failed(page.error)}</p>
                     )}

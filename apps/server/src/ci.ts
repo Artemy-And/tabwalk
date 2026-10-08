@@ -20,8 +20,13 @@ import {
   summarize,
   type Threshold,
 } from './ci/report.js';
-import { checkPageWithScenarios, launchBrowser, NotAPageError } from './scanner/check.js';
+import { checkPageInEnvironments, launchBrowser, NotAPageError } from './scanner/check.js';
 import { crawl } from './scanner/crawl.js';
+import {
+  type EnvironmentRun,
+  environmentsSchema,
+  scanEnvironments,
+} from './scanner/environments.js';
 import { scenariosSchema } from './scanner/scenario-schema.js';
 import type { SiteScenario } from './scanner/scenarios.js';
 import {
@@ -48,6 +53,7 @@ Options:
   --cookie name=value       set before the first page opens; repeat for more
   --fail-on <level>         critical | serious | moderate | minor | none, default critical
   --scenarios <path>        JSON array of named browser scenarios, with exact page paths
+  --environments <ids>      extra runs: mobile,zoom-200,forced-colors (desktop always runs)
   --baseline <path>         a report from an earlier run: only problems it lacks fail
   --comment                 comment on the pull request the run is for (GitHub Actions)
   --report <path>           JSON report file, default tabwalk-report.json
@@ -81,6 +87,7 @@ const { values, positionals } = parseArgs({
     'fail-on': { type: 'string', default: 'critical' },
     baseline: { type: 'string' },
     scenarios: { type: 'string' },
+    environments: { type: 'string', multiple: true },
     comment: { type: 'boolean', default: false },
     report: { type: 'string', default: 'tabwalk-report.json' },
     concurrency: { type: 'string', default: '3' },
@@ -120,6 +127,15 @@ const concurrency = positiveInt('concurrency', values.concurrency);
 const timeoutMs = positiveInt('timeout', values.timeout);
 const include = patterns(values.include, process.env.INPUT_INCLUDE);
 const exclude = patterns(values.exclude, process.env.INPUT_EXCLUDE);
+const environmentInput = environmentsSchema.safeParse(
+  patterns(
+    values.environments,
+    values.environments?.length ? undefined : process.env.INPUT_ENVIRONMENTS,
+  ),
+);
+if (!environmentInput.success)
+  fail('--environments must list each of mobile, zoom-200, forced-colors at most once.');
+const environments = environmentInput.data;
 
 // one selector per flag or per line, since a comma belongs to the selector
 function lines(flags: string[] | undefined, input: string | undefined): string[] {
@@ -216,6 +232,7 @@ const failedPages: { url: string; error: string }[] = [];
 let checked = 0;
 const keyboardCoverage: { url: string; coverage: KeyboardCoverage | null }[] = [];
 const scenarioRuns: { url: string; runs: StoredScenarioRun[] }[] = [];
+const environmentRuns: { url: string; runs: EnvironmentRun[] }[] = [];
 const executedScenarios = new Set<string>();
 
 await crawl(siteUrl, {
@@ -229,12 +246,19 @@ await crawl(siteUrl, {
         findings,
         links,
         keyboardCoverage: coverage,
-        scenarioRuns: runs,
-      } = await checkPageWithScenarios(browser, url, timeoutMs, { ignore, login, scenarios });
+        environmentRuns: profileRuns,
+      } = await checkPageInEnvironments(browser, url, timeoutMs, {
+        ignore,
+        login,
+        scenarios,
+        environments,
+      });
       checked += 1;
       keyboardCoverage.push({ url, coverage });
-      if (runs.length > 0) scenarioRuns.push({ url, runs });
-      for (const run of runs) executedScenarios.add(run.name);
+      environmentRuns.push({ url, runs: profileRuns });
+      const allRuns = profileRuns.flatMap((profile) => profile.scenarioRuns);
+      if (allRuns.length > 0) scenarioRuns.push({ url, runs: allRuns });
+      for (const run of allRuns) executedScenarios.add(run.name);
       for (const f of findings) {
         const key = `${f.kind}:${f.fingerprint}`;
         const group: Group = groups.get(key) ?? {
@@ -253,11 +277,21 @@ await crawl(siteUrl, {
         };
         if (!group.pages.includes(url)) group.pages.push(url);
         group.elements += 1;
+        if (f.environment) {
+          group.environments ??= [];
+          if (!group.environments.some((environment) => environment.id === f.environment?.id))
+            group.environments.push(f.environment);
+        }
         if (f.scenario) {
           group.scenarios ??= [];
           const contexts = group.scenarios;
           if (
-            !contexts.some((context) => context.url === url && context.name === f.scenario?.name)
+            !contexts.some(
+              (context) =>
+                context.url === url &&
+                context.name === f.scenario?.name &&
+                context.environment === f.scenario?.environment,
+            )
           ) {
             contexts.push({ url, ...f.scenario });
           }
@@ -292,6 +326,7 @@ const outcome: Outcome = {
   checked,
   keyboardCoverage,
   scenarioRuns,
+  environmentRuns,
   unmatchedScenarios,
   failedPages,
   failOn,
@@ -313,6 +348,8 @@ await writeFile(
       pagesChecked: checked,
       keyboardCoverage,
       scenarioRuns,
+      environments: scanEnvironments(environments),
+      environmentRuns,
       unmatchedScenarios,
       failedPages,
       failOn,
@@ -334,6 +371,19 @@ await writeFile(
 );
 
 console.log(headline(outcome));
+for (const page of environmentRuns) {
+  for (const run of page.runs) {
+    console.log(
+      `Environment ${run.environment.id} on ${page.url}: ${run.status}, ${run.elapsedMs} ms; keyboard ${run.keyboardCoverage?.status ?? 'not checked'}${run.error ? `; ${run.error}` : ''}`,
+    );
+    if (run.status === 'completed' && run.keyboardCoverage?.status !== 'completed') {
+      const message = `Partial keyboard coverage: ${page.url} (${run.environment.id}: ${run.keyboardCoverage?.reasons.join(', ') || 'not recorded'})`;
+      console.log(
+        process.env.GITHUB_ACTIONS === 'true' ? `::warning title=Tabwalk::${message}` : message,
+      );
+    }
+  }
+}
 for (const page of keyboardCoverage) {
   if (page.coverage?.status === 'completed') continue;
   const message = `Partial keyboard coverage: ${page.url} (${page.coverage?.reasons.join(', ') || 'not recorded'})`;
@@ -423,7 +473,8 @@ if (comment) {
 }
 
 if (hasScenarioFailures(outcome)) {
-  const message = 'Browser scenarios failed or did not run; the scan is incomplete.';
+  const message =
+    'Browser scenarios or environments failed or did not run; the scan is incomplete.';
   console.error(
     process.env.GITHUB_ACTIONS === 'true' ? `::error title=Tabwalk::${message}` : message,
   );

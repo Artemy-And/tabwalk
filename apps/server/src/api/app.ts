@@ -11,9 +11,11 @@ import { defaultOrgId } from '../db/org.js';
 import {
   dismissalReason,
   dismissals,
+  findingReviews,
   issueShots,
   issues,
   pages,
+  reviewStatus,
   type Scan,
   scanSchedule,
   scans,
@@ -24,6 +26,7 @@ import {
 import { env } from '../env.js';
 import { notificationRoutes } from '../notify/routes.js';
 import { enqueueScan, nextScanAt } from '../queue/schedule.js';
+import { environmentsSchema, type ScanEnvironment } from '../scanner/environments.js';
 import { scenariosSchema } from '../scanner/scenario-schema.js';
 import type { ScenarioEvidence, SiteLogin } from '../scanner/types.js';
 import { toCsv } from './csv.js';
@@ -130,7 +133,10 @@ const summaryColumns = {
   serious: sql<number>`count(distinct ${issues.fingerprint})
     filter (where ${issues.kind} = 'violation' and ${issues.impact} = 'serious')::int`,
   incomplete: sql<number>`count(distinct ${issues.fingerprint})
-    filter (where ${issues.kind} = 'incomplete')::int`,
+    filter (where ${issues.kind} = 'incomplete' and not exists (
+      select 1 from ${findingReviews} r where r.scan_id = "issues"."scan_id"
+      and r.fingerprint = "issues"."fingerprint"
+    ))::int`,
   recommendations: sql<number>`count(distinct ${issues.fingerprint})
     filter (where ${issues.kind} = 'recommendation')::int`,
   elements: sql<number>`count(*) filter (where ${issues.kind} = 'violation')::int`,
@@ -164,6 +170,9 @@ function groupedIssues(scanId: string) {
       sampleHtml: sql<string>`min(${issues.html})`,
       sampleTarget: sql<string>`min(${issues.target}::text)`,
       sampleSummary: sql<string | null>`min(${issues.failureSummary})`,
+      environments: sql<
+        ScanEnvironment[]
+      >`coalesce(jsonb_agg(distinct ${issues.environment}) filter (where ${issues.environment} is not null), '[]'::jsonb)`,
       scenarios: sql<(ScenarioEvidence & { url: string })[]>`coalesce(
         jsonb_agg(distinct (${issues.scenario} || jsonb_build_object('url',
           (select p.url from pages p where p.id = ${issues.pageId})
@@ -220,6 +229,43 @@ async function dismissalsOf(siteId: string) {
   return new Map(rows.map(({ fingerprint, ...dismissal }) => [fingerprint, dismissal]));
 }
 
+async function reviewsOf(scanId: string) {
+  const rows = await db
+    .select({
+      fingerprint: findingReviews.fingerprint,
+      status: findingReviews.status,
+      note: findingReviews.note,
+      reviewedAt: findingReviews.reviewedAt,
+      by: findingReviews.reviewer,
+    })
+    .from(findingReviews)
+    .where(eq(findingReviews.scanId, scanId));
+  return new Map(rows.map(({ fingerprint, ...review }) => [fingerprint, review]));
+}
+
+async function manualSummaryOf(scan: Scan) {
+  const [summary] = await db
+    .select({
+      total: sql<number>`count(distinct ${issues.fingerprint})::int`,
+      pending: sql<number>`count(distinct ${issues.fingerprint}) filter (where ${findingReviews.status} is null)::int`,
+      confirmed: sql<number>`count(distinct ${issues.fingerprint}) filter (where ${findingReviews.status} = 'confirmed')::int`,
+      acceptable: sql<number>`count(distinct ${issues.fingerprint}) filter (where ${findingReviews.status} = 'acceptable')::int`,
+      notApplicable: sql<number>`count(distinct ${issues.fingerprint}) filter (where ${findingReviews.status} = 'not_applicable')::int`,
+    })
+    .from(issues)
+    .leftJoin(
+      findingReviews,
+      and(
+        eq(findingReviews.scanId, issues.scanId),
+        eq(findingReviews.fingerprint, issues.fingerprint),
+      ),
+    )
+    .where(
+      and(eq(issues.scanId, scan.id), eq(issues.kind, 'incomplete'), notDismissed(scan.siteId)),
+    );
+  return summary ?? { total: 0, pending: 0, confirmed: 0, acceptable: 0, notApplicable: 0 };
+}
+
 // when each finding of the scan first turned up on its site, counting this scan and older ones
 async function firstSeen(scan: Scan): Promise<Map<string, Date>> {
   const rows = await db
@@ -241,7 +287,7 @@ async function firstSeen(scan: Scan): Promise<Map<string, Date>> {
 }
 
 async function issuesWithNewFlag(scan: Scan) {
-  const [rows, previous, seen, dismissed, pictured] = await Promise.all([
+  const [rows, previous, seen, dismissed, pictured, reviewed] = await Promise.all([
     groupedIssues(scan.id),
     previousDoneScan(scan),
     firstSeen(scan),
@@ -251,9 +297,11 @@ async function issuesWithNewFlag(scan: Scan) {
         fingerprint: issueShots.fingerprint,
         html: issueShots.html,
         target: issueShots.target,
+        context: issueShots.context,
       })
       .from(issueShots)
       .where(eq(issueShots.scanId, scan.id)),
+    reviewsOf(scan.id),
   ]);
   const shots = new Map(pictured.map(({ fingerprint, ...element }) => [fingerprint, element]));
   const kindsByFingerprint = new Map<string, Set<(typeof rows)[number]['kind']>>();
@@ -281,7 +329,9 @@ async function issuesWithNewFlag(scan: Scan) {
       compared: before !== null,
       firstSeenAt: seen.get(row.fingerprint) ?? scan.createdAt,
       dismissal,
+      review: row.kind === 'incomplete' ? (reviewed.get(row.fingerprint) ?? null) : null,
       shot: shot !== undefined,
+      shotContext: shot?.context ?? null,
     };
   });
 }
@@ -502,6 +552,7 @@ app.patch(
         ignoreSelectors: selectorsField.optional(),
         login: loginField.optional(),
         scenarios: scenariosSchema.optional(),
+        environments: environmentsSchema.optional(),
       })
       .refine((body) => Object.values(body).some((v) => v !== undefined), 'Nothing to change'),
   ),
@@ -590,6 +641,81 @@ app.delete(
   },
 );
 
+app.put(
+  '/api/scans/:id/reviews',
+  zValidator('param', uuidParam),
+  json(
+    z
+      .object({
+        fingerprint: z.string().min(1).max(100),
+        status: z.enum(reviewStatus.enumValues),
+        note: z.string().trim().max(2000).optional(),
+      })
+      .strict(),
+  ),
+  async (c) => {
+    const scanId = c.req.valid('param').id;
+    const scan = await db.query.scans.findFirst({ where: eq(scans.id, scanId) });
+    if (!scan) return c.json({ error: 'Scan not found' }, 404);
+    if (scan.status !== 'done')
+      return c.json({ error: 'Finish the scan before reviewing findings' }, 409);
+    const body = c.req.valid('json');
+    const finding = await db.query.issues.findFirst({
+      where: and(
+        eq(issues.scanId, scanId),
+        eq(issues.fingerprint, body.fingerprint),
+        eq(issues.kind, 'incomplete'),
+      ),
+      columns: { id: true },
+    });
+    if (!finding) return c.json({ error: 'No finding needing human assessment in this scan' }, 404);
+    const decision = {
+      status: body.status,
+      note: body.note || null,
+      userId: c.get('user').id,
+      reviewer: c.get('user').email,
+      reviewedAt: new Date(),
+    };
+    const [row] = await db
+      .insert(findingReviews)
+      .values({ scanId, fingerprint: body.fingerprint, ...decision })
+      .onConflictDoUpdate({
+        target: [findingReviews.scanId, findingReviews.fingerprint],
+        set: decision,
+      })
+      .returning();
+    if (!row) throw new Error('Failed to store the assessment');
+    return c.json({
+      status: row.status,
+      note: row.note,
+      by: row.reviewer,
+      reviewedAt: row.reviewedAt,
+    });
+  },
+);
+
+app.delete(
+  '/api/scans/:id/reviews/:fingerprint',
+  zValidator(
+    'param',
+    z.object({
+      id: z.string().uuid(),
+      fingerprint: z.string().min(1).max(100),
+    }),
+  ),
+  async (c) => {
+    const { id, fingerprint } = c.req.valid('param');
+    const scan = await db.query.scans.findFirst({ where: eq(scans.id, id) });
+    if (!scan) return c.json({ error: 'Scan not found' }, 404);
+    if (scan.status !== 'done')
+      return c.json({ error: 'Finish the scan before reviewing findings' }, 409);
+    await db
+      .delete(findingReviews)
+      .where(and(eq(findingReviews.scanId, id), eq(findingReviews.fingerprint, fingerprint)));
+    return c.body(null, 204);
+  },
+);
+
 app.get('/api/scans/:id', zValidator('param', uuidParam), async (c) => {
   const { id } = c.req.valid('param');
 
@@ -629,6 +755,7 @@ app.get('/api/scans/:id', zValidator('param', uuidParam), async (c) => {
     ...scan,
     site: site ?? null,
     summary: summary ?? EMPTY_SUMMARY,
+    manualSummary: await manualSummaryOf(scan),
     pages: pageStats?.total ?? 0,
     comparison,
   });
@@ -684,6 +811,11 @@ app.get('/api/scans/:id/issues.csv', zValidator('param', uuidParam), async (c) =
       'HTML',
       'How to fix',
       'Page URLs',
+      'Human assessment',
+      'Review note',
+      'Reviewed by',
+      'Reviewed at',
+      'Environments',
     ],
     rows.map((row) => [
       KIND_LABEL[row.kind],
@@ -705,6 +837,11 @@ app.get('/api/scans/:id/issues.csv', zValidator('param', uuidParam), async (c) =
       row.sampleHtml,
       row.sampleSummary,
       (urls.get(`${row.kind}|${row.fingerprint}`) ?? []).join('\n'),
+      row.kind === 'incomplete' ? (row.review?.status ?? 'pending') : null,
+      row.review?.note,
+      row.review?.by,
+      row.review?.reviewedAt.toISOString(),
+      row.environments.map((environment) => environment.id).join('; '),
     ]),
   );
 
@@ -752,6 +889,7 @@ app.get('/api/scans/:id/pages', zValidator('param', uuidParam), async (c) => {
       error: pages.error,
       keyboardCoverage: pages.keyboardCoverage,
       scenarioRuns: pages.scenarioRuns,
+      environmentRuns: pages.environmentRuns,
       problems: sql<number>`(
         select count(*) from issues i
         where i.page_id = pages.id and i.kind = 'violation' and not exists (
@@ -780,6 +918,7 @@ app.get('/api/pages/:id', zValidator('param', uuidParam), async (c) => {
       error: pages.error,
       keyboardCoverage: pages.keyboardCoverage,
       scenarioRuns: pages.scenarioRuns,
+      environmentRuns: pages.environmentRuns,
       scan: { id: scans.id, createdAt: scans.createdAt },
       site: { id: sites.id, name: sites.name },
     })

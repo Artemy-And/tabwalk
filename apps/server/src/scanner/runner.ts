@@ -4,8 +4,14 @@ import { db } from '../db/index.js';
 import { issueShots, issues, pages, scans, sites, tabOrders } from '../db/schema.js';
 import { env } from '../env.js';
 import { notifyScan } from '../notify/notify.js';
-import { checkPageWithScenarios, type IgnoreRules, launchBrowser, NotAPageError } from './check.js';
+import {
+  checkPageInEnvironments,
+  type IgnoreRules,
+  launchBrowser,
+  NotAPageError,
+} from './check.js';
 import { crawl } from './crawl.js';
+import { type EnvironmentRun, type ExtraEnvironment, scanEnvironments } from './environments.js';
 import type { SiteScenario } from './scenarios.js';
 import {
   loginHeaders,
@@ -14,7 +20,12 @@ import {
   type StoredScenarioRun,
 } from './types.js';
 
-type PageOutcome = { ok: boolean; links: string[]; scenarioRuns: StoredScenarioRun[] } | null;
+type PageOutcome = {
+  ok: boolean;
+  links: string[];
+  scenarioRuns: StoredScenarioRun[];
+  environmentRuns: EnvironmentRun[];
+} | null;
 
 // null when the address turned out to be a file, which is not a page to report
 async function scanOnePage(
@@ -26,21 +37,37 @@ async function scanOnePage(
     login: SiteLogin | null;
     pictured: Set<string>;
     scenarios: SiteScenario[];
+    environments: ExtraEnvironment[];
   },
 ): Promise<PageOutcome> {
   try {
-    const { title, findings, tabOrder, keyboardCoverage, scenarioRuns, links, shots } =
-      await checkPageWithScenarios(browser, url, env.PAGE_TIMEOUT_MS, {
-        tabOrder: true,
-        ...options,
-      });
+    const {
+      title,
+      findings,
+      tabOrder,
+      keyboardCoverage,
+      scenarioRuns,
+      environmentRuns,
+      links,
+      shots,
+    } = await checkPageInEnvironments(browser, url, env.PAGE_TIMEOUT_MS, {
+      tabOrder: true,
+      ...options,
+    });
 
     const [pageRow] = await db
       .insert(pages)
-      .values({ scanId, url, title, keyboardCoverage, scenarioRuns })
+      .values({ scanId, url, title, keyboardCoverage, scenarioRuns, environmentRuns })
       .onConflictDoUpdate({
         target: [pages.scanId, pages.url],
-        set: { title, keyboardCoverage, scenarioRuns, error: null, scannedAt: new Date() },
+        set: {
+          title,
+          keyboardCoverage,
+          scenarioRuns,
+          environmentRuns,
+          error: null,
+          scannedAt: new Date(),
+        },
       })
       .returning();
 
@@ -79,11 +106,12 @@ async function scanOnePage(
           html: f.html,
           failureSummary: f.failureSummary,
           scenario: f.scenario ?? null,
+          environment: f.environment ?? null,
         })),
       );
     }
 
-    return { ok: true, links, scenarioRuns };
+    return { ok: true, links, scenarioRuns, environmentRuns };
   } catch (err) {
     if (err instanceof NotAPageError) return null;
     // Playwright appends a multi-line call log; the first line says what went wrong
@@ -93,9 +121,15 @@ async function scanOnePage(
       .values({ scanId, url, error: message })
       .onConflictDoUpdate({
         target: [pages.scanId, pages.url],
-        set: { error: message, keyboardCoverage: null, scenarioRuns: [], scannedAt: new Date() },
+        set: {
+          error: message,
+          keyboardCoverage: null,
+          scenarioRuns: [],
+          environmentRuns: [],
+          scannedAt: new Date(),
+        },
       });
-    return { ok: false, links: [], scenarioRuns: [] };
+    return { ok: false, links: [], scenarioRuns: [], environmentRuns: [] };
   }
 }
 
@@ -118,6 +152,7 @@ export async function runScan(scanId: string): Promise<void> {
       pagesFailed: 0,
       scenarioSummary: null,
       ignored: ignore,
+      environments: scanEnvironments(site.environments),
     })
     .where(eq(scans.id, scanId));
 
@@ -145,9 +180,12 @@ export async function runScan(scanId: string): Promise<void> {
           login: site.login,
           pictured,
           scenarios: site.scenarios,
+          environments: site.environments,
         });
         if (!outcome) return [];
-        for (const run of outcome.scenarioRuns) {
+        for (const run of outcome.environmentRuns.flatMap(
+          (environment) => environment.scenarioRuns,
+        )) {
           executed.add(run.name);
           scenarioSummary[run.status === 'completed' ? 'completed' : 'failed']++;
         }

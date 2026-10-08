@@ -1,12 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
+import {
+  EnvironmentFailures,
+  EnvironmentResults,
+  FindingEnvironments,
+  TestedEnvironments,
+} from '../components/Environments';
 import { KeyboardCoverageDetails } from '../components/KeyboardCoverage';
+import { ManualReviewSummary, ReviewDetails } from '../components/ManualReview';
 import {
   FindingScenarios,
   ScanScenarioSummary,
   ScenarioResults,
 } from '../components/ScenarioResults';
-import { Button, ImpactBadge, LiveStatus, StatCard } from '../components/ui';
+import { Badge, Button, ImpactBadge, LiveStatus, StatCard } from '../components/ui';
 import { useI18n } from '../i18n/context';
 import { useRuleHelp } from '../i18n/ruleHelp';
 import { api, type IssueGroup } from '../lib/api';
@@ -26,7 +33,11 @@ function Finding({ issue, scanId }: { issue: IssueGroup; scanId: string }) {
   return (
     <div className="break-inside-avoid border-t border-line py-4">
       <div className="flex flex-wrap items-center gap-3">
-        <ImpactBadge impact={issue.impact} kind={issue.kind} />
+        {issue.review ? (
+          <Badge tone="review">{t.manualReview.statuses[issue.review.status]}</Badge>
+        ) : (
+          <ImpactBadge impact={issue.impact} kind={issue.kind} />
+        )}
         <h3 className="text-[17px] font-semibold">{ruleHelp(issue.ruleId, issue.help)}</h3>
       </div>
       <p className="mt-1.5 text-sm text-muted">
@@ -42,6 +53,8 @@ function Finding({ issue, scanId }: { issue: IssueGroup; scanId: string }) {
         />
       )}
       <FindingScenarios scenarios={issue.scenarios} expanded />
+      <FindingEnvironments environments={issue.environments} shotContext={issue.shotContext} />
+      <ReviewDetails review={issue.review} />
       <p className="mt-3 text-sm font-semibold">{t.report.example}</p>
       <pre className="mt-1 rounded border border-line bg-surface-alt p-2.5 font-mono text-[12px] whitespace-pre-wrap break-all">
         {issue.sampleHtml}
@@ -79,12 +92,20 @@ export function ReportPage() {
   if (!scan.data) return <p>{t.scan.notFound}</p>;
   if (!done) return <p>{t.report.notDone}</p>;
   if (issues.isLoading || pages.isLoading) return <LiveStatus>{t.scan.loadingFindings}</LiveStatus>;
+  if (issues.isError || pages.isError)
+    return <p role="alert">{issues.error?.message ?? pages.error?.message}</p>;
 
   const s = scan.data;
   const list = issues.data ?? [];
   const open = list.filter((issue) => !issue.dismissal);
   const problems = open.filter((issue) => issue.kind === 'violation').sort(byWeight);
-  const review = open.filter((issue) => issue.kind === 'incomplete').sort(byWeight);
+  const review = open
+    .filter((issue) => issue.kind === 'incomplete' && !issue.review)
+    .sort(byWeight);
+  const confirmed = open.filter((issue) => issue.review?.status === 'confirmed').sort(byWeight);
+  const assessed = open
+    .filter((issue) => issue.review && issue.review.status !== 'confirmed')
+    .sort(byWeight);
   const recommendations = open.filter((issue) => issue.kind === 'recommendation').length;
   const dismissed = list.filter((issue) => issue.dismissal);
   const ignored = [
@@ -136,11 +157,15 @@ export function ReportPage() {
       </div>
 
       <ScanScenarioSummary summary={s.scenarioSummary} />
+      <ManualReviewSummary summary={s.manualSummary} />
+      <TestedEnvironments environments={s.environments} />
+      <EnvironmentFailures runs={(pages.data ?? []).flatMap((page) => page.environmentRuns)} />
 
       <section aria-labelledby="report-problems">
         <h2 id="report-problems" className="mb-2 text-[22px] font-bold">
           {t.report.problemsHeading}
         </h2>
+        <p className="mb-2 text-sm text-muted">{t.manualReview.automatic}</p>
         {problems.length === 0 && <p className="text-[15px]">{t.report.none}</p>}
         {problems.map((issue) => (
           <Finding key={`${issue.kind}:${issue.fingerprint}`} issue={issue} scanId={scanId} />
@@ -149,6 +174,27 @@ export function ReportPage() {
           <p className="mt-4 text-sm text-muted">{t.report.recommendations(recommendations)}</p>
         )}
       </section>
+
+      {confirmed.length > 0 && (
+        <section aria-labelledby="report-confirmed">
+          <h2 id="report-confirmed" className="text-[22px] font-bold">
+            {t.manualReview.confirmedHeading}
+          </h2>
+          {confirmed.map((issue) => (
+            <Finding key={issue.fingerprint} issue={issue} scanId={scanId} />
+          ))}
+        </section>
+      )}
+      {assessed.length > 0 && (
+        <section aria-labelledby="report-assessed">
+          <h2 id="report-assessed" className="text-[22px] font-bold">
+            {t.manualReview.reviewed}
+          </h2>
+          {assessed.map((issue) => (
+            <Finding key={issue.fingerprint} issue={issue} scanId={scanId} />
+          ))}
+        </section>
+      )}
 
       {review.length > 0 && (
         <section aria-labelledby="report-review">
@@ -202,10 +248,13 @@ export function ReportPage() {
               <tr key={page.id} className="break-inside-avoid border-b border-line-soft">
                 <td className="py-1.5 pr-3 align-top">
                   <span className="font-mono text-[12px] break-all">{pathOf(page.url)}</span>
-                  {!page.error && (
+                  {!page.error && page.environmentRuns.length === 0 && (
                     <KeyboardCoverageDetails coverage={page.keyboardCoverage} compact />
                   )}
-                  <ScenarioResults runs={page.scenarioRuns} compact />
+                  {page.environmentRuns.length === 0 && (
+                    <ScenarioResults runs={page.scenarioRuns} compact />
+                  )}
+                  <EnvironmentResults runs={page.environmentRuns} expanded />
                 </td>
                 <td className="py-1.5 align-top tabular-nums">
                   {page.error ? t.pages.failed(page.error) : page.problems}

@@ -1,7 +1,9 @@
 import type { CDPSession, Page } from 'playwright';
 import type { PageFinding } from './check.js';
+import type { ScanEnvironment } from './environments.js';
 
 export interface ElementShot {
+  context?: { url: string; environment: ScanEnvironment; scenario: string | null };
   fingerprint: string;
   // the pictured element itself, so the example a report shows is the one in the picture
   html: string;

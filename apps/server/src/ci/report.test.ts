@@ -3,6 +3,7 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { scanEnvironments } from '../scanner/environments.js';
 import type { KeyboardCoverage, StoredScenarioRun } from '../scanner/types.js';
 import {
   BaselineError,
@@ -261,4 +262,34 @@ test('completed scenarios with partial keyboard coverage keep a passing verdict 
   assert.match(text, /Keyboard coverage is partial in 1 scenario run/);
   assert.match(text, /Open settings on https:\/\/example.com\/settings: dialog-blocked/);
   assert.match(text, /checks performed/);
+});
+
+test('failed environments fail CI with disabled thresholds and retain profile evidence', () => {
+  const profile = scanEnvironments(['forced-colors'])[1]!;
+  const result = outcome([], {
+    failOn: 'none',
+    environmentRuns: [
+      {
+        url: 'https://example.com/',
+        runs: [
+          {
+            environment: profile,
+            status: 'failed',
+            error: 'Could not check',
+            elapsedMs: 250,
+            findings: 0,
+            keyboardCoverage: null,
+            scenarioRuns: [],
+          },
+        ],
+      },
+    ],
+  });
+  assert.equal(hasScenarioFailures(result), true);
+  assert.match(verdict(result), /^Fails:/);
+  const text = markdown(result);
+  assert.match(text, /forced-colors/);
+  assert.match(text, /1280×720 CSS px/);
+  assert.match(text, /failed, 250 ms/);
+  assert.match(text, /Could not check/);
 });

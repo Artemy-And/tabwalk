@@ -347,6 +347,54 @@ export const fr: Messages = {
     incomplete:
       'Certains scénarios n’ont pas pu être vérifiés. Consultez les étapes échouées et les chemins des pages non analysées.',
   },
+  manualReview: {
+    heading: 'Évaluation humaine',
+    statuses: {
+      confirmed: 'Problème confirmé',
+      acceptable: 'Résultat acceptable',
+      not_applicable: 'Sans objet',
+    },
+    pending: 'À vérifier',
+    reviewed: 'Vérifié par une personne',
+    assess: 'Évaluer ce résultat',
+    edit: 'Modifier l’évaluation',
+    note: 'Commentaire (facultatif)',
+    save: 'Enregistrer l’évaluation',
+    reset: 'Remettre à vérifier',
+    savedNotice: 'Évaluation enregistrée pour cette analyse.',
+    resetNotice: 'Évaluation supprimée. Ce résultat doit être vérifié.',
+    scope:
+      'Les décisions concernent uniquement cette analyse. Une nouvelle analyse nécessite une nouvelle évaluation.',
+    automatic: 'Problèmes détectés automatiquement',
+    confirmedHeading: 'Problèmes confirmés par une personne',
+  },
+  environments: {
+    incomplete: 'Certains environnements n’ont pas pu être vérifiés :',
+    heading: 'Environnements d’analyse',
+    labels: {
+      desktop: 'Bureau',
+      mobile: 'Écran étroit',
+      'zoom-200': 'Mise en page à 200% émulée',
+      'forced-colors': 'Couleurs forcées',
+    },
+    intro:
+      'Le bureau est toujours analysé. Les environnements supplémentaires vérifient l’état initial et les scénarios correspondants, ce qui prolonge l’analyse. Les changements s’appliquent à la prochaine analyse.',
+    descriptions: {
+      mobile: '390 × 844 CSS px ; navigateur de bureau avec fenêtre étroite.',
+      'zoom-200': '640 × 360 CSS px à une densité 2× ; simule la redistribution à 200%.',
+      'forced-colors': '1280 × 720 ; émulation des couleurs système forcées.',
+    },
+    save: 'Enregistrer les environnements',
+    saved: 'Enregistré pour la prochaine analyse.',
+    foundIn: 'Détecté dans',
+    picture: 'Image prise dans',
+    results: 'Résultats par environnement',
+    completed: 'Vérifié',
+    failed: 'Échec',
+    occurrences: 'Occurrences de violations',
+    limitations:
+      'La mise en page et les couleurs sont émulées. Le zoom du navigateur et le contraste du système doivent être vérifiés manuellement.',
+  },
   coverage: {
     heading: 'Couverture clavier',
     completed: 'Parcours terminé',

@@ -7,4 +7,8 @@ if [ -n "${INPUT_SCENARIOS:-}" ]; then
   set -- "$@" --scenarios "$INPUT_SCENARIOS"
 fi
 
+if [ -n "${INPUT_ENVIRONMENTS:-}" ]; then
+  set -- "$@" --environments "$INPUT_ENVIRONMENTS"
+fi
+
 exec node /app/apps/server/dist/ci.js "$@"

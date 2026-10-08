@@ -50,7 +50,12 @@ interface CliResult {
   summaryPath: string;
 }
 
-async function cli(configuration: string, viaInput = false): Promise<CliResult> {
+async function cli(
+  configuration: string,
+  viaInput = false,
+  environments: string[] = [],
+  forwardEnvironments = false,
+): Promise<CliResult> {
   const runDirectory = await mkdtemp(join(directory, 'run-'));
   const scenariosPath = join(runDirectory, 'scenarios.json');
   const reportPath = join(runDirectory, 'report.json');
@@ -62,6 +67,7 @@ async function cli(configuration: string, viaInput = false): Promise<CliResult> 
   }
   environment.GITHUB_STEP_SUMMARY = summaryPath;
   if (viaInput) environment.INPUT_SCENARIOS = scenariosPath;
+  if (viaInput && environments.length) environment.INPUT_ENVIRONMENTS = environments.join(',');
 
   const args = [
     '--import',
@@ -77,6 +83,9 @@ async function cli(configuration: string, viaInput = false): Promise<CliResult> 
     '--report',
     reportPath,
     ...(viaInput ? [] : ['--scenarios', scenariosPath]),
+    ...((!viaInput || forwardEnvironments) && environments.length
+      ? ['--environments', environments.join(',')]
+      : []),
   ];
   const child = spawn(process.execPath, args, {
     cwd: fileURLToPath(new URL('../..', import.meta.url)),
@@ -98,11 +107,42 @@ async function cli(configuration: string, viaInput = false): Promise<CliResult> 
 }
 
 interface CliReport {
+  environments: { id: string }[];
+  environmentRuns: {
+    url: string;
+    runs: { environment: { id: string }; status: string; elapsedMs: number }[];
+  }[];
   failed: boolean;
   violations: Group[];
   scenarioRuns: NonNullable<Outcome['scenarioRuns']>;
   unmatchedScenarios: NonNullable<Outcome['unmatchedScenarios']>;
 }
+
+test('CLI checks every selected environment and reports the actual scope via INPUT_ENVIRONMENTS', async () => {
+  const result = await cli('[]', true, ['mobile', 'zoom-200', 'forced-colors'], true);
+  assert.equal(result.code, 0, result.output);
+  const report = JSON.parse(await readFile(result.reportPath, 'utf8')) as CliReport;
+  assert.deepEqual(
+    report.environments.map((profile) => profile.id),
+    ['desktop', 'mobile', 'zoom-200', 'forced-colors'],
+  );
+  assert.equal(report.environmentRuns[0]?.runs.length, 4);
+  assert.ok(
+    report.environmentRuns[0]?.runs.every((run) => run.status === 'completed' && run.elapsedMs > 0),
+  );
+  const summary = await readFile(result.summaryPath, 'utf8');
+  assert.match(summary, /Tested environments/);
+  assert.match(summary, /zoom-200 \(640×360 CSS px, scale 2/);
+  assert.match(summary, /forced-colors/);
+});
+
+test('invalid environment flags fail explicitly before scanning', async () => {
+  for (const environments of [['mobile', 'mobile'], ['unknown']]) {
+    const result = await cli('[]', false, environments);
+    assert.equal(result.code, 2);
+    assert.match(result.output, /--environments must list/);
+  }
+});
 
 test('CLI scans named states, groups findings and writes redacted reproduction contexts', async () => {
   const secret = 'configuration-fill-value-is-private';

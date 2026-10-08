@@ -346,6 +346,54 @@ export const es: Messages = {
     incomplete:
       'No se pudieron comprobar algunos escenarios. Revisa los pasos fallidos y las rutas de páginas sin analizar.',
   },
+  manualReview: {
+    heading: 'Evaluación humana',
+    statuses: {
+      confirmed: 'Problema confirmado',
+      acceptable: 'Resultado aceptable',
+      not_applicable: 'No aplicable',
+    },
+    pending: 'Pendiente de revisión',
+    reviewed: 'Revisado por una persona',
+    assess: 'Evaluar hallazgo',
+    edit: 'Editar evaluación',
+    note: 'Comentario (opcional)',
+    save: 'Guardar evaluación',
+    reset: 'Volver a pendiente',
+    savedNotice: 'Evaluación guardada para este análisis.',
+    resetNotice: 'Evaluación eliminada. El hallazgo necesita revisión.',
+    scope:
+      'Las decisiones solo corresponden a este análisis. Un nuevo análisis requiere otra evaluación.',
+    automatic: 'Problemas detectados automáticamente',
+    confirmedHeading: 'Problemas confirmados por una persona',
+  },
+  environments: {
+    incomplete: 'No se pudieron comprobar algunos entornos:',
+    heading: 'Entornos de análisis',
+    labels: {
+      desktop: 'Escritorio',
+      mobile: 'Pantalla estrecha',
+      'zoom-200': 'Diseño al 200% emulado',
+      'forced-colors': 'Colores forzados',
+    },
+    intro:
+      'El escritorio siempre se analiza. Los entornos adicionales comprueban el estado inicial y los escenarios coincidentes, aumentando la duración. Los cambios se aplican al próximo análisis.',
+    descriptions: {
+      mobile: '390 × 844 CSS px; navegador de escritorio con ventana estrecha.',
+      'zoom-200': '640 × 360 CSS px con escala 2×; emula el reajuste al 200%.',
+      'forced-colors': '1280 × 720; emulación de colores del sistema forzados.',
+    },
+    save: 'Guardar entornos',
+    saved: 'Guardado para el próximo análisis.',
+    foundIn: 'Detectado en',
+    picture: 'Imagen de',
+    results: 'Resultados por entorno',
+    completed: 'Comprobado',
+    failed: 'Falló',
+    occurrences: 'Apariciones de infracciones',
+    limitations:
+      'El diseño y los colores se emulan. El zoom del navegador y el contraste del sistema operativo requieren pruebas manuales.',
+  },
   coverage: {
     heading: 'Cobertura de teclado',
     completed: 'Recorrido completado',

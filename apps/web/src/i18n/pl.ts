@@ -361,6 +361,53 @@ export const pl: Messages = {
     incomplete:
       'Nie udało się sprawdzić niektórych scenariuszy. Sprawdź nieudane kroki i ścieżki nieskanowanych stron.',
   },
+  manualReview: {
+    heading: 'Ocena ręczna',
+    statuses: {
+      confirmed: 'Potwierdzony problem',
+      acceptable: 'Akceptowalny wynik',
+      not_applicable: 'Nie dotyczy',
+    },
+    pending: 'Oczekuje na weryfikację',
+    reviewed: 'Sprawdzone przez człowieka',
+    assess: 'Oceń wynik',
+    edit: 'Zmień ocenę',
+    note: 'Komentarz (opcjonalnie)',
+    save: 'Zapisz ocenę',
+    reset: 'Przywróć do weryfikacji',
+    savedNotice: 'Ocena zapisana dla tego skanowania.',
+    resetNotice: 'Ocena usunięta. Wynik wymaga ponownej weryfikacji.',
+    scope: 'Decyzje dotyczą tylko tego skanowania. Nowe skanowanie wymaga nowej oceny.',
+    automatic: 'Problemy wykryte automatycznie',
+    confirmedHeading: 'Problemy potwierdzone przez człowieka',
+  },
+  environments: {
+    incomplete: 'Nie udało się sprawdzić niektórych środowisk:',
+    heading: 'Środowiska skanowania',
+    labels: {
+      desktop: 'Komputer',
+      mobile: 'Wąski ekran',
+      'zoom-200': 'Emulacja układu przy 200%',
+      'forced-colors': 'Wymuszone kolory',
+    },
+    intro:
+      'Komputer jest zawsze sprawdzany. Dodatkowe środowiska sprawdzają stan początkowy i pasujące scenariusze, wydłużając skanowanie. Zmiany dotyczą kolejnego skanowania.',
+    descriptions: {
+      mobile: '390 × 844 CSS px; przeglądarka komputerowa z wąskim oknem.',
+      'zoom-200': '640 × 360 CSS px przy skali 2×; emuluje układ przy 200%.',
+      'forced-colors': '1280 × 720; emulacja wymuszonych kolorów systemowych.',
+    },
+    save: 'Zapisz środowiska',
+    saved: 'Zapisano dla kolejnego skanowania.',
+    foundIn: 'Wykryto w',
+    picture: 'Zdjęcie ze środowiska',
+    results: 'Wyniki według środowiska',
+    completed: 'Sprawdzono',
+    failed: 'Błąd',
+    occurrences: 'Wystąpienia naruszeń',
+    limitations:
+      'Układ i kolory są emulowane. Powiększenie przeglądarki i kontrast systemu operacyjnego wymagają ręcznej weryfikacji.',
+  },
   coverage: {
     heading: 'Zakres kontroli klawiatury',
     completed: 'Przejście zakończone',

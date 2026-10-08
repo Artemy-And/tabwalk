@@ -2,6 +2,13 @@ import { type Browser, chromium, type Page } from 'playwright';
 import { axeChecker } from './checkers/axe.js';
 import { drawTabOrder, keyboardChecker, type TabOrder } from './checkers/keyboard.js';
 import { USER_AGENT } from './crawl.js';
+import {
+  type EnvironmentRun,
+  type ExtraEnvironment,
+  environmentOptions,
+  type ScanEnvironment,
+  scanEnvironments,
+} from './environments.js';
 import { fingerprint } from './fingerprint.js';
 import { runScenario, type ScenarioRun, type SiteScenario } from './scenarios.js';
 import { type ElementShot, shootElements } from './shots.js';
@@ -17,6 +24,7 @@ import type {
 const CHECKERS: Checker[] = [axeChecker, keyboardChecker];
 
 export interface PageFinding extends CheckFinding {
+  environment?: ScanEnvironment | null;
   checker: string;
   fingerprint: string;
   scenario?: ScenarioEvidence | null;
@@ -90,17 +98,20 @@ export async function checkPage(
     ignore?: IgnoreRules;
     login?: SiteLogin | null;
     scenario?: SiteScenario;
+    environment?: ScanEnvironment;
     // fingerprints the scan already has a picture of; the ones this page adds go in too
     pictured?: Set<string>;
   } = {},
 ): Promise<PageResult> {
   const ignore = options.ignore ?? { rules: [], selectors: [] };
+  const environment = options.environment ?? scanEnvironments()[0]!;
   const login = options.login;
   // the page's own address; scripts and images from elsewhere never see the login
   const origin = new URL(url).origin;
   const context = await browser.newContext({
     userAgent: USER_AGENT,
     reducedMotion: 'reduce',
+    ...environmentOptions(environment),
     ...(login?.username
       ? { httpCredentials: { username: login.username, password: login.password ?? '', origin } }
       : {}),
@@ -178,8 +189,14 @@ export async function checkPage(
           ...f,
           checker: checker.name,
           fingerprint: fingerprint(f.ruleId, f.html),
+          environment,
           scenario: scenarioRun
-            ? { name: scenarioRun.name, path: scenarioRun.path, steps: scenarioRun.steps }
+            ? {
+                name: scenarioRun.name,
+                path: scenarioRun.path,
+                steps: scenarioRun.steps,
+                environment: environment.id,
+              }
             : null,
         });
       }
@@ -189,6 +206,13 @@ export async function checkPage(
     const tabOrder = options.tabOrder ? await drawTabOrder(page).catch(() => null) : null;
 
     const shots = options.pictured ? await shootElements(page, kept, options.pictured) : [];
+    for (const shot of shots) {
+      shot.context = {
+        url: page.url(),
+        environment,
+        scenario: options.scenario?.name ?? null,
+      };
+    }
 
     return { title, findings: kept, tabOrder, keyboardCoverage, scenarioRun, links, shots };
   } finally {
@@ -219,6 +243,7 @@ export async function checkPageWithScenarios(
       if (!result.scenarioRun) throw new Error('Scenario did not run');
       scenarioRuns.push({
         ...result.scenarioRun,
+        environment: options.environment?.id ?? 'desktop',
         keyboardCoverage: result.keyboardCoverage,
         findings: result.findings.filter((f) => f.kind === 'violation').length,
       });
@@ -227,6 +252,7 @@ export async function checkPageWithScenarios(
       initial.links.push(...result.links);
     } catch {
       scenarioRuns.push({
+        environment: options.environment?.id ?? 'desktop',
         name: scenario.name,
         path: scenario.path,
         status: 'failed',
@@ -238,4 +264,57 @@ export async function checkPageWithScenarios(
     }
   }
   return { ...initial, links: [...new Set(initial.links)], scenarioRuns };
+}
+
+export async function checkPageInEnvironments(
+  browser: Browser,
+  url: string,
+  timeoutMs: number,
+  options: Omit<NonNullable<Parameters<typeof checkPageWithScenarios>[3]>, 'environment'> & {
+    environments?: ExtraEnvironment[];
+  } = {},
+): Promise<PageResult & { scenarioRuns: StoredScenarioRun[]; environmentRuns: EnvironmentRun[] }> {
+  const { environments = [], ...pageOptions } = options;
+  const profiles = scanEnvironments(environments);
+  let combined: (PageResult & { scenarioRuns: StoredScenarioRun[] }) | undefined;
+  const environmentRuns: EnvironmentRun[] = [];
+  for (const environment of profiles) {
+    const started = Date.now();
+    try {
+      const result = await checkPageWithScenarios(browser, url, timeoutMs, {
+        ...pageOptions,
+        environment,
+        tabOrder: environment.id === 'desktop' && pageOptions.tabOrder,
+      });
+      environmentRuns.push({
+        environment,
+        status: 'completed',
+        error: null,
+        elapsedMs: Date.now() - started,
+        findings: result.findings.filter((f) => f.kind === 'violation').length,
+        keyboardCoverage: result.keyboardCoverage,
+        scenarioRuns: result.scenarioRuns,
+      });
+      if (!combined) combined = result;
+      else {
+        combined.findings.push(...result.findings);
+        combined.links.push(...result.links);
+        combined.shots.push(...result.shots);
+      }
+    } catch (error) {
+      // The baseline must load; extra profiles retain explicit failure evidence.
+      if (environment.id === 'desktop') throw error;
+      environmentRuns.push({
+        environment,
+        status: 'failed',
+        error: 'The page could not be loaded or checked in this environment.',
+        elapsedMs: Date.now() - started,
+        findings: 0,
+        keyboardCoverage: null,
+        scenarioRuns: [],
+      });
+    }
+  }
+  if (!combined) throw new Error('No environment was checked');
+  return { ...combined, links: [...new Set(combined.links)], environmentRuns };
 }

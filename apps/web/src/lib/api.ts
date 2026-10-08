@@ -71,6 +71,7 @@ export interface Site {
   ignoreSelectors: string[];
   login: LoginSummary | null;
   scenarios: SiteScenario[];
+  environments: ExtraEnvironment[];
   createdAt: string;
 }
 
@@ -105,6 +106,7 @@ export type SiteUpdate = Partial<
     | 'ignoreRules'
     | 'ignoreSelectors'
     | 'scenarios'
+    | 'environments'
   >
 > & { login?: LoginInput | null };
 
@@ -136,6 +138,7 @@ export interface ScenarioRun {
 }
 
 export interface StoredScenarioRun extends ScenarioRun {
+  environment?: EnvironmentId;
   keyboardCoverage: KeyboardCoverage | null;
   findings: number;
 }
@@ -150,6 +153,7 @@ export interface ScanSummary {
 }
 
 export interface Scan {
+  environments: ScanEnvironment[] | null;
   id: string;
   siteId: string;
   status: ScanStatus;
@@ -175,9 +179,30 @@ export interface ScanDetail extends Scan {
   pages: number;
   summary: ScanSummary;
   comparison: { previousScanId: string; new: number; fixed: number } | null;
+  manualSummary: ManualSummary;
+}
+
+export type ReviewStatus = 'confirmed' | 'acceptable' | 'not_applicable';
+
+export interface FindingReview {
+  status: ReviewStatus;
+  note: string | null;
+  by: string;
+  reviewedAt: string;
+}
+
+export interface ManualSummary {
+  total: number;
+  pending: number;
+  confirmed: number;
+  acceptable: number;
+  notApplicable: number;
 }
 
 export interface IssueGroup {
+  environments?: ScanEnvironment[];
+  shotContext?: { url: string; environment: ScanEnvironment; scenario: string | null } | null;
+  review?: FindingReview | null;
   fingerprint: string;
   kind: IssueKind;
   checker: string;
@@ -197,7 +222,13 @@ export interface IssueGroup {
   dismissal?: Dismissal | null;
   // whether the scan kept a picture of the first element with this problem
   shot?: boolean;
-  scenarios?: { name: string; path: string; steps: ScenarioStepEvidence[]; url: string }[];
+  scenarios?: {
+    name: string;
+    path: string;
+    steps: ScenarioStepEvidence[];
+    url: string;
+    environment?: EnvironmentId;
+  }[];
 }
 
 export type DismissalReason = 'false_positive' | 'wont_fix';
@@ -239,6 +270,7 @@ export interface KeyboardCoverage {
 }
 
 export interface PageRow {
+  environmentRuns: EnvironmentRun[];
   id: string;
   url: string;
   title: string | null;
@@ -256,6 +288,7 @@ export interface TabStop {
 }
 
 export interface PageDetail {
+  environmentRuns: EnvironmentRun[];
   id: string;
   url: string;
   title: string | null;
@@ -268,6 +301,24 @@ export interface PageDetail {
 }
 
 export type ChannelKind = 'slack' | 'discord' | 'ntfy' | 'webhook' | 'email';
+
+export type ExtraEnvironment = 'mobile' | 'zoom-200' | 'forced-colors';
+export type EnvironmentId = 'desktop' | ExtraEnvironment;
+export interface ScanEnvironment {
+  id: EnvironmentId;
+  viewport: { width: number; height: number };
+  deviceScaleFactor: number;
+  forcedColors: 'active' | 'none';
+}
+export interface EnvironmentRun {
+  environment: ScanEnvironment;
+  status: 'completed' | 'failed';
+  error: string | null;
+  elapsedMs: number;
+  findings: number;
+  keyboardCoverage: KeyboardCoverage | null;
+  scenarioRuns: StoredScenarioRun[];
+}
 
 export const CHANNEL_KINDS: ChannelKind[] = ['slack', 'discord', 'ntfy', 'webhook', 'email'];
 
@@ -332,6 +383,18 @@ export const api = {
   listScans: (siteId: string) => request<ScanRow[]>(`/sites/${siteId}/scans`),
   startScan: (siteId: string) => request<Scan>(`/sites/${siteId}/scans`, { method: 'POST' }),
   getScan: (id: string) => request<ScanDetail>(`/scans/${id}`),
+  reviewFinding: (
+    scanId: string,
+    body: { fingerprint: string; status: ReviewStatus; note?: string },
+  ) =>
+    request<FindingReview>(`/scans/${scanId}/reviews`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+  resetReview: (scanId: string, fingerprint: string) =>
+    request<undefined>(`/scans/${scanId}/reviews/${encodeURIComponent(fingerprint)}`, {
+      method: 'DELETE',
+    }),
   listIssues: (scanId: string) => request<IssueGroup[]>(`/scans/${scanId}/issues`),
   listFixed: (scanId: string) => request<IssueGroup[]>(`/scans/${scanId}/fixed`),
   issuesCsvUrl: (scanId: string) => `${BASE}/scans/${scanId}/issues.csv`,
