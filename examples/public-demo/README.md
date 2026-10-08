@@ -1,5 +1,8 @@
 # Public demo
 
+Live: [tabwalk-demo.pages.dev/demo/](https://tabwalk-demo.pages.dev/demo/).
+Published 2026-10-08 from `develop`, with no application release.
+
 The public report is a snapshot produced by the same checkers used by the worker
 and GitHub Action. It includes the deliberately broken shop in `examples/demo-site`
 and a keyboard trap with a fixed variant in `examples/keyboard-trap`.
@@ -21,6 +24,18 @@ serve it as static files. Regenerate it when scanner behaviour or fixtures chang
 
 Serve `apps/site` as the web root and open `/demo/` to preview it. Opening the
 HTML directly as a file will not resolve the site-wide fonts and styles.
+
+The public static project is `tabwalk-demo`, with production branch `develop`.
+After authenticating to its Cloudflare account, deploy directly without changing
+Git branches:
+
+```sh
+wrangler pages deploy apps/site --project-name tabwalk-demo --branch develop
+```
+
+The previous planned `tabwalk.dev/demo/` address is not the deployed demo host.
+Verify public assets, video, filters and JSON after each upload. Publishing this
+snapshot does not deploy or release the dashboard/server.
 
 Printing includes the currently filtered findings and every page's keyboard
 coverage. The deliberately broken fixture is shown in a recording so visitors

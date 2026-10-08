@@ -15,16 +15,22 @@ what changed since the last scan.
 Free, open source and self-hosted. Scheduled scans, Slack, Discord, ntfy and
 email notifications help you catch regressions.
 
-[Explore the demo](https://tabwalk.dev/demo/) · [Quick start](#quick-start) · [GitHub Action](#github-action)
+[Explore the demo](https://tabwalk-demo.pages.dev/demo/) · [Quick start](#quick-start) · [GitHub Action](#github-action)
 
-<a href="https://tabwalk.dev/demo/">
+<a href="https://tabwalk-demo.pages.dev/demo/">
   <img src="docs/screenshots/keyboard-demo.webp" alt="Watch a newsletter form trap keyboard focus, then see how removing its custom Tab handler restores native keyboard navigation" width="900">
 </a>
 
-The updated demo is prepared on `develop` and awaits static-site deployment.
+The public demo is deployed at [tabwalk-demo.pages.dev/demo/](https://tabwalk-demo.pages.dev/demo/).
 It includes a short recording, both versions of the keyboard example,
 and a real scan of the demo shop with screenshots, Tab order and downloadable
 JSON. No account needed. [Source and regeneration instructions](examples/public-demo/README.md).
+
+On `develop`, uncertain findings now support human assessment with author,
+date and comments, shown separately in reports and PDF. Optional narrow-screen,
+200% layout and forced-color checks record their environments, duration and
+coverage. [Details and emulation limits](docs/review-and-environments.md).
+These features are not in the published v0.4.0 image; no new release was made.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/report-dark.png">

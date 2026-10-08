@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://tabwalk.dev/</loc>
+    <loc>https://tabwalk-demo.pages.dev/</loc>
   </url>
   <url>
-    <loc>https://tabwalk.dev/demo/</loc>
+    <loc>https://tabwalk-demo.pages.dev/demo/</loc>
   </url>
 </urlset>
