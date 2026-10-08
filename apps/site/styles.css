@@ -827,3 +827,12 @@ footer a {
   flex-wrap: wrap;
   gap: 12px;
 }
+
+/* Recorded keyboard example */
+.hero { padding-top: 80px; }
+.hero-demo { position: relative; margin: 48px auto 0; max-width: 960px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); overflow: hidden; box-shadow: var(--shot-shadow); }
+.hero-demo a { display: block; }
+.hero-demo img { display: block; width: 100%; height: auto; }
+.hero-demo figcaption { padding: 16px 20px; font-size: 14px; color: var(--muted); }
+.hero-demo figcaption a { display: inline; color: var(--accent); font-weight: 600; }
+@media (max-width: 520px) { .hero { padding-top: 48px; } .hero-demo { margin-top: 32px; } }

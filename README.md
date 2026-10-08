@@ -5,13 +5,26 @@
   </picture>
 </h1>
 
-**See what's actually broken. On your own server.**
+**Catch keyboard bugs before your users do.**
 
-Self-hosted accessibility monitoring. Tabwalk crawls your site every day or
-every week, checks each page with axe-core, presses Tab through it, collapses
-repeated problems into one row, shows what is new and what got fixed since the
-last scan, and tells Slack, Discord, ntfy or your inbox when something new
-breaks.
+Tabwalk opens your site in a real browser and presses **Tab, Shift+Tab and
+Escape** to find keyboard traps, invisible focus and controls hidden under
+sticky content. It adds axe-core checks, groups repeated problems, and reports
+what changed since the last scan.
+
+Free, open source and self-hosted. Scheduled scans, Slack, Discord, ntfy and
+email notifications help you catch regressions.
+
+[Explore the demo](https://tabwalk.dev/demo/) · [Quick start](#quick-start) · [GitHub Action](#github-action)
+
+<a href="https://tabwalk.dev/demo/">
+  <img src="docs/screenshots/keyboard-demo.webp" alt="Watch a newsletter form trap keyboard focus, then see how removing its custom Tab handler restores native keyboard navigation" width="900">
+</a>
+
+The updated demo is prepared on `develop` and awaits static-site deployment.
+It includes a short recording, both versions of the keyboard example,
+and a real scan of the demo shop with screenshots, Tab order and downloadable
+JSON. No account needed. [Source and regeneration instructions](examples/public-demo/README.md).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/report-dark.png">
@@ -21,8 +34,9 @@ breaks.
 One command to install. No Redis — the job queue lives in the same Postgres.
 
 > Tabwalk collects evidence. It is not a legal opinion and it does not make
-> your site compliant. Automated checks catch less than half of WCAG problems;
-> the rest needs a human. We show you which parts those are.
+> your site compliant. Automated checks cover part of WCAG;
+> other page states and manual accessibility checks still need a person. Uncertain
+> automated results are flagged for review.
 
 Named after the tab walk — pressing Tab through a page to see whether every
 control can be reached and used without a mouse. It is the first thing an
@@ -53,6 +67,20 @@ Open a page from the scan report to see it. Each problem in the report also
 gets a picture of the first element that has it, outlined, under **Show the
 element**; keyboard problems are pictured with the element focused. Pictures
 are kept for the latest scan of each site.
+
+**On develop, for the next release:** each page also records keyboard coverage:
+visited stops, focus style samples checked, and reasons for a partial walk.
+Time and step limits, blocked dialogs, frames and unverified focus styles are
+visible in the page view, printed report and CI output. Older scans say that
+coverage was not recorded. Coverage records the checks performed; it is not a
+percentage of WCAG compliance.
+
+**Also on develop:** named scan scenarios can open a menu or dialog, fill sample
+text, press keys, wait for an element and check expected focus. Each state runs
+in a fresh browser session and keeps its steps, findings and keyboard coverage.
+Failed or unreached scenarios are visible in reports and fail CI with exit code
+2. [Configuration, CLI usage and a broken/fixed dialog example](docs/scenarios.md).
+The published v0.4.0 image does not include these features yet.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/tab-order-dark.png">

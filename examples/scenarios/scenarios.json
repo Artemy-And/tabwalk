@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Dialog open",
+    "path": "/",
+    "steps": [
+      {
+        "action": "click",
+        "selector": "#open-dialog"
+      },
+      {
+        "action": "waitFor",
+        "selector": "#dialog",
+        "state": "visible"
+      },
+      {
+        "action": "expectFocus",
+        "selector": "#close-dialog"
+      }
+    ]
+  },
+  {
+    "name": "Dialog closes and returns focus",
+    "path": "/",
+    "steps": [
+      {
+        "action": "click",
+        "selector": "#open-dialog"
+      },
+      {
+        "action": "press",
+        "key": "Escape"
+      },
+      {
+        "action": "waitFor",
+        "selector": "#dialog",
+        "state": "hidden"
+      },
+      {
+        "action": "expectFocus",
+        "selector": "#open-dialog"
+      }
+    ]
+  }
+]

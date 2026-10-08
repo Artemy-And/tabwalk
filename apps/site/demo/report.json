@@ -1,0 +1,2761 @@
+{
+  "generatedAt": "2026-10-08T15:46:16.167Z",
+  "source": {
+    "repository": "https://github.com/Artemy-And/tabwalk",
+    "branch": "develop",
+    "build": "unreleased",
+    "fixtures": ["examples/demo-site", "examples/keyboard-trap"],
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "command": "pnpm --filter @tabwalk/server demo:build"
+  },
+  "summary": {
+    "uniqueProblems": 17,
+    "critical": 7,
+    "needsHuman": 4,
+    "affectedElements": 81,
+    "pagesChecked": 6,
+    "partialKeyboardPages": 2
+  },
+  "keyboardExample": {
+    "broken": {
+      "path": "/keyboard-trap/",
+      "title": "Keyboard trap example",
+      "findings": [
+        {
+          "kind": "violation",
+          "ruleId": "keyboard-trap",
+          "impact": "critical",
+          "help": "Keyboard focus must not get stuck in one part of the page",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap.html",
+          "wcagTags": ["wcag2a", "wcag212"],
+          "standards": ["EN-9.2.1.2", "RGAA-12.9.1", "section508"],
+          "target": ["div.fields"],
+          "html": "<div class=\"fields\"><input id=\"email\" name=\"email\" type=\"email\" autocomplete=\"email\" placeholder=\"you@example.com\"><button type=\"submit\">Subscribe</button></div>",
+          "failureSummary": "Focus cycles between 2 elements and never leaves: #email, button. Tab, Shift+Tab and Escape do not get out.",
+          "checker": "keyboard",
+          "fingerprint": "b004d97a19232b08",
+          "scenario": null
+        }
+      ],
+      "keyboardCoverage": {
+        "status": "partial",
+        "reasons": ["keyboard-trap", "unreached-stops"],
+        "visitedStops": 3,
+        "forwardSteps": 4,
+        "backwardSteps": 3,
+        "focusChecks": 3,
+        "focusStylesTested": 3,
+        "focusStylesSkipped": 0,
+        "elapsedMs": 527,
+        "limits": {
+          "timeMs": 20000,
+          "stepsPerDirection": 300,
+          "focusChecks": 40
+        }
+      },
+      "tabOrder": {
+        "image": "order-broken.webp",
+        "width": 960,
+        "height": 554,
+        "stops": [
+          {
+            "label": "Read the newsletter",
+            "selector": "a.before:nth-of-type(1)",
+            "drawn": true
+          },
+          {
+            "label": "you@example.com",
+            "selector": "#email",
+            "drawn": true
+          },
+          {
+            "label": "Subscribe",
+            "selector": "button",
+            "drawn": true
+          }
+        ]
+      }
+    },
+    "fixed": {
+      "path": "/keyboard-trap/?fixed",
+      "title": "Keyboard trap example",
+      "findings": [],
+      "keyboardCoverage": {
+        "status": "completed",
+        "reasons": [],
+        "visitedStops": 4,
+        "forwardSteps": 5,
+        "backwardSteps": 5,
+        "focusChecks": 4,
+        "focusStylesTested": 4,
+        "focusStylesSkipped": 0,
+        "elapsedMs": 436,
+        "limits": {
+          "timeMs": 20000,
+          "stepsPerDirection": 300,
+          "focusChecks": 40
+        }
+      },
+      "tabOrder": {
+        "image": "order-fixed.webp",
+        "width": 960,
+        "height": 554,
+        "stops": [
+          {
+            "label": "Read the newsletter",
+            "selector": "a.before:nth-of-type(1)",
+            "drawn": true
+          },
+          {
+            "label": "you@example.com",
+            "selector": "#email",
+            "drawn": true
+          },
+          {
+            "label": "Subscribe",
+            "selector": "button",
+            "drawn": true
+          },
+          {
+            "label": "Read our privacy policy",
+            "selector": "a.after:nth-of-type(2)",
+            "drawn": true
+          }
+        ]
+      }
+    }
+  },
+  "findings": [
+    {
+      "kind": "violation",
+      "ruleId": "image-alt",
+      "impact": "critical",
+      "help": "Images must have alternative text",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+      "wcagTags": ["wcag2a", "wcag111"],
+      "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+      "target": ["img[src$=\"logo.svg\"]"],
+      "html": "<img src=\"/img/logo.svg\" width=\"120\" height=\"40\">",
+      "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+      "checker": "axe-core",
+      "fingerprint": "cf24049f75ec95fc",
+      "scenario": null,
+      "pages": [
+        "/about.html",
+        "/contact.html",
+        "/",
+        "/products/apron.html",
+        "/products/kettle.html",
+        "/products/pan.html"
+      ],
+      "occurrences": 7,
+      "shot": {
+        "image": "finding-cf24049f75ec95fc.webp",
+        "width": 216,
+        "height": 136,
+        "sourcePath": "/about.html"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "image-alt",
+      "impact": "critical",
+      "help": "Images must have alternative text",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+      "wcagTags": ["wcag2a", "wcag111"],
+      "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+      "target": ["iframe", "img[src$=\"cart.svg\"]"],
+      "html": "<img src=\"/img/cart.svg\">",
+      "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+      "checker": "axe-core",
+      "fingerprint": "2dd66b0cfa92901f",
+      "scenario": null,
+      "pages": [
+        "/about.html",
+        "/contact.html",
+        "/",
+        "/products/apron.html",
+        "/products/kettle.html",
+        "/products/pan.html"
+      ],
+      "occurrences": 14,
+      "shot": {
+        "image": "finding-2dd66b0cfa92901f.webp",
+        "width": 580,
+        "height": 220,
+        "sourcePath": "/about.html"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "button-name",
+      "impact": "critical",
+      "help": "Buttons must have discernible text",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=playwright",
+      "wcagTags": ["wcag2a", "wcag412"],
+      "standards": ["EN-9.4.1.2", "RGAA-11.9.1", "section508"],
+      "target": [".card:nth-child(1) > button"],
+      "html": "<button class=\"add\"><img src=\"/img/cart.svg\"></button>",
+      "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+      "checker": "axe-core",
+      "fingerprint": "c60f07a6c6ce46f7",
+      "scenario": null,
+      "pages": ["/", "/products/apron.html", "/products/kettle.html", "/products/pan.html"],
+      "occurrences": 6,
+      "shot": {
+        "image": "finding-c60f07a6c6ce46f7.webp",
+        "width": 136,
+        "height": 136,
+        "sourcePath": "/"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "label",
+      "impact": "critical",
+      "help": "Form elements must have labels",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/label?application=playwright",
+      "wcagTags": ["wcag2a", "wcag412"],
+      "standards": ["EN-9.4.1.2", "RGAA-11.1.1", "section508"],
+      "target": ["input"],
+      "html": "<input type=\"number\" value=\"1\" min=\"1\">",
+      "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+      "checker": "axe-core",
+      "fingerprint": "48ab440cf9e669e4",
+      "scenario": null,
+      "pages": ["/products/apron.html", "/products/kettle.html", "/products/pan.html"],
+      "occurrences": 3,
+      "shot": {
+        "image": "finding-48ab440cf9e669e4.webp",
+        "width": 273,
+        "height": 117,
+        "sourcePath": "/products/apron.html"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "button-name",
+      "impact": "critical",
+      "help": "Buttons must have discernible text",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=playwright",
+      "wcagTags": ["wcag2a", "wcag412"],
+      "standards": ["EN-9.4.1.2", "RGAA-11.9.1", "section508"],
+      "target": ["iframe", "#content > form > button"],
+      "html": "<button><img src=\"/img/cart.svg\"></button>",
+      "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+      "checker": "axe-core",
+      "fingerprint": "76fdb5addaf105b6",
+      "scenario": null,
+      "pages": ["/about.html", "/contact.html"],
+      "occurrences": 2,
+      "shot": {
+        "image": "finding-76fdb5addaf105b6.webp",
+        "width": 580,
+        "height": 220,
+        "sourcePath": "/about.html"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "image-alt",
+      "impact": "critical",
+      "help": "Images must have alternative text",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+      "wcagTags": ["wcag2a", "wcag111"],
+      "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+      "target": ["img[src$=\"kettle.svg\"]"],
+      "html": "<img src=\"/img/kettle.svg\" width=\"240\">",
+      "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+      "checker": "axe-core",
+      "fingerprint": "6ab517baec07f395",
+      "scenario": null,
+      "pages": ["/about.html"],
+      "occurrences": 1,
+      "shot": {
+        "image": "finding-6ab517baec07f395.webp",
+        "width": 336,
+        "height": 256,
+        "sourcePath": "/about.html"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "keyboard-trap",
+      "impact": "critical",
+      "help": "Keyboard focus must not get stuck in one part of the page",
+      "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap.html",
+      "wcagTags": ["wcag2a", "wcag212"],
+      "standards": ["EN-9.2.1.2", "RGAA-12.9.1", "section508"],
+      "target": ["#newsletter > form"],
+      "html": "<form>\n        <input type=\"email\" placeholder=\"Email\" aria-label=\"Email for the newsletter\">\n        <button type=\"submit\">Sign up</button>\n      </form>",
+      "failureSummary": "Focus cycles between 2 elements and never leaves: #newsletter > form > input, #newsletter > form > button. Tab, Shift+Tab and Escape do not get out.",
+      "checker": "keyboard",
+      "fingerprint": "8e7c97039b64a25b",
+      "scenario": null,
+      "pages": ["/contact.html"],
+      "occurrences": 1,
+      "shot": {
+        "image": "finding-8e7c97039b64a25b.webp",
+        "width": 960,
+        "height": 117,
+        "sourcePath": "/contact.html"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+      "wcagTags": ["wcag2aa", "wcag143"],
+      "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+      "target": ["iframe", "p:nth-child(1)"],
+      "html": "<p>Questions about an order? <a href=\"/contact.html\">Click here</a>.</p>",
+      "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+      "checker": "axe-core",
+      "fingerprint": "524030381c64215a",
+      "scenario": null,
+      "pages": [
+        "/about.html",
+        "/contact.html",
+        "/",
+        "/products/apron.html",
+        "/products/kettle.html",
+        "/products/pan.html"
+      ],
+      "occurrences": 7,
+      "shot": {
+        "image": "finding-524030381c64215a.webp",
+        "width": 580,
+        "height": 220,
+        "sourcePath": "/about.html"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+      "wcagTags": ["wcag2aa", "wcag143"],
+      "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+      "target": ["iframe", "p:nth-child(2)"],
+      "html": "<p>© Acme Store</p>",
+      "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+      "checker": "axe-core",
+      "fingerprint": "f16feb8dd1a9dca2",
+      "scenario": null,
+      "pages": [
+        "/about.html",
+        "/contact.html",
+        "/",
+        "/products/apron.html",
+        "/products/kettle.html",
+        "/products/pan.html"
+      ],
+      "occurrences": 7,
+      "shot": {
+        "image": "finding-f16feb8dd1a9dca2.webp",
+        "width": 580,
+        "height": 220,
+        "sourcePath": "/about.html"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "focus-visible",
+      "impact": "serious",
+      "help": "Keyboard focus must be visible",
+      "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+      "wcagTags": ["wcag2aa", "wcag247"],
+      "standards": ["EN-9.2.4.7", "RGAA-10.7.1", "section508"],
+      "target": ["a.skip"],
+      "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+      "failureSummary": "Keyboard focus moves to this element, but it is not visible on the screen.",
+      "checker": "keyboard",
+      "fingerprint": "ec44cfad21c87ded",
+      "scenario": null,
+      "pages": [
+        "/about.html",
+        "/contact.html",
+        "/",
+        "/products/apron.html",
+        "/products/kettle.html",
+        "/products/pan.html"
+      ],
+      "occurrences": 6
+    },
+    {
+      "kind": "violation",
+      "ruleId": "link-name",
+      "impact": "serious",
+      "help": "Links must have discernible text",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/link-name?application=playwright",
+      "wcagTags": ["wcag2a", "wcag244", "wcag412"],
+      "standards": ["EN-9.2.4.4", "EN-9.4.1.2", "RGAA-6.2.1", "section508"],
+      "target": ["header > a[href=\"/\"]"],
+      "html": "<a href=\"/\"><img src=\"/img/logo.svg\" width=\"120\" height=\"40\"></a>",
+      "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
+      "checker": "axe-core",
+      "fingerprint": "1ecebddde24e48e7",
+      "scenario": null,
+      "pages": [
+        "/about.html",
+        "/contact.html",
+        "/",
+        "/products/apron.html",
+        "/products/kettle.html",
+        "/products/pan.html"
+      ],
+      "occurrences": 7,
+      "shot": {
+        "image": "finding-1ecebddde24e48e7.webp",
+        "width": 216,
+        "height": 140,
+        "sourcePath": "/about.html"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+      "wcagTags": ["wcag2aa", "wcag143"],
+      "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+      "target": [".card:nth-child(1) > .price"],
+      "html": "<p class=\"price\">£39.00</p>",
+      "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+      "checker": "axe-core",
+      "fingerprint": "1beb894d0e4dbf64",
+      "scenario": null,
+      "pages": ["/", "/products/apron.html", "/products/kettle.html", "/products/pan.html"],
+      "occurrences": 6,
+      "shot": {
+        "image": "finding-1beb894d0e4dbf64.webp",
+        "width": 379,
+        "height": 112,
+        "sourcePath": "/"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "focus-visible",
+      "impact": "serious",
+      "help": "Keyboard focus must be visible",
+      "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+      "wcagTags": ["wcag2aa", "wcag247"],
+      "standards": ["EN-9.2.4.7", "RGAA-10.7.1", "section508"],
+      "target": ["div.card:nth-of-type(1) > button.add"],
+      "html": "<button class=\"add\"><img src=\"/img/cart.svg\"></button>",
+      "failureSummary": "Nothing on the screen changes when this element receives keyboard focus.",
+      "checker": "keyboard",
+      "fingerprint": "14af16840632b5cc",
+      "scenario": null,
+      "pages": ["/", "/products/apron.html", "/products/kettle.html", "/products/pan.html"],
+      "occurrences": 6,
+      "shot": {
+        "image": "finding-14af16840632b5cc.webp",
+        "width": 136,
+        "height": 136,
+        "sourcePath": "/"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "link-in-text-block",
+      "impact": "serious",
+      "help": "Links must be distinguishable without relying on color",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/link-in-text-block?application=playwright",
+      "wcagTags": ["wcag2a", "wcag141"],
+      "standards": ["EN-9.1.4.1", "RGAA-10.6.1", "section508"],
+      "target": [".crumbs > a[href=\"/\"]"],
+      "html": "<a href=\"/\">Home</a>",
+      "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 2.2:1 with the surrounding text. (Minimum contrast is 3:1, link text: #333333, surrounding text: #666666)\n  The link has no styling (such as underline) to distinguish it from the surrounding text",
+      "checker": "axe-core",
+      "fingerprint": "483fe41fe13b5611",
+      "scenario": null,
+      "pages": [
+        "/about.html",
+        "/products/apron.html",
+        "/products/kettle.html",
+        "/products/pan.html"
+      ],
+      "occurrences": 5,
+      "shot": {
+        "image": "finding-483fe41fe13b5611.webp",
+        "width": 134,
+        "height": 112,
+        "sourcePath": "/about.html"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "focus-obscured",
+      "impact": "serious",
+      "help": "Focused elements must not be hidden under other content",
+      "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html",
+      "wcagTags": ["wcag22aa", "wcag2411"],
+      "standards": [],
+      "target": ["header"],
+      "html": "<header>\n    <a href=\"/\"><img src=\"/img/logo.svg\" width=\"120\" height=\"40\"></a>\n    <nav>\n      <a href=\"/\">Home</a>\n      <a href=\"/products/kettle.html\">Kettles</a>\n      <a href=\"/about.html\">About</a>\n      <a href=\"/contact.html\">Contact</a>\n    </nav>\n  </header>",
+      "failureSummary": "Covers p.crumbs:nth-of-type(1) > a when it receives keyboard focus after the skip link.",
+      "checker": "keyboard",
+      "fingerprint": "d86447b25f511f64",
+      "scenario": null,
+      "pages": ["/about.html"],
+      "occurrences": 1,
+      "shot": {
+        "image": "finding-d86447b25f511f64.webp",
+        "width": 960,
+        "height": 173,
+        "sourcePath": "/about.html"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "frame-title",
+      "impact": "serious",
+      "help": "Frames must have an accessible name",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/frame-title?application=playwright",
+      "wcagTags": ["wcag2a", "wcag412"],
+      "standards": ["EN-9.4.1.2", "RGAA-2.1.1", "section508"],
+      "target": ["iframe"],
+      "html": "<iframe src=\"/contact.html\" width=\"480\" height=\"120\"></iframe>",
+      "failureSummary": "Fix any of the following:\n  Element has no title attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+      "checker": "axe-core",
+      "fingerprint": "a985803575233245",
+      "scenario": null,
+      "pages": ["/about.html"],
+      "occurrences": 1,
+      "shot": {
+        "image": "finding-a985803575233245.webp",
+        "width": 580,
+        "height": 220,
+        "sourcePath": "/about.html"
+      }
+    },
+    {
+      "kind": "violation",
+      "ruleId": "target-size",
+      "impact": "serious",
+      "help": "All touch targets must be 24px large, or leave sufficient space",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/target-size?application=playwright",
+      "wcagTags": ["wcag22aa", "wcag258"],
+      "standards": [],
+      "target": ["iframe", "#content > form > input[type=\"email\"][placeholder=\"Email\"]"],
+      "html": "<input type=\"email\" placeholder=\"Email\">",
+      "failureSummary": "Fix any of the following:\n  Target has insufficient size (177px by 21px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 21px instead of at least 24px.",
+      "checker": "axe-core",
+      "fingerprint": "b9161a951fa66712",
+      "scenario": null,
+      "pages": ["/about.html"],
+      "occurrences": 1,
+      "shot": {
+        "image": "finding-b9161a951fa66712.webp",
+        "width": 580,
+        "height": 220,
+        "sourcePath": "/about.html"
+      }
+    },
+    {
+      "kind": "incomplete",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+      "wcagTags": ["wcag2aa", "wcag143"],
+      "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+      "target": ["h1"],
+      "html": "<h1>Kitchen things that last</h1>",
+      "failureSummary": "Fix any of the following:\n  Element's background color could not be determined due to a background image",
+      "checker": "axe-core",
+      "fingerprint": "78f52413d430cbbf",
+      "scenario": null,
+      "pages": ["/"],
+      "occurrences": 1,
+      "shot": {
+        "image": "finding-78f52413d430cbbf.webp",
+        "width": 960,
+        "height": 132,
+        "sourcePath": "/"
+      }
+    },
+    {
+      "kind": "incomplete",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+      "wcagTags": ["wcag2aa", "wcag143"],
+      "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+      "target": ["section > p"],
+      "html": "<p>Free delivery on orders over £40 — this week only.</p>",
+      "failureSummary": "Fix any of the following:\n  Element's background color could not be determined due to a background image",
+      "checker": "axe-core",
+      "fingerprint": "f16feb8dd1a9dca2",
+      "scenario": null,
+      "pages": ["/"],
+      "occurrences": 1
+    },
+    {
+      "kind": "incomplete",
+      "ruleId": "keyboard-trap",
+      "impact": "critical",
+      "help": "Keyboard focus must not get stuck in one part of the page",
+      "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap.html",
+      "wcagTags": ["wcag2a", "wcag212"],
+      "standards": ["EN-9.2.1.2", "RGAA-12.9.1", "section508"],
+      "target": ["iframe"],
+      "html": "<iframe src=\"/contact.html\" width=\"480\" height=\"120\"></iframe>",
+      "failureSummary": "Focus stayed inside this frame for 100 presses of Tab. Check that keyboard users can get out of it.",
+      "checker": "keyboard",
+      "fingerprint": "3016990bfbf5bb04",
+      "scenario": null,
+      "pages": ["/about.html"],
+      "occurrences": 1,
+      "shot": {
+        "image": "finding-3016990bfbf5bb04.webp",
+        "width": 580,
+        "height": 220,
+        "sourcePath": "/about.html"
+      }
+    },
+    {
+      "kind": "incomplete",
+      "ruleId": "video-caption",
+      "impact": "critical",
+      "help": "<video> elements must have captions",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/video-caption?application=playwright",
+      "wcagTags": ["wcag2a", "wcag122"],
+      "standards": ["EN-9.1.2.2", "RGAA-4.3.1", "section508"],
+      "target": ["video"],
+      "html": "<video src=\"/img/workshop.mp4\" controls=\"\" width=\"480\"></video>",
+      "failureSummary": "Fix all of the following:\n  Check that captions are available for the element",
+      "checker": "axe-core",
+      "fingerprint": "25eac4a00fdf4ea3",
+      "scenario": null,
+      "pages": ["/about.html"],
+      "occurrences": 1,
+      "shot": {
+        "image": "finding-25eac4a00fdf4ea3.webp",
+        "width": 576,
+        "height": 246,
+        "sourcePath": "/about.html"
+      }
+    },
+    {
+      "kind": "recommendation",
+      "ruleId": "heading-order",
+      "impact": "moderate",
+      "help": "Heading levels should only increase by one",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/heading-order?application=playwright",
+      "wcagTags": [],
+      "standards": [],
+      "target": ["#content > h4"],
+      "html": "<h4>Best sellers</h4>",
+      "failureSummary": "Fix any of the following:\n  Heading order invalid",
+      "checker": "axe-core",
+      "fingerprint": "1c624e995f13ffb2",
+      "scenario": null,
+      "pages": ["/", "/products/apron.html", "/products/kettle.html", "/products/pan.html"],
+      "occurrences": 4
+    },
+    {
+      "kind": "recommendation",
+      "ruleId": "region",
+      "impact": "moderate",
+      "help": "All page content should be contained by landmarks",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/region?application=playwright",
+      "wcagTags": [],
+      "standards": ["RGAA-9.2.1"],
+      "target": [".skip"],
+      "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+      "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks",
+      "checker": "axe-core",
+      "fingerprint": "c7fdd86859ccaef4",
+      "scenario": null,
+      "pages": ["/products/apron.html", "/products/kettle.html", "/products/pan.html"],
+      "occurrences": 3
+    },
+    {
+      "kind": "recommendation",
+      "ruleId": "skip-link",
+      "impact": "moderate",
+      "help": "The skip-link target should exist and be focusable",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/skip-link?application=playwright",
+      "wcagTags": [],
+      "standards": ["RGAA-12.7.1"],
+      "target": [".skip"],
+      "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+      "failureSummary": "Fix any of the following:\n  No skip link target",
+      "checker": "axe-core",
+      "fingerprint": "0176891dbf05d0ab",
+      "scenario": null,
+      "pages": ["/products/apron.html", "/products/kettle.html", "/products/pan.html"],
+      "occurrences": 3
+    },
+    {
+      "kind": "recommendation",
+      "ruleId": "landmark-unique",
+      "impact": "moderate",
+      "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/landmark-unique?application=playwright",
+      "wcagTags": [],
+      "standards": [],
+      "target": ["header"],
+      "html": "<header>\n    <a href=\"/\"><img src=\"/img/logo.svg\" width=\"120\" height=\"40\"></a>\n    <nav>\n      <a href=\"/\">Home</a>\n      <a href=\"/products/kettle.html\">Kettles</a>\n      <a href=\"/about.html\">About</a>\n      <a href=\"/contact.html\">Contact</a>\n    </nav>\n  </header>",
+      "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
+      "checker": "axe-core",
+      "fingerprint": "3115e7618f59f4a2",
+      "scenario": null,
+      "pages": ["/about.html"],
+      "occurrences": 1
+    },
+    {
+      "kind": "recommendation",
+      "ruleId": "landmark-unique",
+      "impact": "moderate",
+      "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/landmark-unique?application=playwright",
+      "wcagTags": [],
+      "standards": [],
+      "target": ["nav"],
+      "html": "<nav>\n      <a href=\"/\">Home</a>\n      <a href=\"/products/kettle.html\">Kettles</a>\n      <a href=\"/about.html\">About</a>\n      <a href=\"/contact.html\">Contact</a>\n    </nav>",
+      "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
+      "checker": "axe-core",
+      "fingerprint": "5a1da12371b3bc86",
+      "scenario": null,
+      "pages": ["/about.html"],
+      "occurrences": 1
+    },
+    {
+      "kind": "recommendation",
+      "ruleId": "landmark-unique",
+      "impact": "moderate",
+      "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/landmark-unique?application=playwright",
+      "wcagTags": [],
+      "standards": [],
+      "target": ["#content"],
+      "html": "<main id=\"content\">",
+      "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
+      "checker": "axe-core",
+      "fingerprint": "94294a72fcca836f",
+      "scenario": null,
+      "pages": ["/about.html"],
+      "occurrences": 1
+    },
+    {
+      "kind": "recommendation",
+      "ruleId": "landmark-unique",
+      "impact": "moderate",
+      "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/landmark-unique?application=playwright",
+      "wcagTags": [],
+      "standards": [],
+      "target": ["iframe", "footer"],
+      "html": "<footer>\n    <p>Questions about an order? <a href=\"/contact.html\">Click here</a>.</p>\n    <p>© Acme Store</p>\n  </footer>",
+      "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
+      "checker": "axe-core",
+      "fingerprint": "8dcb9e8c2f720a02",
+      "scenario": null,
+      "pages": ["/about.html"],
+      "occurrences": 1
+    }
+  ],
+  "pages": [
+    {
+      "path": "/about.html",
+      "title": "About — Acme Store",
+      "findings": [
+        {
+          "kind": "violation",
+          "ruleId": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag412"],
+          "standards": ["EN-9.4.1.2", "RGAA-11.9.1", "section508"],
+          "target": ["iframe", "#content > form > button"],
+          "html": "<button><img src=\"/img/cart.svg\"></button>",
+          "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "76fdb5addaf105b6",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["iframe", "p:nth-child(1)"],
+          "html": "<p>Questions about an order? <a href=\"/contact.html\">Click here</a>.</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "524030381c64215a",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["iframe", "p:nth-child(2)"],
+          "html": "<p>© Acme Store</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "f16feb8dd1a9dca2",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["footer > p:nth-child(1)"],
+          "html": "<p>Questions about an order? <a href=\"/contact.html\">Click here</a>.</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "524030381c64215a",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["p:nth-child(2)"],
+          "html": "<p>© Acme Store</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "f16feb8dd1a9dca2",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "frame-title",
+          "impact": "serious",
+          "help": "Frames must have an accessible name",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/frame-title?application=playwright",
+          "wcagTags": ["wcag2a", "wcag412"],
+          "standards": ["EN-9.4.1.2", "RGAA-2.1.1", "section508"],
+          "target": ["iframe"],
+          "html": "<iframe src=\"/contact.html\" width=\"480\" height=\"120\"></iframe>",
+          "failureSummary": "Fix any of the following:\n  Element has no title attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "a985803575233245",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"logo.svg\"]"],
+          "html": "<img src=\"/img/logo.svg\" width=\"120\" height=\"40\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "cf24049f75ec95fc",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"kettle.svg\"]"],
+          "html": "<img src=\"/img/kettle.svg\" width=\"240\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "6ab517baec07f395",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["iframe", "img[src$=\"logo.svg\"]"],
+          "html": "<img src=\"/img/logo.svg\" width=\"120\" height=\"40\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "cf24049f75ec95fc",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["iframe", "img[src$=\"cart.svg\"]"],
+          "html": "<img src=\"/img/cart.svg\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "2dd66b0cfa92901f",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "link-in-text-block",
+          "impact": "serious",
+          "help": "Links must be distinguishable without relying on color",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/link-in-text-block?application=playwright",
+          "wcagTags": ["wcag2a", "wcag141"],
+          "standards": ["EN-9.1.4.1", "RGAA-10.6.1", "section508"],
+          "target": [".crumbs > a[href=\"/\"]"],
+          "html": "<a href=\"/\">Home</a>",
+          "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 2.2:1 with the surrounding text. (Minimum contrast is 3:1, link text: #333333, surrounding text: #666666)\n  The link has no styling (such as underline) to distinguish it from the surrounding text",
+          "checker": "axe-core",
+          "fingerprint": "483fe41fe13b5611",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "link-in-text-block",
+          "impact": "serious",
+          "help": "Links must be distinguishable without relying on color",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/link-in-text-block?application=playwright",
+          "wcagTags": ["wcag2a", "wcag141"],
+          "standards": ["EN-9.1.4.1", "RGAA-10.6.1", "section508"],
+          "target": ["p:nth-child(3) > a[href$=\"contact.html\"]"],
+          "html": "<a href=\"/contact.html\">our story</a>",
+          "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 1.25:1 with the surrounding text. (Minimum contrast is 3:1, link text: #333333, surrounding text: #222222)\n  The link has no styling (such as underline) to distinguish it from the surrounding text",
+          "checker": "axe-core",
+          "fingerprint": "483fe41fe13b5611",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "link-name",
+          "impact": "serious",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/link-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag244", "wcag412"],
+          "standards": ["EN-9.2.4.4", "EN-9.4.1.2", "RGAA-6.2.1", "section508"],
+          "target": ["header > a[href=\"/\"]"],
+          "html": "<a href=\"/\"><img src=\"/img/logo.svg\" width=\"120\" height=\"40\"></a>",
+          "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
+          "checker": "axe-core",
+          "fingerprint": "1ecebddde24e48e7",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "link-name",
+          "impact": "serious",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/link-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag244", "wcag412"],
+          "standards": ["EN-9.2.4.4", "EN-9.4.1.2", "RGAA-6.2.1", "section508"],
+          "target": ["iframe", "header > a[href=\"/\"]"],
+          "html": "<a href=\"/\"><img src=\"/img/logo.svg\" width=\"120\" height=\"40\"></a>",
+          "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
+          "checker": "axe-core",
+          "fingerprint": "1ecebddde24e48e7",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "target-size",
+          "impact": "serious",
+          "help": "All touch targets must be 24px large, or leave sufficient space",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/target-size?application=playwright",
+          "wcagTags": ["wcag22aa", "wcag258"],
+          "standards": [],
+          "target": ["iframe", "#content > form > input[type=\"email\"][placeholder=\"Email\"]"],
+          "html": "<input type=\"email\" placeholder=\"Email\">",
+          "failureSummary": "Fix any of the following:\n  Target has insufficient size (177px by 21px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 21px instead of at least 24px.",
+          "checker": "axe-core",
+          "fingerprint": "b9161a951fa66712",
+          "scenario": null
+        },
+        {
+          "kind": "incomplete",
+          "ruleId": "video-caption",
+          "impact": "critical",
+          "help": "<video> elements must have captions",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/video-caption?application=playwright",
+          "wcagTags": ["wcag2a", "wcag122"],
+          "standards": ["EN-9.1.2.2", "RGAA-4.3.1", "section508"],
+          "target": ["video"],
+          "html": "<video src=\"/img/workshop.mp4\" controls=\"\" width=\"480\"></video>",
+          "failureSummary": "Fix all of the following:\n  Check that captions are available for the element",
+          "checker": "axe-core",
+          "fingerprint": "25eac4a00fdf4ea3",
+          "scenario": null
+        },
+        {
+          "kind": "recommendation",
+          "ruleId": "landmark-unique",
+          "impact": "moderate",
+          "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/landmark-unique?application=playwright",
+          "wcagTags": [],
+          "standards": [],
+          "target": ["header"],
+          "html": "<header>\n    <a href=\"/\"><img src=\"/img/logo.svg\" width=\"120\" height=\"40\"></a>\n    <nav>\n      <a href=\"/\">Home</a>\n      <a href=\"/products/kettle.html\">Kettles</a>\n      <a href=\"/about.html\">About</a>\n      <a href=\"/contact.html\">Contact</a>\n    </nav>\n  </header>",
+          "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
+          "checker": "axe-core",
+          "fingerprint": "3115e7618f59f4a2",
+          "scenario": null
+        },
+        {
+          "kind": "recommendation",
+          "ruleId": "landmark-unique",
+          "impact": "moderate",
+          "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/landmark-unique?application=playwright",
+          "wcagTags": [],
+          "standards": [],
+          "target": ["nav"],
+          "html": "<nav>\n      <a href=\"/\">Home</a>\n      <a href=\"/products/kettle.html\">Kettles</a>\n      <a href=\"/about.html\">About</a>\n      <a href=\"/contact.html\">Contact</a>\n    </nav>",
+          "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
+          "checker": "axe-core",
+          "fingerprint": "5a1da12371b3bc86",
+          "scenario": null
+        },
+        {
+          "kind": "recommendation",
+          "ruleId": "landmark-unique",
+          "impact": "moderate",
+          "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/landmark-unique?application=playwright",
+          "wcagTags": [],
+          "standards": [],
+          "target": ["#content"],
+          "html": "<main id=\"content\">",
+          "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
+          "checker": "axe-core",
+          "fingerprint": "94294a72fcca836f",
+          "scenario": null
+        },
+        {
+          "kind": "recommendation",
+          "ruleId": "landmark-unique",
+          "impact": "moderate",
+          "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/landmark-unique?application=playwright",
+          "wcagTags": [],
+          "standards": [],
+          "target": ["iframe", "footer"],
+          "html": "<footer>\n    <p>Questions about an order? <a href=\"/contact.html\">Click here</a>.</p>\n    <p>© Acme Store</p>\n  </footer>",
+          "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
+          "checker": "axe-core",
+          "fingerprint": "8dcb9e8c2f720a02",
+          "scenario": null
+        },
+        {
+          "kind": "incomplete",
+          "ruleId": "keyboard-trap",
+          "impact": "critical",
+          "help": "Keyboard focus must not get stuck in one part of the page",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap.html",
+          "wcagTags": ["wcag2a", "wcag212"],
+          "standards": ["EN-9.2.1.2", "RGAA-12.9.1", "section508"],
+          "target": ["iframe"],
+          "html": "<iframe src=\"/contact.html\" width=\"480\" height=\"120\"></iframe>",
+          "failureSummary": "Focus stayed inside this frame for 100 presses of Tab. Check that keyboard users can get out of it.",
+          "checker": "keyboard",
+          "fingerprint": "3016990bfbf5bb04",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "focus-visible",
+          "impact": "serious",
+          "help": "Keyboard focus must be visible",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+          "wcagTags": ["wcag2aa", "wcag247"],
+          "standards": ["EN-9.2.4.7", "RGAA-10.7.1", "section508"],
+          "target": ["a.skip"],
+          "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+          "failureSummary": "Keyboard focus moves to this element, but it is not visible on the screen.",
+          "checker": "keyboard",
+          "fingerprint": "ec44cfad21c87ded",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "focus-obscured",
+          "impact": "serious",
+          "help": "Focused elements must not be hidden under other content",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html",
+          "wcagTags": ["wcag22aa", "wcag2411"],
+          "standards": [],
+          "target": ["header"],
+          "html": "<header>\n    <a href=\"/\"><img src=\"/img/logo.svg\" width=\"120\" height=\"40\"></a>\n    <nav>\n      <a href=\"/\">Home</a>\n      <a href=\"/products/kettle.html\">Kettles</a>\n      <a href=\"/about.html\">About</a>\n      <a href=\"/contact.html\">Contact</a>\n    </nav>\n  </header>",
+          "failureSummary": "Covers p.crumbs:nth-of-type(1) > a when it receives keyboard focus after the skip link.",
+          "checker": "keyboard",
+          "fingerprint": "d86447b25f511f64",
+          "scenario": null
+        }
+      ],
+      "keyboardCoverage": {
+        "status": "partial",
+        "reasons": ["frame-content", "frame-limit"],
+        "visitedStops": 10,
+        "forwardSteps": 110,
+        "backwardSteps": 102,
+        "focusChecks": 6,
+        "focusStylesTested": 6,
+        "focusStylesSkipped": 0,
+        "elapsedMs": 1646,
+        "limits": {
+          "timeMs": 20000,
+          "stepsPerDirection": 300,
+          "focusChecks": 40
+        }
+      },
+      "tabOrder": {
+        "image": "order-0.webp",
+        "width": 960,
+        "height": 699,
+        "stops": [
+          {
+            "label": "Skip to content",
+            "selector": "a.skip",
+            "drawn": false
+          },
+          {
+            "label": "",
+            "selector": "header > a",
+            "drawn": true
+          },
+          {
+            "label": "Home",
+            "selector": "nav > a:nth-of-type(1)",
+            "drawn": true
+          },
+          {
+            "label": "Kettles",
+            "selector": "a:nth-of-type(2)",
+            "drawn": true
+          },
+          {
+            "label": "About",
+            "selector": "a:nth-of-type(3)",
+            "drawn": true
+          },
+          {
+            "label": "Contact",
+            "selector": "a:nth-of-type(4)",
+            "drawn": true
+          },
+          {
+            "label": "Home",
+            "selector": "p.crumbs:nth-of-type(1) > a",
+            "drawn": true
+          },
+          {
+            "label": "our story",
+            "selector": "p:nth-of-type(2) > a",
+            "drawn": true
+          },
+          {
+            "label": "",
+            "selector": "video",
+            "drawn": true
+          },
+          {
+            "label": "",
+            "selector": "iframe",
+            "drawn": true
+          }
+        ]
+      }
+    },
+    {
+      "path": "/contact.html",
+      "title": "Contact — Acme Store",
+      "findings": [
+        {
+          "kind": "violation",
+          "ruleId": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag412"],
+          "standards": ["EN-9.4.1.2", "RGAA-11.9.1", "section508"],
+          "target": ["#content > form > button"],
+          "html": "<button><img src=\"/img/cart.svg\"></button>",
+          "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "76fdb5addaf105b6",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["p:nth-child(1)"],
+          "html": "<p>Questions about an order? <a href=\"/contact.html\">Click here</a>.</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "524030381c64215a",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["p:nth-child(2)"],
+          "html": "<p>© Acme Store</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "f16feb8dd1a9dca2",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"logo.svg\"]"],
+          "html": "<img src=\"/img/logo.svg\" width=\"120\" height=\"40\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "cf24049f75ec95fc",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"cart.svg\"]"],
+          "html": "<img src=\"/img/cart.svg\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "2dd66b0cfa92901f",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "link-name",
+          "impact": "serious",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/link-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag244", "wcag412"],
+          "standards": ["EN-9.2.4.4", "EN-9.4.1.2", "RGAA-6.2.1", "section508"],
+          "target": ["header > a[href=\"/\"]"],
+          "html": "<a href=\"/\"><img src=\"/img/logo.svg\" width=\"120\" height=\"40\"></a>",
+          "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
+          "checker": "axe-core",
+          "fingerprint": "1ecebddde24e48e7",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "keyboard-trap",
+          "impact": "critical",
+          "help": "Keyboard focus must not get stuck in one part of the page",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap.html",
+          "wcagTags": ["wcag2a", "wcag212"],
+          "standards": ["EN-9.2.1.2", "RGAA-12.9.1", "section508"],
+          "target": ["#newsletter > form"],
+          "html": "<form>\n        <input type=\"email\" placeholder=\"Email\" aria-label=\"Email for the newsletter\">\n        <button type=\"submit\">Sign up</button>\n      </form>",
+          "failureSummary": "Focus cycles between 2 elements and never leaves: #newsletter > form > input, #newsletter > form > button. Tab, Shift+Tab and Escape do not get out.",
+          "checker": "keyboard",
+          "fingerprint": "8e7c97039b64a25b",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "focus-visible",
+          "impact": "serious",
+          "help": "Keyboard focus must be visible",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+          "wcagTags": ["wcag2aa", "wcag247"],
+          "standards": ["EN-9.2.4.7", "RGAA-10.7.1", "section508"],
+          "target": ["a.skip"],
+          "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+          "failureSummary": "Keyboard focus moves to this element, but it is not visible on the screen.",
+          "checker": "keyboard",
+          "fingerprint": "ec44cfad21c87ded",
+          "scenario": null
+        }
+      ],
+      "keyboardCoverage": {
+        "status": "partial",
+        "reasons": ["keyboard-trap", "unreached-stops"],
+        "visitedStops": 13,
+        "forwardSteps": 14,
+        "backwardSteps": 3,
+        "focusChecks": 10,
+        "focusStylesTested": 10,
+        "focusStylesSkipped": 0,
+        "elapsedMs": 862,
+        "limits": {
+          "timeMs": 20000,
+          "stepsPerDirection": 300,
+          "focusChecks": 40
+        }
+      },
+      "tabOrder": {
+        "image": "order-1.webp",
+        "width": 960,
+        "height": 540,
+        "stops": [
+          {
+            "label": "Skip to content",
+            "selector": "a.skip",
+            "drawn": false
+          },
+          {
+            "label": "",
+            "selector": "header > a",
+            "drawn": true
+          },
+          {
+            "label": "Home",
+            "selector": "nav > a:nth-of-type(1)",
+            "drawn": true
+          },
+          {
+            "label": "Kettles",
+            "selector": "a:nth-of-type(2)",
+            "drawn": true
+          },
+          {
+            "label": "About",
+            "selector": "a:nth-of-type(3)",
+            "drawn": true
+          },
+          {
+            "label": "Contact",
+            "selector": "a:nth-of-type(4)",
+            "drawn": true
+          },
+          {
+            "label": "Your name",
+            "selector": "#content > form > input:nth-of-type(1)",
+            "drawn": true
+          },
+          {
+            "label": "Email",
+            "selector": "input:nth-of-type(2)",
+            "drawn": true
+          },
+          {
+            "label": "Order question Returns",
+            "selector": "select",
+            "drawn": true
+          },
+          {
+            "label": "",
+            "selector": "textarea",
+            "drawn": true
+          },
+          {
+            "label": "",
+            "selector": "#content > form > button",
+            "drawn": true
+          },
+          {
+            "label": "Email for the newsletter",
+            "selector": "#newsletter > form > input",
+            "drawn": true
+          },
+          {
+            "label": "Sign up",
+            "selector": "#newsletter > form > button",
+            "drawn": true
+          }
+        ]
+      }
+    },
+    {
+      "path": "/",
+      "title": "Acme Store",
+      "findings": [
+        {
+          "kind": "violation",
+          "ruleId": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag412"],
+          "standards": ["EN-9.4.1.2", "RGAA-11.9.1", "section508"],
+          "target": [".card:nth-child(1) > button"],
+          "html": "<button class=\"add\"><img src=\"/img/cart.svg\"></button>",
+          "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "c60f07a6c6ce46f7",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag412"],
+          "standards": ["EN-9.4.1.2", "RGAA-11.9.1", "section508"],
+          "target": [".card:nth-child(2) > button"],
+          "html": "<button class=\"add\"><img src=\"/img/cart.svg\"></button>",
+          "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "c60f07a6c6ce46f7",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag412"],
+          "standards": ["EN-9.4.1.2", "RGAA-11.9.1", "section508"],
+          "target": [".card:nth-child(3) > button"],
+          "html": "<button class=\"add\"><img src=\"/img/cart.svg\"></button>",
+          "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "c60f07a6c6ce46f7",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": [".card:nth-child(1) > .price"],
+          "html": "<p class=\"price\">£39.00</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "1beb894d0e4dbf64",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": [".card:nth-child(2) > .price"],
+          "html": "<p class=\"price\">£54.00</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "1beb894d0e4dbf64",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": [".card:nth-child(3) > .price"],
+          "html": "<p class=\"price\">£22.00</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "1beb894d0e4dbf64",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["p:nth-child(1)"],
+          "html": "<p>Questions about an order? <a href=\"/contact.html\">Click here</a>.</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "524030381c64215a",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["footer > p:nth-child(2)"],
+          "html": "<p>© Acme Store</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "f16feb8dd1a9dca2",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"logo.svg\"]"],
+          "html": "<img src=\"/img/logo.svg\" width=\"120\" height=\"40\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "cf24049f75ec95fc",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"kettle.svg\"]"],
+          "html": "<img src=\"/img/kettle.svg\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "2dd66b0cfa92901f",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": [".card:nth-child(1) > button > img[src$=\"cart.svg\"]"],
+          "html": "<img src=\"/img/cart.svg\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "2dd66b0cfa92901f",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"pan.svg\"]"],
+          "html": "<img src=\"/img/pan.svg\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "2dd66b0cfa92901f",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": [".card:nth-child(2) > button > img[src$=\"cart.svg\"]"],
+          "html": "<img src=\"/img/cart.svg\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "2dd66b0cfa92901f",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"apron.svg\"]"],
+          "html": "<img src=\"/img/apron.svg\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "2dd66b0cfa92901f",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": [".card:nth-child(3) > button > img[src$=\"cart.svg\"]"],
+          "html": "<img src=\"/img/cart.svg\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "2dd66b0cfa92901f",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "link-name",
+          "impact": "serious",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/link-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag244", "wcag412"],
+          "standards": ["EN-9.2.4.4", "EN-9.4.1.2", "RGAA-6.2.1", "section508"],
+          "target": ["header > a[href=\"/\"]"],
+          "html": "<a href=\"/\"><img src=\"/img/logo.svg\" width=\"120\" height=\"40\"></a>",
+          "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
+          "checker": "axe-core",
+          "fingerprint": "1ecebddde24e48e7",
+          "scenario": null
+        },
+        {
+          "kind": "incomplete",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["h1"],
+          "html": "<h1>Kitchen things that last</h1>",
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined due to a background image",
+          "checker": "axe-core",
+          "fingerprint": "78f52413d430cbbf",
+          "scenario": null
+        },
+        {
+          "kind": "incomplete",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["section > p"],
+          "html": "<p>Free delivery on orders over £40 — this week only.</p>",
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined due to a background image",
+          "checker": "axe-core",
+          "fingerprint": "f16feb8dd1a9dca2",
+          "scenario": null
+        },
+        {
+          "kind": "recommendation",
+          "ruleId": "heading-order",
+          "impact": "moderate",
+          "help": "Heading levels should only increase by one",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/heading-order?application=playwright",
+          "wcagTags": [],
+          "standards": [],
+          "target": ["#content > h4"],
+          "html": "<h4>Best sellers</h4>",
+          "failureSummary": "Fix any of the following:\n  Heading order invalid",
+          "checker": "axe-core",
+          "fingerprint": "1c624e995f13ffb2",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "focus-visible",
+          "impact": "serious",
+          "help": "Keyboard focus must be visible",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+          "wcagTags": ["wcag2aa", "wcag247"],
+          "standards": ["EN-9.2.4.7", "RGAA-10.7.1", "section508"],
+          "target": ["a.skip"],
+          "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+          "failureSummary": "Keyboard focus moves to this element, but it is not visible on the screen.",
+          "checker": "keyboard",
+          "fingerprint": "ec44cfad21c87ded",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "focus-visible",
+          "impact": "serious",
+          "help": "Keyboard focus must be visible",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+          "wcagTags": ["wcag2aa", "wcag247"],
+          "standards": ["EN-9.2.4.7", "RGAA-10.7.1", "section508"],
+          "target": ["div.card:nth-of-type(1) > button.add"],
+          "html": "<button class=\"add\"><img src=\"/img/cart.svg\"></button>",
+          "failureSummary": "Nothing on the screen changes when this element receives keyboard focus.",
+          "checker": "keyboard",
+          "fingerprint": "14af16840632b5cc",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "focus-visible",
+          "impact": "serious",
+          "help": "Keyboard focus must be visible",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+          "wcagTags": ["wcag2aa", "wcag247"],
+          "standards": ["EN-9.2.4.7", "RGAA-10.7.1", "section508"],
+          "target": ["div.card:nth-of-type(2) > button.add"],
+          "html": "<button class=\"add\"><img src=\"/img/cart.svg\"></button>",
+          "failureSummary": "Nothing on the screen changes when this element receives keyboard focus.",
+          "checker": "keyboard",
+          "fingerprint": "14af16840632b5cc",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "focus-visible",
+          "impact": "serious",
+          "help": "Keyboard focus must be visible",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+          "wcagTags": ["wcag2aa", "wcag247"],
+          "standards": ["EN-9.2.4.7", "RGAA-10.7.1", "section508"],
+          "target": ["div.card:nth-of-type(3) > button.add"],
+          "html": "<button class=\"add\"><img src=\"/img/cart.svg\"></button>",
+          "failureSummary": "Nothing on the screen changes when this element receives keyboard focus.",
+          "checker": "keyboard",
+          "fingerprint": "14af16840632b5cc",
+          "scenario": null
+        }
+      ],
+      "keyboardCoverage": {
+        "status": "completed",
+        "reasons": [],
+        "visitedStops": 13,
+        "forwardSteps": 14,
+        "backwardSteps": 14,
+        "focusChecks": 6,
+        "focusStylesTested": 6,
+        "focusStylesSkipped": 0,
+        "elapsedMs": 1233,
+        "limits": {
+          "timeMs": 20000,
+          "stepsPerDirection": 300,
+          "focusChecks": 40
+        }
+      },
+      "tabOrder": {
+        "image": "order-2.webp",
+        "width": 960,
+        "height": 624,
+        "stops": [
+          {
+            "label": "Skip to content",
+            "selector": "a.skip",
+            "drawn": false
+          },
+          {
+            "label": "",
+            "selector": "header > a",
+            "drawn": true
+          },
+          {
+            "label": "Home",
+            "selector": "nav > a:nth-of-type(1)",
+            "drawn": true
+          },
+          {
+            "label": "Kettles",
+            "selector": "a:nth-of-type(2)",
+            "drawn": true
+          },
+          {
+            "label": "About",
+            "selector": "a:nth-of-type(3)",
+            "drawn": true
+          },
+          {
+            "label": "Contact",
+            "selector": "a:nth-of-type(4)",
+            "drawn": true
+          },
+          {
+            "label": "Kettle 1.7 L",
+            "selector": "div.card:nth-of-type(1) > h4 > a",
+            "drawn": true
+          },
+          {
+            "label": "",
+            "selector": "div.card:nth-of-type(1) > button.add",
+            "drawn": true
+          },
+          {
+            "label": "Cast iron pan",
+            "selector": "div.card:nth-of-type(2) > h4 > a",
+            "drawn": true
+          },
+          {
+            "label": "",
+            "selector": "div.card:nth-of-type(2) > button.add",
+            "drawn": true
+          },
+          {
+            "label": "Linen apron",
+            "selector": "div.card:nth-of-type(3) > h4 > a",
+            "drawn": true
+          },
+          {
+            "label": "",
+            "selector": "div.card:nth-of-type(3) > button.add",
+            "drawn": true
+          },
+          {
+            "label": "Click here",
+            "selector": "p:nth-of-type(1) > a",
+            "drawn": true
+          }
+        ]
+      }
+    },
+    {
+      "path": "/products/apron.html",
+      "title": "Linen apron — Acme Store",
+      "findings": [
+        {
+          "kind": "violation",
+          "ruleId": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag412"],
+          "standards": ["EN-9.4.1.2", "RGAA-11.9.1", "section508"],
+          "target": ["button"],
+          "html": "<button class=\"add\"><img src=\"/img/cart.svg\"></button>",
+          "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "c60f07a6c6ce46f7",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": [".price"],
+          "html": "<p class=\"price\">£22.00</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "1beb894d0e4dbf64",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["p:nth-child(1)"],
+          "html": "<p>Questions about an order? <a href=\"/contact.html\">Click here</a>.</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "524030381c64215a",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["p:nth-child(2)"],
+          "html": "<p>© Acme Store</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "f16feb8dd1a9dca2",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"logo.svg\"]"],
+          "html": "<img src=\"/img/logo.svg\" width=\"120\" height=\"40\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "cf24049f75ec95fc",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"apron.svg\"]"],
+          "html": "<img src=\"/img/apron.svg\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "2dd66b0cfa92901f",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"cart.svg\"]"],
+          "html": "<img src=\"/img/cart.svg\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "2dd66b0cfa92901f",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "label",
+          "impact": "critical",
+          "help": "Form elements must have labels",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/label?application=playwright",
+          "wcagTags": ["wcag2a", "wcag412"],
+          "standards": ["EN-9.4.1.2", "RGAA-11.1.1", "section508"],
+          "target": ["input"],
+          "html": "<input type=\"number\" value=\"1\" min=\"1\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "48ab440cf9e669e4",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "link-in-text-block",
+          "impact": "serious",
+          "help": "Links must be distinguishable without relying on color",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/link-in-text-block?application=playwright",
+          "wcagTags": ["wcag2a", "wcag141"],
+          "standards": ["EN-9.1.4.1", "RGAA-10.6.1", "section508"],
+          "target": ["p:nth-child(6) > a[href$=\"about.html\"]"],
+          "html": "<a href=\"/about.html\">delivery terms</a>",
+          "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 1.25:1 with the surrounding text. (Minimum contrast is 3:1, link text: #333333, surrounding text: #222222)\n  The link has no styling (such as underline) to distinguish it from the surrounding text",
+          "checker": "axe-core",
+          "fingerprint": "483fe41fe13b5611",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "link-name",
+          "impact": "serious",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/link-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag244", "wcag412"],
+          "standards": ["EN-9.2.4.4", "EN-9.4.1.2", "RGAA-6.2.1", "section508"],
+          "target": ["header > a[href=\"/\"]"],
+          "html": "<a href=\"/\"><img src=\"/img/logo.svg\" width=\"120\" height=\"40\"></a>",
+          "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
+          "checker": "axe-core",
+          "fingerprint": "1ecebddde24e48e7",
+          "scenario": null
+        },
+        {
+          "kind": "recommendation",
+          "ruleId": "heading-order",
+          "impact": "moderate",
+          "help": "Heading levels should only increase by one",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/heading-order?application=playwright",
+          "wcagTags": [],
+          "standards": [],
+          "target": ["h4"],
+          "html": "<h4>Delivery</h4>",
+          "failureSummary": "Fix any of the following:\n  Heading order invalid",
+          "checker": "axe-core",
+          "fingerprint": "1c624e995f13ffb2",
+          "scenario": null
+        },
+        {
+          "kind": "recommendation",
+          "ruleId": "region",
+          "impact": "moderate",
+          "help": "All page content should be contained by landmarks",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/region?application=playwright",
+          "wcagTags": [],
+          "standards": ["RGAA-9.2.1"],
+          "target": [".skip"],
+          "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+          "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks",
+          "checker": "axe-core",
+          "fingerprint": "c7fdd86859ccaef4",
+          "scenario": null
+        },
+        {
+          "kind": "recommendation",
+          "ruleId": "skip-link",
+          "impact": "moderate",
+          "help": "The skip-link target should exist and be focusable",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/skip-link?application=playwright",
+          "wcagTags": [],
+          "standards": ["RGAA-12.7.1"],
+          "target": [".skip"],
+          "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+          "failureSummary": "Fix any of the following:\n  No skip link target",
+          "checker": "axe-core",
+          "fingerprint": "0176891dbf05d0ab",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "focus-visible",
+          "impact": "serious",
+          "help": "Keyboard focus must be visible",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+          "wcagTags": ["wcag2aa", "wcag247"],
+          "standards": ["EN-9.2.4.7", "RGAA-10.7.1", "section508"],
+          "target": ["a.skip"],
+          "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+          "failureSummary": "Keyboard focus moves to this element, but it is not visible on the screen.",
+          "checker": "keyboard",
+          "fingerprint": "ec44cfad21c87ded",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "focus-visible",
+          "impact": "serious",
+          "help": "Keyboard focus must be visible",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+          "wcagTags": ["wcag2aa", "wcag247"],
+          "standards": ["EN-9.2.4.7", "RGAA-10.7.1", "section508"],
+          "target": ["button.add"],
+          "html": "<button class=\"add\"><img src=\"/img/cart.svg\"></button>",
+          "failureSummary": "Nothing on the screen changes when this element receives keyboard focus.",
+          "checker": "keyboard",
+          "fingerprint": "14af16840632b5cc",
+          "scenario": null
+        }
+      ],
+      "keyboardCoverage": {
+        "status": "completed",
+        "reasons": [],
+        "visitedStops": 10,
+        "forwardSteps": 11,
+        "backwardSteps": 11,
+        "focusChecks": 7,
+        "focusStylesTested": 7,
+        "focusStylesSkipped": 0,
+        "elapsedMs": 905,
+        "limits": {
+          "timeMs": 20000,
+          "stepsPerDirection": 300,
+          "focusChecks": 40
+        }
+      },
+      "tabOrder": {
+        "image": "order-3.webp",
+        "width": 960,
+        "height": 835,
+        "stops": [
+          {
+            "label": "Skip to content",
+            "selector": "a.skip",
+            "drawn": false
+          },
+          {
+            "label": "",
+            "selector": "header > a",
+            "drawn": true
+          },
+          {
+            "label": "Home",
+            "selector": "nav > a:nth-of-type(1)",
+            "drawn": true
+          },
+          {
+            "label": "Kettles",
+            "selector": "a:nth-of-type(2)",
+            "drawn": true
+          },
+          {
+            "label": "About",
+            "selector": "a:nth-of-type(3)",
+            "drawn": true
+          },
+          {
+            "label": "Contact",
+            "selector": "a:nth-of-type(4)",
+            "drawn": true
+          },
+          {
+            "label": "1",
+            "selector": "input",
+            "drawn": true
+          },
+          {
+            "label": "",
+            "selector": "button.add",
+            "drawn": true
+          },
+          {
+            "label": "delivery terms",
+            "selector": "p:nth-of-type(2) > a",
+            "drawn": true
+          },
+          {
+            "label": "Click here",
+            "selector": "p:nth-of-type(1) > a",
+            "drawn": true
+          }
+        ]
+      }
+    },
+    {
+      "path": "/products/kettle.html",
+      "title": "Kettle 1.7 L — Acme Store",
+      "findings": [
+        {
+          "kind": "violation",
+          "ruleId": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag412"],
+          "standards": ["EN-9.4.1.2", "RGAA-11.9.1", "section508"],
+          "target": ["button"],
+          "html": "<button class=\"add\"><img src=\"/img/cart.svg\"></button>",
+          "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "c60f07a6c6ce46f7",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": [".price"],
+          "html": "<p class=\"price\">£39.00</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "1beb894d0e4dbf64",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["p:nth-child(1)"],
+          "html": "<p>Questions about an order? <a href=\"/contact.html\">Click here</a>.</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "524030381c64215a",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["p:nth-child(2)"],
+          "html": "<p>© Acme Store</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "f16feb8dd1a9dca2",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"logo.svg\"]"],
+          "html": "<img src=\"/img/logo.svg\" width=\"120\" height=\"40\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "cf24049f75ec95fc",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"kettle.svg\"]"],
+          "html": "<img src=\"/img/kettle.svg\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "2dd66b0cfa92901f",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"cart.svg\"]"],
+          "html": "<img src=\"/img/cart.svg\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "2dd66b0cfa92901f",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "label",
+          "impact": "critical",
+          "help": "Form elements must have labels",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/label?application=playwright",
+          "wcagTags": ["wcag2a", "wcag412"],
+          "standards": ["EN-9.4.1.2", "RGAA-11.1.1", "section508"],
+          "target": ["input"],
+          "html": "<input type=\"number\" value=\"1\" min=\"1\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "48ab440cf9e669e4",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "link-in-text-block",
+          "impact": "serious",
+          "help": "Links must be distinguishable without relying on color",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/link-in-text-block?application=playwright",
+          "wcagTags": ["wcag2a", "wcag141"],
+          "standards": ["EN-9.1.4.1", "RGAA-10.6.1", "section508"],
+          "target": ["p:nth-child(6) > a[href$=\"about.html\"]"],
+          "html": "<a href=\"/about.html\">delivery terms</a>",
+          "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 1.25:1 with the surrounding text. (Minimum contrast is 3:1, link text: #333333, surrounding text: #222222)\n  The link has no styling (such as underline) to distinguish it from the surrounding text",
+          "checker": "axe-core",
+          "fingerprint": "483fe41fe13b5611",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "link-name",
+          "impact": "serious",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/link-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag244", "wcag412"],
+          "standards": ["EN-9.2.4.4", "EN-9.4.1.2", "RGAA-6.2.1", "section508"],
+          "target": ["header > a[href=\"/\"]"],
+          "html": "<a href=\"/\"><img src=\"/img/logo.svg\" width=\"120\" height=\"40\"></a>",
+          "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
+          "checker": "axe-core",
+          "fingerprint": "1ecebddde24e48e7",
+          "scenario": null
+        },
+        {
+          "kind": "recommendation",
+          "ruleId": "heading-order",
+          "impact": "moderate",
+          "help": "Heading levels should only increase by one",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/heading-order?application=playwright",
+          "wcagTags": [],
+          "standards": [],
+          "target": ["h4"],
+          "html": "<h4>Delivery</h4>",
+          "failureSummary": "Fix any of the following:\n  Heading order invalid",
+          "checker": "axe-core",
+          "fingerprint": "1c624e995f13ffb2",
+          "scenario": null
+        },
+        {
+          "kind": "recommendation",
+          "ruleId": "region",
+          "impact": "moderate",
+          "help": "All page content should be contained by landmarks",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/region?application=playwright",
+          "wcagTags": [],
+          "standards": ["RGAA-9.2.1"],
+          "target": [".skip"],
+          "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+          "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks",
+          "checker": "axe-core",
+          "fingerprint": "c7fdd86859ccaef4",
+          "scenario": null
+        },
+        {
+          "kind": "recommendation",
+          "ruleId": "skip-link",
+          "impact": "moderate",
+          "help": "The skip-link target should exist and be focusable",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/skip-link?application=playwright",
+          "wcagTags": [],
+          "standards": ["RGAA-12.7.1"],
+          "target": [".skip"],
+          "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+          "failureSummary": "Fix any of the following:\n  No skip link target",
+          "checker": "axe-core",
+          "fingerprint": "0176891dbf05d0ab",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "focus-visible",
+          "impact": "serious",
+          "help": "Keyboard focus must be visible",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+          "wcagTags": ["wcag2aa", "wcag247"],
+          "standards": ["EN-9.2.4.7", "RGAA-10.7.1", "section508"],
+          "target": ["a.skip"],
+          "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+          "failureSummary": "Keyboard focus moves to this element, but it is not visible on the screen.",
+          "checker": "keyboard",
+          "fingerprint": "ec44cfad21c87ded",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "focus-visible",
+          "impact": "serious",
+          "help": "Keyboard focus must be visible",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+          "wcagTags": ["wcag2aa", "wcag247"],
+          "standards": ["EN-9.2.4.7", "RGAA-10.7.1", "section508"],
+          "target": ["button.add"],
+          "html": "<button class=\"add\"><img src=\"/img/cart.svg\"></button>",
+          "failureSummary": "Nothing on the screen changes when this element receives keyboard focus.",
+          "checker": "keyboard",
+          "fingerprint": "14af16840632b5cc",
+          "scenario": null
+        }
+      ],
+      "keyboardCoverage": {
+        "status": "completed",
+        "reasons": [],
+        "visitedStops": 10,
+        "forwardSteps": 11,
+        "backwardSteps": 11,
+        "focusChecks": 7,
+        "focusStylesTested": 7,
+        "focusStylesSkipped": 0,
+        "elapsedMs": 899,
+        "limits": {
+          "timeMs": 20000,
+          "stepsPerDirection": 300,
+          "focusChecks": 40
+        }
+      },
+      "tabOrder": {
+        "image": "order-4.webp",
+        "width": 960,
+        "height": 835,
+        "stops": [
+          {
+            "label": "Skip to content",
+            "selector": "a.skip",
+            "drawn": false
+          },
+          {
+            "label": "",
+            "selector": "header > a",
+            "drawn": true
+          },
+          {
+            "label": "Home",
+            "selector": "nav > a:nth-of-type(1)",
+            "drawn": true
+          },
+          {
+            "label": "Kettles",
+            "selector": "a:nth-of-type(2)",
+            "drawn": true
+          },
+          {
+            "label": "About",
+            "selector": "a:nth-of-type(3)",
+            "drawn": true
+          },
+          {
+            "label": "Contact",
+            "selector": "a:nth-of-type(4)",
+            "drawn": true
+          },
+          {
+            "label": "1",
+            "selector": "input",
+            "drawn": true
+          },
+          {
+            "label": "",
+            "selector": "button.add",
+            "drawn": true
+          },
+          {
+            "label": "delivery terms",
+            "selector": "p:nth-of-type(2) > a",
+            "drawn": true
+          },
+          {
+            "label": "Click here",
+            "selector": "p:nth-of-type(1) > a",
+            "drawn": true
+          }
+        ]
+      }
+    },
+    {
+      "path": "/products/pan.html",
+      "title": "Cast iron pan — Acme Store",
+      "findings": [
+        {
+          "kind": "violation",
+          "ruleId": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag412"],
+          "standards": ["EN-9.4.1.2", "RGAA-11.9.1", "section508"],
+          "target": ["button"],
+          "html": "<button class=\"add\"><img src=\"/img/cart.svg\"></button>",
+          "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "c60f07a6c6ce46f7",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": [".price"],
+          "html": "<p class=\"price\">£54.00</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "1beb894d0e4dbf64",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["p:nth-child(1)"],
+          "html": "<p>Questions about an order? <a href=\"/contact.html\">Click here</a>.</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "524030381c64215a",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+          "wcagTags": ["wcag2aa", "wcag143"],
+          "standards": ["EN-9.1.4.3", "RGAA-3.2.1", "section508"],
+          "target": ["p:nth-child(2)"],
+          "html": "<p>© Acme Store</p>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+          "checker": "axe-core",
+          "fingerprint": "f16feb8dd1a9dca2",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"logo.svg\"]"],
+          "html": "<img src=\"/img/logo.svg\" width=\"120\" height=\"40\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "cf24049f75ec95fc",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"pan.svg\"]"],
+          "html": "<img src=\"/img/pan.svg\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "2dd66b0cfa92901f",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "image-alt",
+          "impact": "critical",
+          "help": "Images must have alternative text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright",
+          "wcagTags": ["wcag2a", "wcag111"],
+          "standards": ["EN-9.1.1.1", "RGAA-1.1.1", "section508"],
+          "target": ["img[src$=\"cart.svg\"]"],
+          "html": "<img src=\"/img/cart.svg\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "2dd66b0cfa92901f",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "label",
+          "impact": "critical",
+          "help": "Form elements must have labels",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/label?application=playwright",
+          "wcagTags": ["wcag2a", "wcag412"],
+          "standards": ["EN-9.4.1.2", "RGAA-11.1.1", "section508"],
+          "target": ["input"],
+          "html": "<input type=\"number\" value=\"1\" min=\"1\">",
+          "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+          "checker": "axe-core",
+          "fingerprint": "48ab440cf9e669e4",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "link-in-text-block",
+          "impact": "serious",
+          "help": "Links must be distinguishable without relying on color",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/link-in-text-block?application=playwright",
+          "wcagTags": ["wcag2a", "wcag141"],
+          "standards": ["EN-9.1.4.1", "RGAA-10.6.1", "section508"],
+          "target": ["p:nth-child(6) > a[href$=\"about.html\"]"],
+          "html": "<a href=\"/about.html\">delivery terms</a>",
+          "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 1.25:1 with the surrounding text. (Minimum contrast is 3:1, link text: #333333, surrounding text: #222222)\n  The link has no styling (such as underline) to distinguish it from the surrounding text",
+          "checker": "axe-core",
+          "fingerprint": "483fe41fe13b5611",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "link-name",
+          "impact": "serious",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/link-name?application=playwright",
+          "wcagTags": ["wcag2a", "wcag244", "wcag412"],
+          "standards": ["EN-9.2.4.4", "EN-9.4.1.2", "RGAA-6.2.1", "section508"],
+          "target": ["header > a[href=\"/\"]"],
+          "html": "<a href=\"/\"><img src=\"/img/logo.svg\" width=\"120\" height=\"40\"></a>",
+          "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
+          "checker": "axe-core",
+          "fingerprint": "1ecebddde24e48e7",
+          "scenario": null
+        },
+        {
+          "kind": "recommendation",
+          "ruleId": "heading-order",
+          "impact": "moderate",
+          "help": "Heading levels should only increase by one",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/heading-order?application=playwright",
+          "wcagTags": [],
+          "standards": [],
+          "target": ["h4"],
+          "html": "<h4>Delivery</h4>",
+          "failureSummary": "Fix any of the following:\n  Heading order invalid",
+          "checker": "axe-core",
+          "fingerprint": "1c624e995f13ffb2",
+          "scenario": null
+        },
+        {
+          "kind": "recommendation",
+          "ruleId": "region",
+          "impact": "moderate",
+          "help": "All page content should be contained by landmarks",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/region?application=playwright",
+          "wcagTags": [],
+          "standards": ["RGAA-9.2.1"],
+          "target": [".skip"],
+          "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+          "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks",
+          "checker": "axe-core",
+          "fingerprint": "c7fdd86859ccaef4",
+          "scenario": null
+        },
+        {
+          "kind": "recommendation",
+          "ruleId": "skip-link",
+          "impact": "moderate",
+          "help": "The skip-link target should exist and be focusable",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/skip-link?application=playwright",
+          "wcagTags": [],
+          "standards": ["RGAA-12.7.1"],
+          "target": [".skip"],
+          "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+          "failureSummary": "Fix any of the following:\n  No skip link target",
+          "checker": "axe-core",
+          "fingerprint": "0176891dbf05d0ab",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "focus-visible",
+          "impact": "serious",
+          "help": "Keyboard focus must be visible",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+          "wcagTags": ["wcag2aa", "wcag247"],
+          "standards": ["EN-9.2.4.7", "RGAA-10.7.1", "section508"],
+          "target": ["a.skip"],
+          "html": "<a class=\"skip\" href=\"#content\">Skip to content</a>",
+          "failureSummary": "Keyboard focus moves to this element, but it is not visible on the screen.",
+          "checker": "keyboard",
+          "fingerprint": "ec44cfad21c87ded",
+          "scenario": null
+        },
+        {
+          "kind": "violation",
+          "ruleId": "focus-visible",
+          "impact": "serious",
+          "help": "Keyboard focus must be visible",
+          "helpUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html",
+          "wcagTags": ["wcag2aa", "wcag247"],
+          "standards": ["EN-9.2.4.7", "RGAA-10.7.1", "section508"],
+          "target": ["button.add"],
+          "html": "<button class=\"add\"><img src=\"/img/cart.svg\"></button>",
+          "failureSummary": "Nothing on the screen changes when this element receives keyboard focus.",
+          "checker": "keyboard",
+          "fingerprint": "14af16840632b5cc",
+          "scenario": null
+        }
+      ],
+      "keyboardCoverage": {
+        "status": "completed",
+        "reasons": [],
+        "visitedStops": 10,
+        "forwardSteps": 11,
+        "backwardSteps": 11,
+        "focusChecks": 7,
+        "focusStylesTested": 7,
+        "focusStylesSkipped": 0,
+        "elapsedMs": 876,
+        "limits": {
+          "timeMs": 20000,
+          "stepsPerDirection": 300,
+          "focusChecks": 40
+        }
+      },
+      "tabOrder": {
+        "image": "order-5.webp",
+        "width": 960,
+        "height": 835,
+        "stops": [
+          {
+            "label": "Skip to content",
+            "selector": "a.skip",
+            "drawn": false
+          },
+          {
+            "label": "",
+            "selector": "header > a",
+            "drawn": true
+          },
+          {
+            "label": "Home",
+            "selector": "nav > a:nth-of-type(1)",
+            "drawn": true
+          },
+          {
+            "label": "Kettles",
+            "selector": "a:nth-of-type(2)",
+            "drawn": true
+          },
+          {
+            "label": "About",
+            "selector": "a:nth-of-type(3)",
+            "drawn": true
+          },
+          {
+            "label": "Contact",
+            "selector": "a:nth-of-type(4)",
+            "drawn": true
+          },
+          {
+            "label": "1",
+            "selector": "input",
+            "drawn": true
+          },
+          {
+            "label": "",
+            "selector": "button.add",
+            "drawn": true
+          },
+          {
+            "label": "delivery terms",
+            "selector": "p:nth-of-type(2) > a",
+            "drawn": true
+          },
+          {
+            "label": "Click here",
+            "selector": "p:nth-of-type(1) > a",
+            "drawn": true
+          }
+        ]
+      }
+    }
+  ]
+}

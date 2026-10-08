@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Keyboard trap example</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="trap.js" defer></script>
+</head>
+<body>
+  <header><span class="brand">Acme Journal</span><span id="variant">Broken keyboard interaction</span></header>
+  <aside class="key-trace" aria-label="Keyboard trace"><span id="key">Press Tab to start</span><span id="trace">Focus: page</span></aside>
+  <main>
+    <p class="eyebrow">A page can look fine and still block someone</p>
+    <h1>Keep up with the good things.</h1>
+    <p class="intro">A simple newsletter. A visible focus ring. A form that looks ready to use.</p>
+    <a class="before" href="#newsletter">Read the newsletter</a>
+    <section id="newsletter" aria-labelledby="newsletter-heading">
+      <h2 id="newsletter-heading">One useful email a month.</h2>
+      <p>No noise. Just new articles, in your inbox.</p>
+      <form>
+        <label for="email">Email address</label>
+        <div class="fields"><input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com"><button type="submit">Subscribe</button></div>
+      </form>
+    </section>
+    <a class="after" href="#privacy">Read our privacy policy</a>
+    <p id="privacy" class="fine">This intentionally broken test fixture never sends email. Reload the page to reset focus.</p>
+  </main>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tabwalk dialog scenario</title>
+  <style>
+    body { max-width: 42rem; margin: 3rem auto; padding: 0 1rem; font: 1.1rem/1.6 system-ui; color: #172536; background: #fff; }
+    button, a { font: inherit; }
+    button { padding: .6rem 1rem; color: #172536; background: #e8eef5; border: 2px solid #51667e; border-radius: .4rem; }
+    :focus-visible { outline: 3px solid #0049a3; outline-offset: 3px; }
+    a { color: #0049a3; }
+    dialog { max-width: 28rem; padding: 1.5rem; color: #172536; background: #fff; border: 2px solid #51667e; }
+    dialog::backdrop { background: #17253688; }
+    svg { display: block; width: 1.4rem; height: 1.4rem; }
+  </style>
+  <script src="dialog.js" defer></script>
+</head>
+<body>
+  <main>
+    <h1>Check an open dialog and focus restoration</h1>
+    <p id="version">Broken version: an unnamed dialog button and incorrect focus after Escape.</p>
+    <button id="open-dialog" type="button">Open dialog</button>
+    <p><a id="after" href="#version">Continue after the dialog</a></p>
+    <p><a href="?fixed">Try the fixed version</a> or <a href="./">return to the broken version</a>.</p>
+    <dialog id="dialog" aria-labelledby="dialog-title">
+      <h2 id="dialog-title">Example dialog</h2>
+      <p>The icon button needs a name. Closing should return focus to Open dialog.</p>
+      <button id="close-dialog" type="button">Close dialog</button>
+      <button id="icon-action" type="button">
+        <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path fill="currentColor" d="M12 2 15 9 22 10 17 15 18 22 12 18 6 22 7 15 2 10 9 9Z"/></svg>
+      </button>
+    </dialog>
+  </main>
+</body>
+</html>

@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tabwalk — self-hosted accessibility monitoring</title>
+    <title>Tabwalk — catch keyboard bugs before your users do</title>
     <meta
       name="description"
-      content="Free and open source accessibility monitoring. Tabwalk crawls your site, checks every page against WCAG with axe-core, presses Tab through it and shows what is actually broken — including what a machine cannot judge. Runs on your own server."
+      content="Tabwalk checks your site with axe-core and a real keyboard walk. Find focus traps, invisible focus and repeated accessibility problems. Explore the demo, then run it on your own server. Free and open source."
     />
     <link rel="canonical" href="https://tabwalk.dev/" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -17,10 +17,10 @@
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://tabwalk.dev/" />
-    <meta property="og:title" content="Tabwalk — self-hosted accessibility monitoring" />
+    <meta property="og:title" content="Tabwalk — catch keyboard bugs before your users do" />
     <meta
       property="og:description"
-      content="See what is actually broken on your sites. Free, open source, runs on your own server — no overlay, no compliance promises."
+      content="A real browser presses Tab, Shift+Tab and Escape. Explore a keyboard bug, its fix and the scan report. Free, open source and self-hosted."
     />
     <meta property="og:image" content="https://tabwalk.dev/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -45,7 +45,7 @@
         </a>
         <nav aria-label="Main">
           <a href="#features">Features</a>
-          <a href="#overlays">Why not an overlay</a>
+          <a href="/demo/">Demo</a>
           <a href="#faq">FAQ</a>
         </nav>
         <div class="right">
@@ -67,38 +67,23 @@
           <a class="pill" href="https://github.com/Artemy-And/tabwalk/releases/tag/v0.4.0">
             <span class="tag">New</span><b>Tabwalk 0.4.0: logins, PDF reports, eight languages</b><span aria-hidden="true">→</span>
           </a>
-          <h1>See what’s actually broken. On your own server.</h1>
+          <h1>Catch keyboard bugs before your users do.</h1>
           <p class="lede">
-            Tabwalk scans your site every day or week, checks each page against WCAG with axe-core, presses Tab
-            through it like a tester and collapses repeated problems into one row. What a machine cannot judge is
-            shown too, not quietly dropped.
+            A real browser presses Tab, Shift+Tab and Escape to find focus traps, invisible focus and controls
+            hidden under sticky content. Add axe-core checks, group repeated problems, and watch for changes.
+            Free, open source, on your own server.
           </p>
           <div class="actions">
-            <a class="btn btn-light" href="https://github.com/Artemy-And/tabwalk">Star on GitHub</a>
-            <a class="btn btn-dark" href="#install">Install in 5 minutes</a>
+            <a class="btn btn-light" href="/demo/">Try the demo <span aria-hidden="true">→</span></a>
+            <a class="btn btn-dark" href="#install">Install on your server</a>
+            <a class="btn btn-dark" href="https://github.com/Artemy-And/tabwalk">View on GitHub</a>
           </div>
 
-          <figure class="shot" aria-label="Example report for a made-up shop">
-            <div class="shot-bar"><b>Tabwalk</b> Sites / Acme Store / Sep 25, 10:35</div>
-            <div class="shot-body">
-              <div class="shot-head">
-                <h2>Acme Store</h2>
-                <span class="shot-next"><i class="dot dot-good"></i>Scans weekly · next Oct 2, 10:35</span>
-              </div>
-              <div class="stats">
-                <div class="stat"><strong>17</strong><span>unique problems on 1,564 elements</span></div>
-                <div class="stat"><strong class="c-critical">6</strong><span>critical</span></div>
-                <div class="stat"><strong class="c-review">28</strong><span>need a human</span></div>
-                <div class="stat"><strong>50</strong><span>pages checked</span></div>
-              </div>
-              <div class="rows">
-                <div class="row"><span class="badge c-critical">Critical</span><span>Buttons must have discernible text</span><code>button.add</code><span class="pages">38 pages</span></div>
-                <div class="row"><span class="badge c-critical">Critical</span><span>Images must have alternative text</span><code>.gallery img</code><span class="pages">31 pages</span></div>
-                <div class="row"><span class="badge c-critical">Critical</span><span>Keyboard focus must not get stuck in one part of the page</span><code>#newsletter form</code><span class="pages">1 page</span></div>
-                <div class="row"><span class="badge c-serious">Serious</span><span>Focused elements must not be hidden under other content</span><code>header.sticky</code><span class="pages">44 pages</span></div>
-                <div class="row"><span class="badge c-review">Needs review</span><span>Links must be distinguishable without relying on color</span><code>main p &gt; a</code><span class="pages">23 pages</span></div>
-              </div>
-            </div>
+          <figure class="hero-demo">
+            <a href="/demo/" aria-label="Watch the keyboard trap and explore its report">
+              <img src="/demo/keyboard-poster.webp" width="1280" height="800" alt="A newsletter form with a visible focus ring can still trap keyboard navigation. The demo shows the bug and its fix.">
+            </a>
+            <figcaption><a href="/demo/">Watch the keyboard bug and its fix →</a> Then explore the real scan report. No signup.</figcaption>
           </figure>
         </div>
       </div>
@@ -144,12 +129,12 @@
               </div>
             </div>
             <div class="card">
-              <h3>Shows what machines miss</h3>
-              <p>Results axe-core cannot decide are listed as “needs a human”, so you know what to check by hand.</p>
+              <h3>Flags checks that need a person</h3>
+              <p>Uncertain results from axe-core and the keyboard walk are listed as “needs a human”, with the evidence to review.</p>
               <div class="art mini checks">
-                <div class="mini-row"><span><i class="dot dot-review"></i>Do these links make sense?</span><span>23</span></div>
-                <div class="mini-row"><span><i class="dot dot-review"></i>Contrast over an image</span><span>12</span></div>
-                <div class="mini-row"><span><i class="dot dot-review"></i>Video captions correct?</span><span>4</span></div>
+                <div class="mini-row"><span><i class="dot dot-review"></i>Contrast could not be measured</span><span>review</span></div>
+                <div class="mini-row"><span><i class="dot dot-review"></i>A field shows only its text cursor</span><span>review</span></div>
+                <div class="mini-row"><span><i class="dot dot-review"></i>A focus loop can be left backwards</span><span>review</span></div>
               </div>
             </div>
             <div class="card">
@@ -210,8 +195,12 @@
           <div class="section-head"><h2 class="big" id="faq-title">Questions and answers</h2></div>
           <div class="faq">
             <details>
+              <summary>Can I try it before installing?</summary>
+              <p><a href="/demo/">Open the sample report</a> to watch a real keyboard bug, see its fix, explore findings, and download the JSON. No signup needed. The demo is a snapshot; you run scans on your own server.</p>
+            </details>
+            <details>
               <summary>Is it really free?</summary>
-              <p>Yes. The self-hosted version is AGPL-3.0 with no account and no feature limits, and it always will be.</p>
+              <p>Yes. The self-hosted version is AGPL-3.0 with no subscription or feature limits. You create a local admin account on your own server.</p>
             </details>
             <details>
               <summary>Will it make my site compliant?</summary>

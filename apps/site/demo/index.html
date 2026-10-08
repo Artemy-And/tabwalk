@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tabwalk demo — a keyboard bug you can see</title>
+  <meta name="description" content="Explore a real Tabwalk scan: a keyboard trap, its fix, screenshots, tab order and the checks that still need a human. No account needed.">
+  <link rel="canonical" href="https://tabwalk.dev/demo/">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="demo.css">
+  <script src="report.js" defer></script>
+  <meta property="og:title" content="Tabwalk — see a keyboard bug and its fix">
+  <meta property="og:description" content="A real scan, a short keyboard recording and a report you can explore without signing up.">
+  <meta property="og:image" content="https://tabwalk.dev/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="top"><div class="wrap">
+    <a class="brand" href="/"><img src="/favicon.svg" width="28" height="28" alt="">Tabwalk</a>
+    <span class="demo-label">Public demo</span>
+    <div class="right"><a class="btn btn-dark" href="https://github.com/Artemy-And/tabwalk">View source</a><a class="btn btn-light" href="https://github.com/Artemy-And/tabwalk#quick-start">Run on your site</a></div>
+  </div></header>
+  <main id="main" class="wrap demo-main">
+    <div class="demo-intro">
+      <p class="eyebrow">A real browser. A reproducible result.</p>
+      <h1>The page looks fine.<br>Try leaving the form.</h1>
+      <p class="lede">Tabwalk presses Tab and Shift+Tab, tries Escape, and shows where keyboard navigation breaks. Start with this small example, then explore the report below.</p>
+    </div>
+    <section class="story" aria-labelledby="story-heading">
+      <div class="recording">
+        <h2 id="story-heading" class="sr-only">The keyboard trap and its fix</h2>
+        <video controls preload="metadata" poster="keyboard-poster.webp" width="1280" height="800" aria-describedby="transcript">
+          <source src="keyboard-demo.webm" type="video/webm">
+          <a href="keyboard-demo.webm">Download the keyboard demonstration</a>
+        </video>
+        <p id="transcript"><strong>Recording transcript:</strong> Tab enters the email field, then Subscribe. Tab cycles back to email. Shift+Tab and Escape cannot leave the form. After removing the custom focus loop, Tab reaches the privacy link and Shift+Tab leaves the form.</p>
+      </div>
+      <div class="story-evidence">
+        <p class="eyebrow">Same markup. Different keyboard behaviour.</p>
+        <h2>Static checks alone miss this trap.</h2>
+        <table class="comparison"><caption class="sr-only">WCAG violations detected in the two versions</caption><thead><tr><th scope="col">Check</th><th scope="col">Broken</th><th scope="col">Fixed</th></tr></thead><tbody><tr><th scope="row">axe-core violations</th><td>0</td><td>0</td></tr><tr><th scope="row">Keyboard violations</th><td class="c-critical">1 trap</td><td class="c-good">0</td></tr></tbody></table>
+        <p class="story-note">Counts above come from scanning both versions with the same Tabwalk checkers. Zero findings does not establish accessibility.</p>
+        <details class="fix"><summary>See the fix</summary>
+          <p>Remove the custom Tab handler from this ordinary form. Native keyboard navigation already moves between its controls and the rest of the page.</p>
+          <pre><code>// Remove the handler that redirects focus:
+if (!event.shiftKey &amp;&amp; active === last) {
+  event.preventDefault();
+  first.focus();
+}</code></pre>
+          <a href="https://github.com/Artemy-And/tabwalk/tree/develop/examples/keyboard-trap">Both versions and their source</a>
+        </details>
+      </div>
+    </section>
+    <section class="demo-report" aria-labelledby="report-heading">
+      <div class="report-heading">
+        <div><p class="eyebrow">Explore the scanner output</p><h2 id="report-heading">Acme Store</h2><p class="muted">A deliberately broken demo shop, checked with the production scanner.</p></div>
+        <div class="report-actions"><a class="btn btn-dark" href="report.json" download>Download JSON</a><button class="btn btn-dark" id="print" type="button">Print / save PDF</button></div>
+      </div>
+      <div class="demo-stats"><div class="demo-stat"><strong class="">17</strong><span>unique problems</span></div>
+<div class="demo-stat"><strong class="c-critical">7</strong><span>critical</span></div>
+<div class="demo-stat"><strong class="c-review">4</strong><span>need a human</span></div>
+<div class="demo-stat"><strong class="">6</strong><span>pages checked</span></div></div>
+      <p class="scan-meta">Generated 2026-10-08 · develop snapshot · 81 affected elements · 2 page(s) with partial keyboard coverage. Open a finding for evidence and a page for its Tab order.</p>
+      <div class="demo-tools">
+        <div class="filters" role="group" aria-label="Filter findings">
+          <button type="button" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" data-filter="keyboard" aria-pressed="false">Keyboard</button>
+          <button type="button" data-filter="axe-core" aria-pressed="false">axe-core</button>
+          <button type="button" data-filter="incomplete" aria-pressed="false">Needs a human</button>
+        </div>
+        <label class="search">Search findings<input id="search" type="search" placeholder="Rule, selector or problem"></label>
+      </div>
+      <p id="result-count" class="scan-meta" aria-live="polite">28 findings shown</p>
+      <div id="findings" class="findings"><details class="finding" data-checker="axe-core" data-kind="violation" open><summary><span class="badge c-critical">critical</span>Images must have alternative text</summary>
+<p class="finding-meta">axe-core · image-alt · 6 page(s) · 7 element(s)</p>
+<p class="finding-meta">wcag2a · wcag111 · EN-9.1.1.1 · RGAA-1.1.1 · section508</p>
+<img src="finding-cf24049f75ec95fc.webp" width="216" height="136" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /about.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;img src=&quot;/img/logo.svg&quot; width=&quot;120&quot; height=&quot;40&quot;&gt;</code></pre><p class="finding-meta">img[src$=&quot;logo.svg&quot;]</p>
+<p>Fix any of the following:
+  Element does not have an alt attribute
+  aria-label attribute does not exist or is empty
+  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+  Element has no title attribute
+  Element&#39;s default semantics were not overridden with role=&quot;none&quot; or role=&quot;presentation&quot;</p>
+<p>Found on: /about.html, /contact.html, /, /products/apron.html, /products/kettle.html, /products/pan.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="violation"><summary><span class="badge c-critical">critical</span>Images must have alternative text</summary>
+<p class="finding-meta">axe-core · image-alt · 6 page(s) · 14 element(s)</p>
+<p class="finding-meta">wcag2a · wcag111 · EN-9.1.1.1 · RGAA-1.1.1 · section508</p>
+<img src="finding-2dd66b0cfa92901f.webp" width="580" height="220" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /about.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;img src=&quot;/img/cart.svg&quot;&gt;</code></pre><p class="finding-meta">iframe img[src$=&quot;cart.svg&quot;]</p>
+<p>Fix any of the following:
+  Element does not have an alt attribute
+  aria-label attribute does not exist or is empty
+  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+  Element has no title attribute
+  Element&#39;s default semantics were not overridden with role=&quot;none&quot; or role=&quot;presentation&quot;</p>
+<p>Found on: /about.html, /contact.html, /, /products/apron.html, /products/kettle.html, /products/pan.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="violation"><summary><span class="badge c-critical">critical</span>Buttons must have discernible text</summary>
+<p class="finding-meta">axe-core · button-name · 4 page(s) · 6 element(s)</p>
+<p class="finding-meta">wcag2a · wcag412 · EN-9.4.1.2 · RGAA-11.9.1 · section508</p>
+<img src="finding-c60f07a6c6ce46f7.webp" width="136" height="136" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /. The HTML and selector below describe this element.</p>
+<pre><code>&lt;button class=&quot;add&quot;&gt;&lt;img src=&quot;/img/cart.svg&quot;&gt;&lt;/button&gt;</code></pre><p class="finding-meta">.card:nth-child(1) &gt; button</p>
+<p>Fix any of the following:
+  Element does not have inner text that is visible to screen readers
+  aria-label attribute does not exist or is empty
+  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+  Element has no title attribute
+  Element does not have an implicit (wrapped) &lt;label&gt;
+  Element does not have an explicit &lt;label&gt;
+  Element&#39;s default semantics were not overridden with role=&quot;none&quot; or role=&quot;presentation&quot;</p>
+<p>Found on: /, /products/apron.html, /products/kettle.html, /products/pan.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/button-name?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="violation"><summary><span class="badge c-critical">critical</span>Form elements must have labels</summary>
+<p class="finding-meta">axe-core · label · 3 page(s) · 3 element(s)</p>
+<p class="finding-meta">wcag2a · wcag412 · EN-9.4.1.2 · RGAA-11.1.1 · section508</p>
+<img src="finding-48ab440cf9e669e4.webp" width="273" height="117" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /products/apron.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;input type=&quot;number&quot; value=&quot;1&quot; min=&quot;1&quot;&gt;</code></pre><p class="finding-meta">input</p>
+<p>Fix any of the following:
+  Element does not have an implicit (wrapped) &lt;label&gt;
+  Element does not have an explicit &lt;label&gt;
+  aria-label attribute does not exist or is empty
+  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+  Element has no title attribute
+  Element has no placeholder attribute
+  Element&#39;s default semantics were not overridden with role=&quot;none&quot; or role=&quot;presentation&quot;</p>
+<p>Found on: /products/apron.html, /products/kettle.html, /products/pan.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/label?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="violation"><summary><span class="badge c-critical">critical</span>Buttons must have discernible text</summary>
+<p class="finding-meta">axe-core · button-name · 2 page(s) · 2 element(s)</p>
+<p class="finding-meta">wcag2a · wcag412 · EN-9.4.1.2 · RGAA-11.9.1 · section508</p>
+<img src="finding-76fdb5addaf105b6.webp" width="580" height="220" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /about.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;button&gt;&lt;img src=&quot;/img/cart.svg&quot;&gt;&lt;/button&gt;</code></pre><p class="finding-meta">iframe #content &gt; form &gt; button</p>
+<p>Fix any of the following:
+  Element does not have inner text that is visible to screen readers
+  aria-label attribute does not exist or is empty
+  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+  Element has no title attribute
+  Element does not have an implicit (wrapped) &lt;label&gt;
+  Element does not have an explicit &lt;label&gt;
+  Element&#39;s default semantics were not overridden with role=&quot;none&quot; or role=&quot;presentation&quot;</p>
+<p>Found on: /about.html, /contact.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/button-name?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="violation"><summary><span class="badge c-critical">critical</span>Images must have alternative text</summary>
+<p class="finding-meta">axe-core · image-alt · 1 page(s) · 1 element(s)</p>
+<p class="finding-meta">wcag2a · wcag111 · EN-9.1.1.1 · RGAA-1.1.1 · section508</p>
+<img src="finding-6ab517baec07f395.webp" width="336" height="256" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /about.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;img src=&quot;/img/kettle.svg&quot; width=&quot;240&quot;&gt;</code></pre><p class="finding-meta">img[src$=&quot;kettle.svg&quot;]</p>
+<p>Fix any of the following:
+  Element does not have an alt attribute
+  aria-label attribute does not exist or is empty
+  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+  Element has no title attribute
+  Element&#39;s default semantics were not overridden with role=&quot;none&quot; or role=&quot;presentation&quot;</p>
+<p>Found on: /about.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/image-alt?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="keyboard" data-kind="violation"><summary><span class="badge c-critical">critical</span>Keyboard focus must not get stuck in one part of the page</summary>
+<p class="finding-meta">keyboard · keyboard-trap · 1 page(s) · 1 element(s)</p>
+<p class="finding-meta">wcag2a · wcag212 · EN-9.2.1.2 · RGAA-12.9.1 · section508</p>
+<img src="finding-8e7c97039b64a25b.webp" width="960" height="117" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /contact.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;form&gt;
+        &lt;input type=&quot;email&quot; placeholder=&quot;Email&quot; aria-label=&quot;Email for the newsletter&quot;&gt;
+        &lt;button type=&quot;submit&quot;&gt;Sign up&lt;/button&gt;
+      &lt;/form&gt;</code></pre><p class="finding-meta">#newsletter &gt; form</p>
+<p>Focus cycles between 2 elements and never leaves: #newsletter &gt; form &gt; input, #newsletter &gt; form &gt; button. Tab, Shift+Tab and Escape do not get out.</p>
+<p>Found on: /contact.html</p>
+<p><a href="https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap.html">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="violation"><summary><span class="badge c-serious">serious</span>Elements must meet minimum color contrast ratio thresholds</summary>
+<p class="finding-meta">axe-core · color-contrast · 6 page(s) · 7 element(s)</p>
+<p class="finding-meta">wcag2aa · wcag143 · EN-9.1.4.3 · RGAA-3.2.1 · section508</p>
+<img src="finding-524030381c64215a.webp" width="580" height="220" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /about.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;p&gt;Questions about an order? &lt;a href=&quot;/contact.html&quot;&gt;Click here&lt;/a&gt;.&lt;/p&gt;</code></pre><p class="finding-meta">iframe p:nth-child(1)</p>
+<p>Fix any of the following:
+  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1</p>
+<p>Found on: /about.html, /contact.html, /, /products/apron.html, /products/kettle.html, /products/pan.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="violation"><summary><span class="badge c-serious">serious</span>Elements must meet minimum color contrast ratio thresholds</summary>
+<p class="finding-meta">axe-core · color-contrast · 6 page(s) · 7 element(s)</p>
+<p class="finding-meta">wcag2aa · wcag143 · EN-9.1.4.3 · RGAA-3.2.1 · section508</p>
+<img src="finding-f16feb8dd1a9dca2.webp" width="580" height="220" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /about.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;p&gt;© Acme Store&lt;/p&gt;</code></pre><p class="finding-meta">iframe p:nth-child(2)</p>
+<p>Fix any of the following:
+  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1</p>
+<p>Found on: /about.html, /contact.html, /, /products/apron.html, /products/kettle.html, /products/pan.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="keyboard" data-kind="violation"><summary><span class="badge c-serious">serious</span>Keyboard focus must be visible</summary>
+<p class="finding-meta">keyboard · focus-visible · 6 page(s) · 6 element(s)</p>
+<p class="finding-meta">wcag2aa · wcag247 · EN-9.2.4.7 · RGAA-10.7.1 · section508</p>
+
+<pre><code>&lt;a class=&quot;skip&quot; href=&quot;#content&quot;&gt;Skip to content&lt;/a&gt;</code></pre><p class="finding-meta">a.skip</p>
+<p>Keyboard focus moves to this element, but it is not visible on the screen.</p>
+<p>Found on: /about.html, /contact.html, /, /products/apron.html, /products/kettle.html, /products/pan.html</p>
+<p><a href="https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="violation"><summary><span class="badge c-serious">serious</span>Links must have discernible text</summary>
+<p class="finding-meta">axe-core · link-name · 6 page(s) · 7 element(s)</p>
+<p class="finding-meta">wcag2a · wcag244 · wcag412 · EN-9.2.4.4 · EN-9.4.1.2 · RGAA-6.2.1 · section508</p>
+<img src="finding-1ecebddde24e48e7.webp" width="216" height="140" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /about.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;a href=&quot;/&quot;&gt;&lt;img src=&quot;/img/logo.svg&quot; width=&quot;120&quot; height=&quot;40&quot;&gt;&lt;/a&gt;</code></pre><p class="finding-meta">header &gt; a[href=&quot;/&quot;]</p>
+<p>Fix all of the following:
+  Element is in tab order and does not have accessible text
+
+Fix any of the following:
+  Element does not have text that is visible to screen readers
+  aria-label attribute does not exist or is empty
+  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+  Element has no title attribute</p>
+<p>Found on: /about.html, /contact.html, /, /products/apron.html, /products/kettle.html, /products/pan.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/link-name?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="violation"><summary><span class="badge c-serious">serious</span>Elements must meet minimum color contrast ratio thresholds</summary>
+<p class="finding-meta">axe-core · color-contrast · 4 page(s) · 6 element(s)</p>
+<p class="finding-meta">wcag2aa · wcag143 · EN-9.1.4.3 · RGAA-3.2.1 · section508</p>
+<img src="finding-1beb894d0e4dbf64.webp" width="379" height="112" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /. The HTML and selector below describe this element.</p>
+<pre><code>&lt;p class=&quot;price&quot;&gt;£39.00&lt;/p&gt;</code></pre><p class="finding-meta">.card:nth-child(1) &gt; .price</p>
+<p>Fix any of the following:
+  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1</p>
+<p>Found on: /, /products/apron.html, /products/kettle.html, /products/pan.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="keyboard" data-kind="violation"><summary><span class="badge c-serious">serious</span>Keyboard focus must be visible</summary>
+<p class="finding-meta">keyboard · focus-visible · 4 page(s) · 6 element(s)</p>
+<p class="finding-meta">wcag2aa · wcag247 · EN-9.2.4.7 · RGAA-10.7.1 · section508</p>
+<img src="finding-14af16840632b5cc.webp" width="136" height="136" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /. The HTML and selector below describe this element.</p>
+<pre><code>&lt;button class=&quot;add&quot;&gt;&lt;img src=&quot;/img/cart.svg&quot;&gt;&lt;/button&gt;</code></pre><p class="finding-meta">div.card:nth-of-type(1) &gt; button.add</p>
+<p>Nothing on the screen changes when this element receives keyboard focus.</p>
+<p>Found on: /, /products/apron.html, /products/kettle.html, /products/pan.html</p>
+<p><a href="https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="violation"><summary><span class="badge c-serious">serious</span>Links must be distinguishable without relying on color</summary>
+<p class="finding-meta">axe-core · link-in-text-block · 4 page(s) · 5 element(s)</p>
+<p class="finding-meta">wcag2a · wcag141 · EN-9.1.4.1 · RGAA-10.6.1 · section508</p>
+<img src="finding-483fe41fe13b5611.webp" width="134" height="112" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /about.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;a href=&quot;/&quot;&gt;Home&lt;/a&gt;</code></pre><p class="finding-meta">.crumbs &gt; a[href=&quot;/&quot;]</p>
+<p>Fix any of the following:
+  The link has insufficient color contrast of 2.2:1 with the surrounding text. (Minimum contrast is 3:1, link text: #333333, surrounding text: #666666)
+  The link has no styling (such as underline) to distinguish it from the surrounding text</p>
+<p>Found on: /about.html, /products/apron.html, /products/kettle.html, /products/pan.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/link-in-text-block?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="keyboard" data-kind="violation"><summary><span class="badge c-serious">serious</span>Focused elements must not be hidden under other content</summary>
+<p class="finding-meta">keyboard · focus-obscured · 1 page(s) · 1 element(s)</p>
+<p class="finding-meta">wcag22aa · wcag2411</p>
+<img src="finding-d86447b25f511f64.webp" width="960" height="173" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /about.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;header&gt;
+    &lt;a href=&quot;/&quot;&gt;&lt;img src=&quot;/img/logo.svg&quot; width=&quot;120&quot; height=&quot;40&quot;&gt;&lt;/a&gt;
+    &lt;nav&gt;
+      &lt;a href=&quot;/&quot;&gt;Home&lt;/a&gt;
+      &lt;a href=&quot;/products/kettle.html&quot;&gt;Kettles&lt;/a&gt;
+      &lt;a href=&quot;/about.html&quot;&gt;About&lt;/a&gt;
+      &lt;a href=&quot;/contact.html&quot;&gt;Contact&lt;/a&gt;
+    &lt;/nav&gt;
+  &lt;/header&gt;</code></pre><p class="finding-meta">header</p>
+<p>Covers p.crumbs:nth-of-type(1) &gt; a when it receives keyboard focus after the skip link.</p>
+<p>Found on: /about.html</p>
+<p><a href="https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="violation"><summary><span class="badge c-serious">serious</span>Frames must have an accessible name</summary>
+<p class="finding-meta">axe-core · frame-title · 1 page(s) · 1 element(s)</p>
+<p class="finding-meta">wcag2a · wcag412 · EN-9.4.1.2 · RGAA-2.1.1 · section508</p>
+<img src="finding-a985803575233245.webp" width="580" height="220" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /about.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;iframe src=&quot;/contact.html&quot; width=&quot;480&quot; height=&quot;120&quot;&gt;&lt;/iframe&gt;</code></pre><p class="finding-meta">iframe</p>
+<p>Fix any of the following:
+  Element has no title attribute
+  aria-label attribute does not exist or is empty
+  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+  Element&#39;s default semantics were not overridden with role=&quot;none&quot; or role=&quot;presentation&quot;</p>
+<p>Found on: /about.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/frame-title?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="violation"><summary><span class="badge c-serious">serious</span>All touch targets must be 24px large, or leave sufficient space</summary>
+<p class="finding-meta">axe-core · target-size · 1 page(s) · 1 element(s)</p>
+<p class="finding-meta">wcag22aa · wcag258</p>
+<img src="finding-b9161a951fa66712.webp" width="580" height="220" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /about.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;input type=&quot;email&quot; placeholder=&quot;Email&quot;&gt;</code></pre><p class="finding-meta">iframe #content &gt; form &gt; input[type=&quot;email&quot;][placeholder=&quot;Email&quot;]</p>
+<p>Fix any of the following:
+  Target has insufficient size (177px by 21px, should be at least 24px by 24px)
+  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 21px instead of at least 24px.</p>
+<p>Found on: /about.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/target-size?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="incomplete"><summary><span class="badge c-review">Needs a human</span>Elements must meet minimum color contrast ratio thresholds</summary>
+<p class="finding-meta">axe-core · color-contrast · 1 page(s) · 1 element(s)</p>
+<p class="finding-meta">wcag2aa · wcag143 · EN-9.1.4.3 · RGAA-3.2.1 · section508</p>
+<img src="finding-78f52413d430cbbf.webp" width="960" height="132" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /. The HTML and selector below describe this element.</p>
+<pre><code>&lt;h1&gt;Kitchen things that last&lt;/h1&gt;</code></pre><p class="finding-meta">h1</p>
+<p>Fix any of the following:
+  Element&#39;s background color could not be determined due to a background image</p>
+<p>Found on: /</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="incomplete"><summary><span class="badge c-review">Needs a human</span>Elements must meet minimum color contrast ratio thresholds</summary>
+<p class="finding-meta">axe-core · color-contrast · 1 page(s) · 1 element(s)</p>
+<p class="finding-meta">wcag2aa · wcag143 · EN-9.1.4.3 · RGAA-3.2.1 · section508</p>
+
+<pre><code>&lt;p&gt;Free delivery on orders over £40 — this week only.&lt;/p&gt;</code></pre><p class="finding-meta">section &gt; p</p>
+<p>Fix any of the following:
+  Element&#39;s background color could not be determined due to a background image</p>
+<p>Found on: /</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="keyboard" data-kind="incomplete"><summary><span class="badge c-review">Needs a human</span>Keyboard focus must not get stuck in one part of the page</summary>
+<p class="finding-meta">keyboard · keyboard-trap · 1 page(s) · 1 element(s)</p>
+<p class="finding-meta">wcag2a · wcag212 · EN-9.2.1.2 · RGAA-12.9.1 · section508</p>
+<img src="finding-3016990bfbf5bb04.webp" width="580" height="220" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /about.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;iframe src=&quot;/contact.html&quot; width=&quot;480&quot; height=&quot;120&quot;&gt;&lt;/iframe&gt;</code></pre><p class="finding-meta">iframe</p>
+<p>Focus stayed inside this frame for 100 presses of Tab. Check that keyboard users can get out of it.</p>
+<p>Found on: /about.html</p>
+<p><a href="https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap.html">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="incomplete"><summary><span class="badge c-review">Needs a human</span>&lt;video&gt; elements must have captions</summary>
+<p class="finding-meta">axe-core · video-caption · 1 page(s) · 1 element(s)</p>
+<p class="finding-meta">wcag2a · wcag122 · EN-9.1.2.2 · RGAA-4.3.1 · section508</p>
+<img src="finding-25eac4a00fdf4ea3.webp" width="576" height="246" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: /about.html. The HTML and selector below describe this element.</p>
+<pre><code>&lt;video src=&quot;/img/workshop.mp4&quot; controls=&quot;&quot; width=&quot;480&quot;&gt;&lt;/video&gt;</code></pre><p class="finding-meta">video</p>
+<p>Fix all of the following:
+  Check that captions are available for the element</p>
+<p>Found on: /about.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/video-caption?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="recommendation"><summary><span class="badge c-review">Recommendation</span>Heading levels should only increase by one</summary>
+<p class="finding-meta">axe-core · heading-order · 4 page(s) · 4 element(s)</p>
+<p class="finding-meta"></p>
+
+<pre><code>&lt;h4&gt;Best sellers&lt;/h4&gt;</code></pre><p class="finding-meta">#content &gt; h4</p>
+<p>Fix any of the following:
+  Heading order invalid</p>
+<p>Found on: /, /products/apron.html, /products/kettle.html, /products/pan.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/heading-order?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="recommendation"><summary><span class="badge c-review">Recommendation</span>All page content should be contained by landmarks</summary>
+<p class="finding-meta">axe-core · region · 3 page(s) · 3 element(s)</p>
+<p class="finding-meta">RGAA-9.2.1</p>
+
+<pre><code>&lt;a class=&quot;skip&quot; href=&quot;#content&quot;&gt;Skip to content&lt;/a&gt;</code></pre><p class="finding-meta">.skip</p>
+<p>Fix any of the following:
+  Some page content is not contained by landmarks</p>
+<p>Found on: /products/apron.html, /products/kettle.html, /products/pan.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/region?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="recommendation"><summary><span class="badge c-review">Recommendation</span>The skip-link target should exist and be focusable</summary>
+<p class="finding-meta">axe-core · skip-link · 3 page(s) · 3 element(s)</p>
+<p class="finding-meta">RGAA-12.7.1</p>
+
+<pre><code>&lt;a class=&quot;skip&quot; href=&quot;#content&quot;&gt;Skip to content&lt;/a&gt;</code></pre><p class="finding-meta">.skip</p>
+<p>Fix any of the following:
+  No skip link target</p>
+<p>Found on: /products/apron.html, /products/kettle.html, /products/pan.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/skip-link?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="recommendation"><summary><span class="badge c-review">Recommendation</span>Landmarks should have a unique role or role/label/title (i.e. accessible name) combination</summary>
+<p class="finding-meta">axe-core · landmark-unique · 1 page(s) · 1 element(s)</p>
+<p class="finding-meta"></p>
+
+<pre><code>&lt;header&gt;
+    &lt;a href=&quot;/&quot;&gt;&lt;img src=&quot;/img/logo.svg&quot; width=&quot;120&quot; height=&quot;40&quot;&gt;&lt;/a&gt;
+    &lt;nav&gt;
+      &lt;a href=&quot;/&quot;&gt;Home&lt;/a&gt;
+      &lt;a href=&quot;/products/kettle.html&quot;&gt;Kettles&lt;/a&gt;
+      &lt;a href=&quot;/about.html&quot;&gt;About&lt;/a&gt;
+      &lt;a href=&quot;/contact.html&quot;&gt;Contact&lt;/a&gt;
+    &lt;/nav&gt;
+  &lt;/header&gt;</code></pre><p class="finding-meta">header</p>
+<p>Fix any of the following:
+  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable</p>
+<p>Found on: /about.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/landmark-unique?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="recommendation"><summary><span class="badge c-review">Recommendation</span>Landmarks should have a unique role or role/label/title (i.e. accessible name) combination</summary>
+<p class="finding-meta">axe-core · landmark-unique · 1 page(s) · 1 element(s)</p>
+<p class="finding-meta"></p>
+
+<pre><code>&lt;nav&gt;
+      &lt;a href=&quot;/&quot;&gt;Home&lt;/a&gt;
+      &lt;a href=&quot;/products/kettle.html&quot;&gt;Kettles&lt;/a&gt;
+      &lt;a href=&quot;/about.html&quot;&gt;About&lt;/a&gt;
+      &lt;a href=&quot;/contact.html&quot;&gt;Contact&lt;/a&gt;
+    &lt;/nav&gt;</code></pre><p class="finding-meta">nav</p>
+<p>Fix any of the following:
+  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable</p>
+<p>Found on: /about.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/landmark-unique?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="recommendation"><summary><span class="badge c-review">Recommendation</span>Landmarks should have a unique role or role/label/title (i.e. accessible name) combination</summary>
+<p class="finding-meta">axe-core · landmark-unique · 1 page(s) · 1 element(s)</p>
+<p class="finding-meta"></p>
+
+<pre><code>&lt;main id=&quot;content&quot;&gt;</code></pre><p class="finding-meta">#content</p>
+<p>Fix any of the following:
+  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable</p>
+<p>Found on: /about.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/landmark-unique?application=playwright">Read the rule guidance</a></p></details>
+<details class="finding" data-checker="axe-core" data-kind="recommendation"><summary><span class="badge c-review">Recommendation</span>Landmarks should have a unique role or role/label/title (i.e. accessible name) combination</summary>
+<p class="finding-meta">axe-core · landmark-unique · 1 page(s) · 1 element(s)</p>
+<p class="finding-meta"></p>
+
+<pre><code>&lt;footer&gt;
+    &lt;p&gt;Questions about an order? &lt;a href=&quot;/contact.html&quot;&gt;Click here&lt;/a&gt;.&lt;/p&gt;
+    &lt;p&gt;© Acme Store&lt;/p&gt;
+  &lt;/footer&gt;</code></pre><p class="finding-meta">iframe footer</p>
+<p>Fix any of the following:
+  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable</p>
+<p>Found on: /about.html</p>
+<p><a href="https://dequeuniversity.com/rules/axe/4.13/landmark-unique?application=playwright">Read the rule guidance</a></p></details></div>
+      <p id="empty" class="muted" hidden>No findings match this filter.</p>
+    </section>
+    <section class="demo-pages" aria-labelledby="pages-heading">
+      <div class="report-heading"><div><h2 id="pages-heading">Pages and keyboard coverage</h2><p class="muted">A completed walk describes the initial page state. Other states and manual checks still need review.</p></div></div>
+      <div class="page-list"><details><summary>/about.html — About — Acme Store</summary><p class="coverage">Partial walk · 10 stops visited · 6 focus style samples tested</p><p class="coverage">Limits or omissions: Focus styles inside embedded frames were not checked. The keyboard walk could not finish traversing a frame.</p>
+<img src="order-0.webp" width="960" height="699" loading="lazy" alt="Numbered keyboard stops on /about.html"><ol><li>Skip to content <code>a.skip</code></li><li>No text <code>header &gt; a</code></li><li>Home <code>nav &gt; a:nth-of-type(1)</code></li><li>Kettles <code>a:nth-of-type(2)</code></li><li>About <code>a:nth-of-type(3)</code></li><li>Contact <code>a:nth-of-type(4)</code></li><li>Home <code>p.crumbs:nth-of-type(1) &gt; a</code></li><li>our story <code>p:nth-of-type(2) &gt; a</code></li><li>No text <code>video</code></li><li>No text <code>iframe</code></li></ol></details>
+<details><summary>/contact.html — Contact — Acme Store</summary><p class="coverage">Partial walk · 13 stops visited · 10 focus style samples tested</p><p class="coverage">Limits or omissions: A focus cycle prevented the forward walk from continuing. Some potentially focusable controls were not reached.</p>
+<img src="order-1.webp" width="960" height="540" loading="lazy" alt="Numbered keyboard stops on /contact.html"><ol><li>Skip to content <code>a.skip</code></li><li>No text <code>header &gt; a</code></li><li>Home <code>nav &gt; a:nth-of-type(1)</code></li><li>Kettles <code>a:nth-of-type(2)</code></li><li>About <code>a:nth-of-type(3)</code></li><li>Contact <code>a:nth-of-type(4)</code></li><li>Your name <code>#content &gt; form &gt; input:nth-of-type(1)</code></li><li>Email <code>input:nth-of-type(2)</code></li><li>Order question Returns <code>select</code></li><li>No text <code>textarea</code></li><li>No text <code>#content &gt; form &gt; button</code></li><li>Email for the newsletter <code>#newsletter &gt; form &gt; input</code></li><li>Sign up <code>#newsletter &gt; form &gt; button</code></li></ol></details>
+<details><summary>/ — Acme Store</summary><p class="coverage">Walk completed · 13 stops visited · 6 focus style samples tested</p>
+<img src="order-2.webp" width="960" height="624" loading="lazy" alt="Numbered keyboard stops on /"><ol><li>Skip to content <code>a.skip</code></li><li>No text <code>header &gt; a</code></li><li>Home <code>nav &gt; a:nth-of-type(1)</code></li><li>Kettles <code>a:nth-of-type(2)</code></li><li>About <code>a:nth-of-type(3)</code></li><li>Contact <code>a:nth-of-type(4)</code></li><li>Kettle 1.7 L <code>div.card:nth-of-type(1) &gt; h4 &gt; a</code></li><li>No text <code>div.card:nth-of-type(1) &gt; button.add</code></li><li>Cast iron pan <code>div.card:nth-of-type(2) &gt; h4 &gt; a</code></li><li>No text <code>div.card:nth-of-type(2) &gt; button.add</code></li><li>Linen apron <code>div.card:nth-of-type(3) &gt; h4 &gt; a</code></li><li>No text <code>div.card:nth-of-type(3) &gt; button.add</code></li><li>Click here <code>p:nth-of-type(1) &gt; a</code></li></ol></details>
+<details><summary>/products/apron.html — Linen apron — Acme Store</summary><p class="coverage">Walk completed · 10 stops visited · 7 focus style samples tested</p>
+<img src="order-3.webp" width="960" height="835" loading="lazy" alt="Numbered keyboard stops on /products/apron.html"><ol><li>Skip to content <code>a.skip</code></li><li>No text <code>header &gt; a</code></li><li>Home <code>nav &gt; a:nth-of-type(1)</code></li><li>Kettles <code>a:nth-of-type(2)</code></li><li>About <code>a:nth-of-type(3)</code></li><li>Contact <code>a:nth-of-type(4)</code></li><li>1 <code>input</code></li><li>No text <code>button.add</code></li><li>delivery terms <code>p:nth-of-type(2) &gt; a</code></li><li>Click here <code>p:nth-of-type(1) &gt; a</code></li></ol></details>
+<details><summary>/products/kettle.html — Kettle 1.7 L — Acme Store</summary><p class="coverage">Walk completed · 10 stops visited · 7 focus style samples tested</p>
+<img src="order-4.webp" width="960" height="835" loading="lazy" alt="Numbered keyboard stops on /products/kettle.html"><ol><li>Skip to content <code>a.skip</code></li><li>No text <code>header &gt; a</code></li><li>Home <code>nav &gt; a:nth-of-type(1)</code></li><li>Kettles <code>a:nth-of-type(2)</code></li><li>About <code>a:nth-of-type(3)</code></li><li>Contact <code>a:nth-of-type(4)</code></li><li>1 <code>input</code></li><li>No text <code>button.add</code></li><li>delivery terms <code>p:nth-of-type(2) &gt; a</code></li><li>Click here <code>p:nth-of-type(1) &gt; a</code></li></ol></details>
+<details><summary>/products/pan.html — Cast iron pan — Acme Store</summary><p class="coverage">Walk completed · 10 stops visited · 7 focus style samples tested</p>
+<img src="order-5.webp" width="960" height="835" loading="lazy" alt="Numbered keyboard stops on /products/pan.html"><ol><li>Skip to content <code>a.skip</code></li><li>No text <code>header &gt; a</code></li><li>Home <code>nav &gt; a:nth-of-type(1)</code></li><li>Kettles <code>a:nth-of-type(2)</code></li><li>About <code>a:nth-of-type(3)</code></li><li>Contact <code>a:nth-of-type(4)</code></li><li>1 <code>input</code></li><li>No text <code>button.add</code></li><li>delivery terms <code>p:nth-of-type(2) &gt; a</code></li><li>Click here <code>p:nth-of-type(1) &gt; a</code></li></ol></details></div>
+    </section>
+    <section class="reproduce" aria-labelledby="reproduce-heading">
+      <h2 id="reproduce-heading">Run the same example yourself.</h2>
+      <p>This is a read-only snapshot, generated from the examples in the repository. Filters and print work here; scheduling, notifications and new scans run in your own installation.</p>
+      <pre><code>git clone https://github.com/Artemy-And/tabwalk.git
+cd tabwalk
+docker compose -f docker-compose.yml \
+  -f docker-compose.demo.yml up -d</code></pre>
+      <p>Open <code>http://localhost:8080</code>, create your local admin account, add <code>http://acmestore.example/</code> and run a scan.</p>
+      <div class="report-actions"><a class="btn btn-light" href="https://github.com/Artemy-And/tabwalk#quick-start">Install Tabwalk</a><a class="btn btn-dark" href="https://github.com/Artemy-And/tabwalk">Star on GitHub</a></div>
+    </section>
+  </main>
+  <footer><div class="wrap"><span>Automated checks cover part of WCAG. Tabwalk reports evidence and does not certify compliance.</span><a href="/">About Tabwalk</a></div></footer>
+</body>
+</html>
