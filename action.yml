@@ -42,6 +42,9 @@ inputs:
   fail-on:
     description: Lowest impact that fails the job - critical, serious, moderate, minor or none
     default: critical
+  scenarios:
+    description: 'Path to a JSON array of browser scenarios. Exact page pathnames; fill only test fields. Failed or unmatched scenarios fail the job even with fail-on: none'
+    default: ''
   baseline:
     description: 'A report from an earlier run, like a committed tabwalk-report.json. Only problems it does not have fail the job'
     default: ''

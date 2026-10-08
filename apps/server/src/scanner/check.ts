@@ -3,20 +3,31 @@ import { axeChecker } from './checkers/axe.js';
 import { drawTabOrder, keyboardChecker, type TabOrder } from './checkers/keyboard.js';
 import { USER_AGENT } from './crawl.js';
 import { fingerprint } from './fingerprint.js';
+import { runScenario, type ScenarioRun, type SiteScenario } from './scenarios.js';
 import { type ElementShot, shootElements } from './shots.js';
-import type { Checker, CheckFinding, SiteLogin } from './types.js';
+import type {
+  Checker,
+  CheckFinding,
+  KeyboardCoverage,
+  ScenarioEvidence,
+  SiteLogin,
+  StoredScenarioRun,
+} from './types.js';
 
 const CHECKERS: Checker[] = [axeChecker, keyboardChecker];
 
 export interface PageFinding extends CheckFinding {
   checker: string;
   fingerprint: string;
+  scenario?: ScenarioEvidence | null;
 }
 
 export interface PageResult {
   title: string | null;
   findings: PageFinding[];
   tabOrder: TabOrder | null;
+  keyboardCoverage: KeyboardCoverage | null;
+  scenarioRun: ScenarioRun | null;
   shots: ElementShot[];
   links: string[];
 }
@@ -78,6 +89,7 @@ export async function checkPage(
     tabOrder?: boolean;
     ignore?: IgnoreRules;
     login?: SiteLogin | null;
+    scenario?: SiteScenario;
     // fingerprints the scan already has a picture of; the ones this page adds go in too
     pictured?: Set<string>;
   } = {},
@@ -125,7 +137,19 @@ export async function checkPage(
     if (type && !/html/i.test(type)) throw new NotAPageError(`Not a web page: ${type}`);
     await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
 
+    const scenarioRun = options.scenario ? await runScenario(page, options.scenario) : null;
     const title = await page.title().catch(() => null);
+    if (scenarioRun?.status === 'failed') {
+      return {
+        title,
+        findings: [],
+        tabOrder: null,
+        keyboardCoverage: null,
+        scenarioRun,
+        links: [],
+        shots: [],
+      };
+    }
 
     // read before the tab walk, which presses keys on the page
     const links = await page
@@ -141,10 +165,23 @@ export async function checkPage(
       .catch(() => [] as string[]);
 
     const findings: PageFinding[] = [];
+    let keyboardCoverage: KeyboardCoverage | null = null;
     for (const checker of CHECKERS) {
-      for (const f of await checker.run(page, { ignoreSelectors: ignore.selectors })) {
+      for (const f of await checker.run(page, {
+        ignoreSelectors: ignore.selectors,
+        onKeyboardCoverage: (coverage) => {
+          keyboardCoverage = coverage;
+        },
+      })) {
         if (ignore.rules.includes(f.ruleId)) continue;
-        findings.push({ ...f, checker: checker.name, fingerprint: fingerprint(f.ruleId, f.html) });
+        findings.push({
+          ...f,
+          checker: checker.name,
+          fingerprint: fingerprint(f.ruleId, f.html),
+          scenario: scenarioRun
+            ? { name: scenarioRun.name, path: scenarioRun.path, steps: scenarioRun.steps }
+            : null,
+        });
       }
     }
     const kept = await outsideIgnored(page, findings, ignore.selectors);
@@ -153,8 +190,52 @@ export async function checkPage(
 
     const shots = options.pictured ? await shootElements(page, kept, options.pictured) : [];
 
-    return { title, findings: kept, tabOrder, links, shots };
+    return { title, findings: kept, tabOrder, keyboardCoverage, scenarioRun, links, shots };
   } finally {
     await context.close().catch(() => {});
   }
+}
+
+export async function checkPageWithScenarios(
+  browser: Browser,
+  url: string,
+  timeoutMs: number,
+  options: Omit<NonNullable<Parameters<typeof checkPage>[3]>, 'scenario'> & {
+    scenarios?: SiteScenario[];
+  } = {},
+): Promise<PageResult & { scenarioRuns: StoredScenarioRun[] }> {
+  const { scenarios = [], ...pageOptions } = options;
+  const initial = await checkPage(browser, url, timeoutMs, pageOptions);
+  const scenarioRuns: StoredScenarioRun[] = [];
+  for (const scenario of scenarios) {
+    if (scenario.path !== new URL(url).pathname) continue;
+    try {
+      // Every state opens independently, with the same site login, before any checker presses keys.
+      const result = await checkPage(browser, url, timeoutMs, {
+        ...pageOptions,
+        tabOrder: false,
+        scenario,
+      });
+      if (!result.scenarioRun) throw new Error('Scenario did not run');
+      scenarioRuns.push({
+        ...result.scenarioRun,
+        keyboardCoverage: result.keyboardCoverage,
+        findings: result.findings.filter((f) => f.kind === 'violation').length,
+      });
+      initial.findings.push(...result.findings);
+      initial.shots.push(...result.shots);
+      initial.links.push(...result.links);
+    } catch {
+      scenarioRuns.push({
+        name: scenario.name,
+        path: scenario.path,
+        status: 'failed',
+        steps: [],
+        error: 'The scenario page could not be loaded or checked.',
+        keyboardCoverage: null,
+        findings: 0,
+      });
+    }
+  }
+  return { ...initial, links: [...new Set(initial.links)], scenarioRuns };
 }

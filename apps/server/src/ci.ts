@@ -1,4 +1,4 @@
-import { appendFile, writeFile } from 'node:fs/promises';
+import { appendFile, readFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import { commentMarker, GitHubError, pullRequestNumber, upsertComment } from './ci/github.js';
 import {
@@ -7,6 +7,7 @@ import {
   blockingOf,
   compare,
   type Group,
+  hasScenarioFailures,
   headline,
   IMPACTS,
   impactOf,
@@ -15,12 +16,20 @@ import {
   plural,
   rank,
   readBaseline,
+  scenarioStepLabel,
   summarize,
   type Threshold,
 } from './ci/report.js';
-import { checkPage, launchBrowser, NotAPageError } from './scanner/check.js';
+import { checkPageWithScenarios, launchBrowser, NotAPageError } from './scanner/check.js';
 import { crawl } from './scanner/crawl.js';
-import { loginHeaders, type SiteLogin } from './scanner/types.js';
+import { scenariosSchema } from './scanner/scenario-schema.js';
+import type { SiteScenario } from './scanner/scenarios.js';
+import {
+  type KeyboardCoverage,
+  loginHeaders,
+  type SiteLogin,
+  type StoredScenarioRun,
+} from './scanner/types.js';
 
 const USAGE = `Usage: ci <url> [options]
 
@@ -38,6 +47,7 @@ Options:
   --header "Name: value"    sent to the site only, like "Authorization: Bearer …"; repeat for more
   --cookie name=value       set before the first page opens; repeat for more
   --fail-on <level>         critical | serious | moderate | minor | none, default critical
+  --scenarios <path>        JSON array of named browser scenarios, with exact page paths
   --baseline <path>         a report from an earlier run: only problems it lacks fail
   --comment                 comment on the pull request the run is for (GitHub Actions)
   --report <path>           JSON report file, default tabwalk-report.json
@@ -70,6 +80,7 @@ const { values, positionals } = parseArgs({
     cookie: { type: 'string', multiple: true },
     'fail-on': { type: 'string', default: 'critical' },
     baseline: { type: 'string' },
+    scenarios: { type: 'string' },
     comment: { type: 'boolean', default: false },
     report: { type: 'string', default: 'tabwalk-report.json' },
     concurrency: { type: 'string', default: '3' },
@@ -164,6 +175,21 @@ const signIn = [
   .filter(Boolean)
   .join(', ');
 
+// Validate before launching a browser. Neither parse errors nor schema errors expose values.
+const scenariosPath = values.scenarios || process.env.INPUT_SCENARIOS || '';
+let scenarios: SiteScenario[] = [];
+if (scenariosPath) {
+  let configuration: unknown;
+  try {
+    configuration = JSON.parse(await readFile(scenariosPath, 'utf8'));
+  } catch {
+    fail('Could not read the scenarios file as JSON.');
+  }
+  const parsed = scenariosSchema.safeParse(configuration);
+  if (!parsed.success) fail('The scenarios file does not match the scenario format.');
+  scenarios = parsed.data;
+}
+
 // read before the crawl, so a broken baseline stops the run at once
 const baselinePath = values.baseline || process.env.INPUT_BASELINE || '';
 let baseline: Baseline | null = null;
@@ -188,6 +214,9 @@ const browser = await launchBrowser(process.env.CHROMIUM_EXECUTABLE);
 const groups = new Map<string, Group>();
 const failedPages: { url: string; error: string }[] = [];
 let checked = 0;
+const keyboardCoverage: { url: string; coverage: KeyboardCoverage | null }[] = [];
+const scenarioRuns: { url: string; runs: StoredScenarioRun[] }[] = [];
+const executedScenarios = new Set<string>();
 
 await crawl(siteUrl, {
   limit: maxPages,
@@ -196,11 +225,19 @@ await crawl(siteUrl, {
   headers: loginHeaders(login),
   visit: async (url) => {
     try {
-      const { findings, links } = await checkPage(browser, url, timeoutMs, { ignore, login });
+      const {
+        findings,
+        links,
+        keyboardCoverage: coverage,
+        scenarioRuns: runs,
+      } = await checkPageWithScenarios(browser, url, timeoutMs, { ignore, login, scenarios });
       checked += 1;
+      keyboardCoverage.push({ url, coverage });
+      if (runs.length > 0) scenarioRuns.push({ url, runs });
+      for (const run of runs) executedScenarios.add(run.name);
       for (const f of findings) {
         const key = `${f.kind}:${f.fingerprint}`;
-        const group = groups.get(key) ?? {
+        const group: Group = groups.get(key) ?? {
           kind: f.kind,
           ruleId: f.ruleId,
           impact: impactOf(f.impact),
@@ -216,6 +253,15 @@ await crawl(siteUrl, {
         };
         if (!group.pages.includes(url)) group.pages.push(url);
         group.elements += 1;
+        if (f.scenario) {
+          group.scenarios ??= [];
+          const contexts = group.scenarios;
+          if (
+            !contexts.some((context) => context.url === url && context.name === f.scenario?.name)
+          ) {
+            contexts.push({ url, ...f.scenario });
+          }
+        }
         groups.set(key, group);
       }
       return links;
@@ -238,9 +284,15 @@ const { violations, gone } = compare(
   sorted.filter((g) => g.kind === 'violation'),
   baseline,
 );
+const unmatchedScenarios = scenarios
+  .filter((scenario) => !executedScenarios.has(scenario.name))
+  .map(({ name, path }) => ({ name, path }));
 const outcome: Outcome = {
   siteUrl,
   checked,
+  keyboardCoverage,
+  scenarioRuns,
+  unmatchedScenarios,
   failedPages,
   failOn,
   ignored: ignoredNote((text) => `\`${text}\``),
@@ -259,9 +311,12 @@ await writeFile(
       url: siteUrl,
       scannedAt: new Date().toISOString(),
       pagesChecked: checked,
+      keyboardCoverage,
+      scenarioRuns,
+      unmatchedScenarios,
       failedPages,
       failOn,
-      failed: outcome.blocking.length > 0,
+      failed: checked === 0 || outcome.blocking.length > 0 || hasScenarioFailures(outcome),
       ignored: ignore,
       baseline: baseline && {
         path: baseline.path,
@@ -279,6 +334,37 @@ await writeFile(
 );
 
 console.log(headline(outcome));
+for (const page of keyboardCoverage) {
+  if (page.coverage?.status === 'completed') continue;
+  const message = `Partial keyboard coverage: ${page.url} (${page.coverage?.reasons.join(', ') || 'not recorded'})`;
+  console.log(
+    process.env.GITHUB_ACTIONS === 'true' ? `::warning title=Tabwalk::${message}` : message,
+  );
+}
+for (const page of scenarioRuns) {
+  for (const run of page.runs) {
+    if (run.status === 'failed') {
+      console.log(
+        `Scenario "${run.name}" failed on ${page.url}: ${run.error ?? 'Scenario failed.'}`,
+      );
+    } else if (run.keyboardCoverage?.status !== 'completed') {
+      const message = `Partial keyboard coverage: ${page.url} (scenario "${run.name}": ${run.keyboardCoverage?.reasons.join(', ') || 'not recorded'})`;
+      console.log(
+        process.env.GITHUB_ACTIONS === 'true' ? `::warning title=Tabwalk::${message}` : message,
+      );
+    }
+    for (const [index, step] of run.steps.entries()) {
+      console.log(
+        `  Scenario "${run.name}", step ${index + 1}: ${scenarioStepLabel(step)} (${step.status})`,
+      );
+    }
+  }
+}
+for (const scenario of unmatchedScenarios) {
+  console.log(
+    `Scenario "${scenario.name}" did not run: its path ${scenario.path} was not checked.`,
+  );
+}
 for (const g of violations) {
   const pages = plural(g.pages.length, 'page');
   const tag = g.new === true ? ' new' : g.new === false ? ' known' : '';
@@ -334,6 +420,14 @@ if (comment) {
       );
     }
   }
+}
+
+if (hasScenarioFailures(outcome)) {
+  const message = 'Browser scenarios failed or did not run; the scan is incomplete.';
+  console.error(
+    process.env.GITHUB_ACTIONS === 'true' ? `::error title=Tabwalk::${message}` : message,
+  );
+  process.exit(2);
 }
 
 if (checked === 0) {

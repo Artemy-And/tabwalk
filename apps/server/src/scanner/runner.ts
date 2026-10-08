@@ -4,33 +4,43 @@ import { db } from '../db/index.js';
 import { issueShots, issues, pages, scans, sites, tabOrders } from '../db/schema.js';
 import { env } from '../env.js';
 import { notifyScan } from '../notify/notify.js';
-import { checkPage, type IgnoreRules, launchBrowser, NotAPageError } from './check.js';
+import { checkPageWithScenarios, type IgnoreRules, launchBrowser, NotAPageError } from './check.js';
 import { crawl } from './crawl.js';
-import { loginHeaders, type SiteLogin } from './types.js';
+import type { SiteScenario } from './scenarios.js';
+import {
+  loginHeaders,
+  type ScenarioSummary,
+  type SiteLogin,
+  type StoredScenarioRun,
+} from './types.js';
 
-type PageOutcome = { ok: boolean; links: string[] } | null;
+type PageOutcome = { ok: boolean; links: string[]; scenarioRuns: StoredScenarioRun[] } | null;
 
 // null when the address turned out to be a file, which is not a page to report
 async function scanOnePage(
   browser: Browser,
   scanId: string,
   url: string,
-  options: { ignore: IgnoreRules; login: SiteLogin | null; pictured: Set<string> },
+  options: {
+    ignore: IgnoreRules;
+    login: SiteLogin | null;
+    pictured: Set<string>;
+    scenarios: SiteScenario[];
+  },
 ): Promise<PageOutcome> {
   try {
-    const { title, findings, tabOrder, links, shots } = await checkPage(
-      browser,
-      url,
-      env.PAGE_TIMEOUT_MS,
-      { tabOrder: true, ...options },
-    );
+    const { title, findings, tabOrder, keyboardCoverage, scenarioRuns, links, shots } =
+      await checkPageWithScenarios(browser, url, env.PAGE_TIMEOUT_MS, {
+        tabOrder: true,
+        ...options,
+      });
 
     const [pageRow] = await db
       .insert(pages)
-      .values({ scanId, url, title })
+      .values({ scanId, url, title, keyboardCoverage, scenarioRuns })
       .onConflictDoUpdate({
         target: [pages.scanId, pages.url],
-        set: { title, error: null, scannedAt: new Date() },
+        set: { title, keyboardCoverage, scenarioRuns, error: null, scannedAt: new Date() },
       })
       .returning();
 
@@ -68,11 +78,12 @@ async function scanOnePage(
           target: f.target,
           html: f.html,
           failureSummary: f.failureSummary,
+          scenario: f.scenario ?? null,
         })),
       );
     }
 
-    return { ok: true, links };
+    return { ok: true, links, scenarioRuns };
   } catch (err) {
     if (err instanceof NotAPageError) return null;
     // Playwright appends a multi-line call log; the first line says what went wrong
@@ -82,9 +93,9 @@ async function scanOnePage(
       .values({ scanId, url, error: message })
       .onConflictDoUpdate({
         target: [pages.scanId, pages.url],
-        set: { error: message, scannedAt: new Date() },
+        set: { error: message, keyboardCoverage: null, scenarioRuns: [], scannedAt: new Date() },
       });
-    return { ok: false, links: [] };
+    return { ok: false, links: [], scenarioRuns: [] };
   }
 }
 
@@ -105,6 +116,7 @@ export async function runScan(scanId: string): Promise<void> {
       error: null,
       pagesScanned: 0,
       pagesFailed: 0,
+      scenarioSummary: null,
       ignored: ignore,
     })
     .where(eq(scans.id, scanId));
@@ -120,6 +132,8 @@ export async function runScan(scanId: string): Promise<void> {
     const pictured = new Set<string>();
     let ok = 0;
     let failed = 0;
+    const executed = new Set<string>();
+    const scenarioSummary: ScenarioSummary = { completed: 0, failed: 0, unmatched: [] };
     await crawl(site.url, {
       limit,
       concurrency: env.SCAN_CONCURRENCY,
@@ -130,8 +144,13 @@ export async function runScan(scanId: string): Promise<void> {
           ignore,
           login: site.login,
           pictured,
+          scenarios: site.scenarios,
         });
         if (!outcome) return [];
+        for (const run of outcome.scenarioRuns) {
+          executed.add(run.name);
+          scenarioSummary[run.status === 'completed' ? 'completed' : 'failed']++;
+        }
         if (outcome.ok) ok += 1;
         else failed += 1;
         await db
@@ -155,10 +174,14 @@ export async function runScan(scanId: string): Promise<void> {
       throw new Error(`No page could be loaded: ${failed?.error ?? 'unknown error'}`);
     }
 
+    scenarioSummary.unmatched = site.scenarios
+      .filter((s) => !executed.has(s.name))
+      .map(({ name, path }) => ({ name, path }));
     await db
       .update(scans)
       .set({
         status: 'done',
+        scenarioSummary,
         finishedAt: new Date(),
         pagesScanned: ok,
         pagesFailed: failed,

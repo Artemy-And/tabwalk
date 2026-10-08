@@ -1,5 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
+import { KeyboardCoverageDetails } from '../components/KeyboardCoverage';
+import {
+  FindingScenarios,
+  ScanScenarioSummary,
+  ScenarioResults,
+} from '../components/ScenarioResults';
 import { Button, ImpactBadge, LiveStatus, StatCard } from '../components/ui';
 import { useI18n } from '../i18n/context';
 import { useRuleHelp } from '../i18n/ruleHelp';
@@ -35,6 +41,7 @@ function Finding({ issue, scanId }: { issue: IssueGroup; scanId: string }) {
           className="mt-3 block max-h-[300px] max-w-full rounded border border-line"
         />
       )}
+      <FindingScenarios scenarios={issue.scenarios} expanded />
       <p className="mt-3 text-sm font-semibold">{t.report.example}</p>
       <pre className="mt-1 rounded border border-line bg-surface-alt p-2.5 font-mono text-[12px] whitespace-pre-wrap break-all">
         {issue.sampleHtml}
@@ -128,6 +135,8 @@ export function ReportPage() {
         {ignored.length > 0 && <p>{t.scan.ignored(ignored.join('; '))}</p>}
       </div>
 
+      <ScanScenarioSummary summary={s.scenarioSummary} />
+
       <section aria-labelledby="report-problems">
         <h2 id="report-problems" className="mb-2 text-[22px] font-bold">
           {t.report.problemsHeading}
@@ -191,8 +200,14 @@ export function ReportPage() {
           <tbody>
             {(pages.data ?? []).map((page) => (
               <tr key={page.id} className="break-inside-avoid border-b border-line-soft">
-                <td className="py-1.5 pr-3 font-mono text-[12px] break-all">{pathOf(page.url)}</td>
-                <td className="py-1.5 tabular-nums">
+                <td className="py-1.5 pr-3 align-top">
+                  <span className="font-mono text-[12px] break-all">{pathOf(page.url)}</span>
+                  {!page.error && (
+                    <KeyboardCoverageDetails coverage={page.keyboardCoverage} compact />
+                  )}
+                  <ScenarioResults runs={page.scenarioRuns} compact />
+                </td>
+                <td className="py-1.5 align-top tabular-nums">
                   {page.error ? t.pages.failed(page.error) : page.problems}
                 </td>
               </tr>

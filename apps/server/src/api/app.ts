@@ -24,7 +24,8 @@ import {
 import { env } from '../env.js';
 import { notificationRoutes } from '../notify/routes.js';
 import { enqueueScan, nextScanAt } from '../queue/schedule.js';
-import type { SiteLogin } from '../scanner/types.js';
+import { scenariosSchema } from '../scanner/scenario-schema.js';
+import type { ScenarioEvidence, SiteLogin } from '../scanner/types.js';
 import { toCsv } from './csv.js';
 import { json } from './validate.js';
 
@@ -163,6 +164,11 @@ function groupedIssues(scanId: string) {
       sampleHtml: sql<string>`min(${issues.html})`,
       sampleTarget: sql<string>`min(${issues.target}::text)`,
       sampleSummary: sql<string | null>`min(${issues.failureSummary})`,
+      scenarios: sql<(ScenarioEvidence & { url: string })[]>`coalesce(
+        jsonb_agg(distinct (${issues.scenario} || jsonb_build_object('url',
+          (select p.url from pages p where p.id = ${issues.pageId})
+        ))) filter (where ${issues.scenario} is not null), '[]'::jsonb
+      )`,
     })
     .from(issues)
     .where(eq(issues.scanId, scanId))
@@ -250,11 +256,20 @@ async function issuesWithNewFlag(scan: Scan) {
       .where(eq(issueShots.scanId, scan.id)),
   ]);
   const shots = new Map(pictured.map(({ fingerprint, ...element }) => [fingerprint, element]));
+  const kindsByFingerprint = new Map<string, Set<(typeof rows)[number]['kind']>>();
+  for (const row of rows) {
+    const kinds = kindsByFingerprint.get(row.fingerprint) ?? new Set();
+    kinds.add(row.kind);
+    kindsByFingerprint.set(row.fingerprint, kinds);
+  }
   const before = previous ? await fingerprints(previous.id, scan.siteId) : null;
 
   return rows.map((row) => {
     const dismissal = dismissed.get(row.fingerprint) ?? null;
-    const shot = shots.get(row.fingerprint);
+    // Legacy pictures do not record their classification. Do not attach an
+    // ambiguous picture to a different kind of finding with the same fingerprint.
+    const shot =
+      kindsByFingerprint.get(row.fingerprint)?.size === 1 ? shots.get(row.fingerprint) : undefined;
     return {
       ...row,
       // the example a report shows is the element in its picture
@@ -486,6 +501,7 @@ app.patch(
         ignoreRules: rulesField.optional(),
         ignoreSelectors: selectorsField.optional(),
         login: loginField.optional(),
+        scenarios: scenariosSchema.optional(),
       })
       .refine((body) => Object.values(body).some((v) => v !== undefined), 'Nothing to change'),
   ),
@@ -734,6 +750,8 @@ app.get('/api/scans/:id/pages', zValidator('param', uuidParam), async (c) => {
       url: pages.url,
       title: pages.title,
       error: pages.error,
+      keyboardCoverage: pages.keyboardCoverage,
+      scenarioRuns: pages.scenarioRuns,
       problems: sql<number>`(
         select count(*) from issues i
         where i.page_id = pages.id and i.kind = 'violation' and not exists (
@@ -760,6 +778,8 @@ app.get('/api/pages/:id', zValidator('param', uuidParam), async (c) => {
       url: pages.url,
       title: pages.title,
       error: pages.error,
+      keyboardCoverage: pages.keyboardCoverage,
+      scenarioRuns: pages.scenarioRuns,
       scan: { id: scans.id, createdAt: scans.createdAt },
       site: { id: sites.id, name: sites.name },
     })

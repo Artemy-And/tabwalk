@@ -1,4 +1,5 @@
 import type { Page } from 'playwright';
+import type { ScenarioRun, ScenarioStepEvidence } from './scenarios.js';
 
 export interface CheckFinding {
   kind: 'violation' | 'incomplete' | 'recommendation';
@@ -39,9 +40,53 @@ export function loginHeaders(login: SiteLogin | null | undefined): Record<string
   return headers;
 }
 
+export type KeyboardCoverageReason =
+  | 'time-limit'
+  | 'step-limit'
+  | 'keyboard-trap'
+  | 'dialog-blocked'
+  | 'frame-limit'
+  | 'frame-content'
+  | 'focus-limit'
+  | 'focus-unavailable'
+  | 'unreached-stops'
+  | 'error';
+
+// Describes this bounded walk, not a percentage of WCAG or every possible page state.
+export interface KeyboardCoverage {
+  status: 'completed' | 'partial';
+  reasons: KeyboardCoverageReason[];
+  visitedStops: number;
+  forwardSteps: number;
+  backwardSteps: number;
+  focusChecks: number;
+  focusStylesTested: number;
+  focusStylesSkipped: number;
+  elapsedMs: number;
+  limits: { timeMs: number; stepsPerDirection: number; focusChecks: number };
+}
+
 export interface CheckOptions {
   // problems inside elements that match these CSS selectors are left out
   ignoreSelectors?: string[];
+  onKeyboardCoverage?: (coverage: KeyboardCoverage) => void;
+}
+
+export interface ScenarioEvidence {
+  name: string;
+  path: string;
+  steps: ScenarioStepEvidence[];
+}
+
+export interface StoredScenarioRun extends ScenarioRun {
+  keyboardCoverage: KeyboardCoverage | null;
+  findings: number;
+}
+
+export interface ScenarioSummary {
+  completed: number;
+  failed: number;
+  unmatched: { name: string; path: string }[];
 }
 
 export interface Checker {

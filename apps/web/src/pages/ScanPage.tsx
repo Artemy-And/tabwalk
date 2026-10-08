@@ -3,6 +3,7 @@ import { Link, useParams } from '@tanstack/react-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { IssuesTable } from '../components/IssuesTable';
 import { PagesTable } from '../components/PagesTable';
+import { ScanScenarioSummary } from '../components/ScenarioResults';
 import {
   Breadcrumbs,
   ButtonLink,
@@ -153,6 +154,8 @@ export function ScanPage() {
           <StatCard value={s.pages} label={t.scan.pages(s.pages)} />
         </div>
       )}
+
+      {done && <ScanScenarioSummary summary={s.scenarioSummary} />}
 
       {done && ignoredParts.length > 0 && (
         <p className="max-w-[700px] text-[15px] text-muted">

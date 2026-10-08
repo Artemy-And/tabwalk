@@ -354,9 +354,21 @@ export function installKeyboardHelpers(margin: number): void {
 
   const isTabbable = (el: Element): boolean => {
     if (!(el instanceof HTMLElement) || el.tabIndex < 0) return false;
-    if ((el as HTMLButtonElement).disabled || el.closest('[inert]')) return false;
+    if ((el as HTMLButtonElement).disabled) return false;
+    for (let ancestor: Element | null = el; ancestor; ancestor = parentOf(ancestor)) {
+      if (ancestor.hasAttribute('inert')) return false;
+    }
     if (el.getClientRects().length === 0) return false;
     return getComputedStyle(el).visibility !== 'hidden';
+  };
+
+  const tabbableElements = (root: Document | ShadowRoot = document): HTMLElement[] => {
+    const result: HTMLElement[] = [];
+    for (const el of root.querySelectorAll('*')) {
+      if (el.matches(TABBABLE) && isTabbable(el)) result.push(el as HTMLElement);
+      if (el.shadowRoot) result.push(...tabbableElements(el.shadowRoot));
+    }
+    return result;
   };
 
   const afterTarget = (target: Element, el: Element): boolean => {
@@ -536,17 +548,15 @@ export function installKeyboardHelpers(margin: number): void {
     },
 
     focusLast() {
-      const all = [...document.querySelectorAll(TABBABLE)].filter(isTabbable);
-      const last = all[all.length - 1] as HTMLElement | undefined;
+      const all = tabbableElements();
+      const last = all[all.length - 1];
       last?.focus();
       return last !== undefined && deepActive() === last;
     },
 
     unreached(visited) {
       const seen = new Set(visited.map((id) => byId.get(id)));
-      return [...document.querySelectorAll(TABBABLE)].filter(
-        (el) => isTabbable(el) && !seen.has(el),
-      ).length;
+      return tabbableElements().filter((el) => !seen.has(el)).length;
     },
 
     container(list) {

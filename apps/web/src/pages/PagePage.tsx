@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
+import { KeyboardCoverageDetails } from '../components/KeyboardCoverage';
+import { ScenarioResults } from '../components/ScenarioResults';
 import { Breadcrumbs, Card, LiveStatus, PageHeader } from '../components/ui';
 import { useI18n } from '../i18n/context';
 import { api } from '../lib/api';
@@ -43,6 +45,8 @@ export function PagePage() {
         }
       />
 
+      <KeyboardCoverageDetails coverage={p.keyboardCoverage} />
+
       {!order && <p className="text-[15px] text-muted">{t.page.noPicture}</p>}
 
       {order && (
@@ -83,6 +87,8 @@ export function PagePage() {
           </details>
         </section>
       )}
+
+      <ScenarioResults runs={p.scenarioRuns} />
     </div>
   );
 }

@@ -3,7 +3,8 @@ import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { after, before, test } from 'node:test';
 import { type Browser, chromium } from 'playwright';
-import { checkPage, type PageFinding } from './check.js';
+import { checkPage, checkPageWithScenarios, type PageFinding } from './check.js';
+import type { SiteScenario } from './scenarios.js';
 import { loginHeaders, type SiteLogin } from './types.js';
 
 // an image without alt text and a button without a focus style, once more inside a chat widget
@@ -15,14 +16,40 @@ body{margin:0;font:16px sans-serif}.buy:focus,.send:focus{outline:none}
 <div id="chat"><button class="send">Send</button><img class="avatar" src="data:," width="40" height="40"></div>
 </main></body></html>`;
 
+const SCENARIO_PAGE = `<!doctype html><html lang="en"><head><title>Settings</title></head><body>
+<main><h1>Settings</h1><button id="open">Open settings</button>
+<dialog id="settings" aria-label="Profile settings">
+<label for="field">Email</label><input id="field" type="email" autofocus>
+<button id="unnamed" style="width:40px;height:40px"></button>
+<img id="modal-image" src="data:," width="40" height="40">
+</dialog></main>
+<script>
+  document.getElementById('open').addEventListener('click', () => {
+    if (localStorage.getItem('scenario-opened')) return;
+    localStorage.setItem('scenario-opened', 'yes');
+    document.getElementById('settings').showModal();
+  });
+</script></body></html>`;
+
+const FAILED_SCENARIO_PAGE = `<!doctype html><html lang="en"><head><title>Failed state</title></head><body>
+<main><h1>Failed state</h1><label for="field">Email</label><input id="field">
+<button id="other">Other</button><img src="data:," width="40" height="40"></main></body></html>`;
+
 let server: Server;
 let url: string;
 let browser: Browser;
 
 before(async () => {
-  server = createServer((_req, res) => {
+  server = createServer((req, res) => {
     res.writeHead(200, { 'content-type': 'text/html' });
-    res.end(PAGE);
+    const pathname = new URL(req.url ?? '/', 'http://fixture.test').pathname;
+    res.end(
+      pathname === '/scenario'
+        ? SCENARIO_PAGE
+        : pathname === '/scenario-failed'
+          ? FAILED_SCENARIO_PAGE
+          : PAGE,
+    );
   });
   await new Promise<void>((resolve) => server.listen(0, resolve));
   url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/`;
@@ -38,7 +65,9 @@ const targets = (findings: PageFinding[], ruleId: string) =>
   findings.filter((f) => f.ruleId === ruleId).map((f) => f.target.join(' '));
 
 test('without anything to ignore, both copies of each problem are reported', async () => {
-  const { findings } = await checkPage(browser, url, 10_000);
+  const { findings, keyboardCoverage } = await checkPage(browser, url, 10_000);
+  assert.equal(keyboardCoverage?.status, 'completed');
+  assert.equal(keyboardCoverage?.visitedStops, 5);
   assert.equal(targets(findings, 'image-alt').length, 2);
   assert.equal(targets(findings, 'focus-visible').length, 2);
 });
@@ -170,4 +199,135 @@ test('each new problem gets one picture, and a later page with the same problems
 
   const again = await checkPage(browser, url, 10_000, { pictured });
   assert.equal(again.shots.length, 0);
+});
+
+test('scenarios check independently opened modal states and retain only redacted step evidence', async () => {
+  const secrets = ['private-scenario-first@example.test', 'private-scenario-second@example.test'];
+  const scenarios: SiteScenario[] = secrets.map((value, index) => ({
+    name: `Profile state ${index + 1}`,
+    path: '/scenario',
+    steps: [
+      { action: 'click', selector: '#open' },
+      { action: 'waitFor', selector: '#settings', state: 'visible' },
+      { action: 'fill', selector: '#field', value },
+      { action: 'expectFocus', selector: '#field' },
+    ],
+  }));
+  scenarios.push({
+    name: 'Other pathname',
+    path: '/scenario/',
+    steps: [{ action: 'click', selector: '#must-not-run' }],
+  });
+  const result = await checkPageWithScenarios(browser, `${url}scenario`, 10_000, { scenarios });
+  assert.equal(result.scenarioRun, null);
+  assert.equal(result.scenarioRuns.length, 2);
+  assert.equal(result.keyboardCoverage?.status, 'completed');
+  for (const [index, run] of result.scenarioRuns.entries()) {
+    assert.equal(run.name, scenarios[index]?.name);
+    assert.equal(run.path, '/scenario');
+    assert.equal(run.status, 'completed');
+    assert.equal(run.error, null);
+    assert.equal(run.steps.length, 4);
+    assert.ok(run.steps.every((step) => step.status === 'completed'));
+    assert.deepEqual(run.steps[2], { action: 'fill', selector: '#field', status: 'completed' });
+    assert.equal(run.steps[3]?.actualFocus, '#field');
+    assert.ok(run.keyboardCoverage);
+    assert.ok(run.findings >= 2, 'the open modal is checked for real accessibility findings');
+  }
+  const modalFindings = result.findings.filter(
+    (finding) => finding.ruleId === 'image-alt' && finding.target.includes('#modal-image'),
+  );
+  assert.equal(modalFindings.length, 2);
+  assert.deepEqual(modalFindings.map((finding) => finding.scenario?.name).sort(), [
+    'Profile state 1',
+    'Profile state 2',
+  ]);
+  for (const finding of modalFindings) {
+    assert.deepEqual(finding.scenario, {
+      name: finding.scenario?.name,
+      path: '/scenario',
+      steps: result.scenarioRuns.find((run) => run.name === finding.scenario?.name)?.steps,
+    });
+  }
+  assert.equal(
+    result.findings.some((finding) => !finding.scenario && finding.target.includes('#modal-image')),
+    false,
+    'the hidden modal must not be reported in the initial state',
+  );
+  for (const secret of secrets) assert.equal(JSON.stringify(result).includes(secret), false);
+  assert.equal(browser.contexts().length, 0, 'every initial and scenario context is closed');
+});
+
+test('a failed scenario skips accessibility checkers and keeps earlier fill values out of results', async () => {
+  const secret = 'private-failed-scenario@example.test';
+  const result = await checkPage(browser, `${url}scenario-failed`, 10_000, {
+    tabOrder: true,
+    pictured: new Set(),
+    scenario: {
+      name: 'Focus must move',
+      path: '/scenario-failed',
+      steps: [
+        { action: 'fill', selector: '#field', value: secret },
+        { action: 'expectFocus', selector: '#other' },
+        { action: 'click', selector: '#other' },
+      ],
+    },
+  });
+  assert.equal(result.scenarioRun?.status, 'failed');
+  assert.equal(result.scenarioRun?.steps.length, 2, 'later steps are skipped');
+  assert.deepEqual(result.scenarioRun?.steps[0], {
+    action: 'fill',
+    selector: '#field',
+    status: 'completed',
+  });
+  assert.deepEqual(result.scenarioRun?.steps[1], {
+    action: 'expectFocus',
+    selector: '#other',
+    status: 'failed',
+    actualFocus: '#field',
+  });
+  assert.equal(result.keyboardCoverage, null);
+  assert.equal(result.tabOrder, null);
+  assert.deepEqual(result.findings, []);
+  assert.deepEqual(result.shots, []);
+  assert.deepEqual(result.links, []);
+  assert.equal(JSON.stringify(result).includes(secret), false);
+  assert.equal(browser.contexts().length, 0);
+});
+
+test('a failed scenario preserves the initial findings and does not prevent a later state from being checked', async () => {
+  const result = await checkPageWithScenarios(browser, `${url}scenario-failed`, 10_000, {
+    scenarios: [
+      {
+        name: 'Wrong initial focus',
+        path: '/scenario-failed',
+        steps: [{ action: 'expectFocus', selector: '#other' }],
+      },
+      {
+        name: 'Field filled',
+        path: '/scenario-failed',
+        steps: [
+          { action: 'fill', selector: '#field', value: 'private-later-state@example.test' },
+          { action: 'expectFocus', selector: '#field' },
+        ],
+      },
+    ],
+  });
+  assert.deepEqual(
+    result.scenarioRuns.map((run) => run.status),
+    ['failed', 'completed'],
+  );
+  assert.equal(result.scenarioRuns[0]?.keyboardCoverage, null);
+  assert.equal(result.scenarioRuns[0]?.findings, 0);
+  assert.ok(result.scenarioRuns[1]?.keyboardCoverage);
+  const missingAlt = result.findings.filter((finding) => finding.ruleId === 'image-alt');
+  assert.equal(missingAlt.length, 2);
+  assert.equal(missingAlt.filter((finding) => !finding.scenario).length, 1);
+  assert.equal(missingAlt.filter((finding) => finding.scenario?.name === 'Field filled').length, 1);
+  assert.equal(
+    result.findings.some((finding) => finding.scenario?.name === 'Wrong initial focus'),
+    false,
+  );
+  assert.equal(JSON.stringify(result).includes('private-later-state@example.test'), false);
+  assert.equal(browser.contexts().length, 0);
 });

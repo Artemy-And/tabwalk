@@ -70,6 +70,7 @@ export interface Site {
   ignoreRules: string[];
   ignoreSelectors: string[];
   login: LoginSummary | null;
+  scenarios: SiteScenario[];
   createdAt: string;
 }
 
@@ -97,9 +98,47 @@ export interface SiteDetail extends Site {
 export type SiteUpdate = Partial<
   Pick<
     Site,
-    'schedule' | 'maxPages' | 'crawlInclude' | 'crawlExclude' | 'ignoreRules' | 'ignoreSelectors'
+    | 'schedule'
+    | 'maxPages'
+    | 'crawlInclude'
+    | 'crawlExclude'
+    | 'ignoreRules'
+    | 'ignoreSelectors'
+    | 'scenarios'
   >
 > & { login?: LoginInput | null };
+
+export type ScenarioStep =
+  | { action: 'click'; selector: string }
+  | { action: 'fill'; selector: string; value: string }
+  | { action: 'press'; key: string }
+  | { action: 'waitFor'; selector: string; state: 'visible' | 'hidden' }
+  | { action: 'expectFocus'; selector: string };
+
+export interface SiteScenario {
+  name: string;
+  path: string;
+  steps: ScenarioStep[];
+}
+
+// Fill values stay in site settings and are never returned in run evidence.
+export type ScenarioStepEvidence = (
+  | Exclude<ScenarioStep, { action: 'fill' }>
+  | { action: 'fill'; selector: string }
+) & { status: 'completed' | 'failed'; actualFocus?: string | null };
+
+export interface ScenarioRun {
+  name: string;
+  path: string;
+  status: 'completed' | 'failed';
+  steps: ScenarioStepEvidence[];
+  error: string | null;
+}
+
+export interface StoredScenarioRun extends ScenarioRun {
+  keyboardCoverage: KeyboardCoverage | null;
+  findings: number;
+}
 
 export interface ScanSummary {
   uniqueProblems: number;
@@ -121,6 +160,11 @@ export interface Scan {
   error: string | null;
   // what the site told the scan to leave out; null for scans from before 0.4
   ignored: { rules: string[]; selectors: string[] } | null;
+  scenarioSummary: {
+    completed: number;
+    failed: number;
+    unmatched: { name: string; path: string }[];
+  } | null;
   createdAt: string;
 }
 
@@ -153,6 +197,7 @@ export interface IssueGroup {
   dismissal?: Dismissal | null;
   // whether the scan kept a picture of the first element with this problem
   shot?: boolean;
+  scenarios?: { name: string; path: string; steps: ScenarioStepEvidence[]; url: string }[];
 }
 
 export type DismissalReason = 'false_positive' | 'wont_fix';
@@ -167,6 +212,32 @@ export interface Dismissal {
   by: string | null;
 }
 
+export type KeyboardCoverageReason =
+  | 'time-limit'
+  | 'step-limit'
+  | 'keyboard-trap'
+  | 'dialog-blocked'
+  | 'frame-limit'
+  | 'frame-content'
+  | 'focus-limit'
+  | 'focus-unavailable'
+  | 'unreached-stops'
+  | 'error';
+
+// Describes this bounded walk, not a percentage of WCAG or every possible page state.
+export interface KeyboardCoverage {
+  status: 'completed' | 'partial';
+  reasons: KeyboardCoverageReason[];
+  visitedStops: number;
+  forwardSteps: number;
+  backwardSteps: number;
+  focusChecks: number;
+  focusStylesTested: number;
+  focusStylesSkipped: number;
+  elapsedMs: number;
+  limits: { timeMs: number; stepsPerDirection: number; focusChecks: number };
+}
+
 export interface PageRow {
   id: string;
   url: string;
@@ -174,6 +245,8 @@ export interface PageRow {
   error: string | null;
   problems: number;
   tabStops: number | null;
+  keyboardCoverage: KeyboardCoverage | null;
+  scenarioRuns: StoredScenarioRun[];
 }
 
 export interface TabStop {
@@ -190,6 +263,8 @@ export interface PageDetail {
   scan: { id: string; createdAt: string };
   site: { id: string; name: string };
   tabOrder: { width: number; height: number; stops: TabStop[] } | null;
+  keyboardCoverage: KeyboardCoverage | null;
+  scenarioRuns: StoredScenarioRun[];
 }
 
 export type ChannelKind = 'slack' | 'discord' | 'ntfy' | 'webhook' | 'email';

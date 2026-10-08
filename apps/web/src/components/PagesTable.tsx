@@ -3,6 +3,8 @@ import { Link } from '@tanstack/react-router';
 import { useI18n } from '../i18n/context';
 import { api } from '../lib/api';
 import { pathOf } from '../lib/format';
+import { KeyboardCoverageLabel } from './KeyboardCoverage';
+import { PageScenarioLabel } from './ScenarioResults';
 import { Card, LiveStatus } from './ui';
 
 const TH = 'px-3 py-3 text-[13px] font-semibold text-muted first:pl-5 last:pr-5';
@@ -51,12 +53,16 @@ export function PagesTable({ scanId }: { scanId: string }) {
                       {pathOf(page.url)}
                     </Link>
                     {page.title && <p className="mt-0.5 text-sm text-muted">{page.title}</p>}
+                    <PageScenarioLabel runs={page.scenarioRuns} />
                     {page.error && (
                       <p className="mt-0.5 text-sm text-critical">{t.pages.failed(page.error)}</p>
                     )}
                   </td>
                   <td className={`${TD} tabular-nums`}>{page.error ? '—' : page.problems}</td>
-                  <td className={`${TD} tabular-nums`}>{page.tabStops ?? '—'}</td>
+                  <td className={`${TD} tabular-nums`}>
+                    {page.keyboardCoverage?.visitedStops ?? page.tabStops ?? '—'}
+                    {!page.error && <KeyboardCoverageLabel coverage={page.keyboardCoverage} />}
+                  </td>
                 </tr>
               ))}
             </tbody>

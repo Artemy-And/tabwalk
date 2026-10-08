@@ -85,6 +85,20 @@
       "when": 1791305515899,
       "tag": "0011_issue_shots",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791458781699,
+      "tag": "0012_keyboard_coverage",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791473367143,
+      "tag": "0013_scan_scenarios",
+      "breakpoints": true
     }
   ]
 }

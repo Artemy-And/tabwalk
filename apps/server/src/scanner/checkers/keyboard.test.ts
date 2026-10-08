@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { type Browser, chromium } from 'playwright';
-import type { CheckFinding } from '../types.js';
+import type { CheckFinding, CheckOptions, KeyboardCoverage } from '../types.js';
 import { drawTabOrder, keyboardChecker } from './keyboard.js';
 
 let browser: Browser;
@@ -14,7 +14,7 @@ after(async () => {
   await browser.close();
 });
 
-async function check(body: string, style = ''): Promise<CheckFinding[]> {
+async function check(body: string, style = '', options?: CheckOptions): Promise<CheckFinding[]> {
   const context = await browser.newContext({ reducedMotion: 'reduce' });
   const page = await context.newPage();
   await page.route('http://fixture.test/**', (route) =>
@@ -25,11 +25,201 @@ async function check(body: string, style = ''): Promise<CheckFinding[]> {
   );
   await page.goto('http://fixture.test/');
   try {
-    return await keyboardChecker.run(page);
+    return await keyboardChecker.run(page, options);
   } finally {
     await context.close();
   }
 }
+
+async function coverageOf(body: string, style = ''): Promise<KeyboardCoverage> {
+  let coverage: KeyboardCoverage | undefined;
+  await check(body, style, {
+    onKeyboardCoverage: (value) => {
+      coverage = value;
+    },
+  });
+  assert.ok(coverage);
+  return coverage;
+}
+
+test('a finished walk records the stops and both directions', async () => {
+  const coverage = await coverageOf('<main><button>One</button><button>Two</button></main>');
+  assert.equal(coverage.status, 'completed');
+  assert.deepEqual(coverage.reasons, []);
+  assert.equal(coverage.visitedStops, 2);
+  assert.ok(coverage.forwardSteps >= 2);
+  assert.ok(coverage.backwardSteps >= 2);
+  assert.equal(coverage.focusStylesSkipped, 0);
+});
+
+test('a backward-only focus loop records partial coverage', async () => {
+  const coverage = await coverageOf(
+    '<button>One</button><button>Two</button><button id="third">Three</button><button id="last">Four</button>' +
+      `<script>
+        document.addEventListener('keydown', (event) => {
+          if (event.key !== 'Tab' || !event.shiftKey) return;
+          const third = document.getElementById('third');
+          const last = document.getElementById('last');
+          if (document.activeElement === third) {
+            event.preventDefault();
+            last.focus();
+          }
+        });
+      </script>`,
+  );
+  assert.equal(coverage.visitedStops, 4);
+  assert.equal(coverage.status, 'partial');
+  assert.ok(coverage.reasons.includes('unreached-stops'));
+});
+
+test('losing focus before finishing the backward walk records partial coverage', async () => {
+  const coverage = await coverageOf(
+    '<button>One</button><button>Two</button><button id="last">Three</button>' +
+      `<script>
+        document.getElementById('last').addEventListener('keydown', (event) => {
+          if (event.key !== 'Tab' || !event.shiftKey) return;
+          event.preventDefault();
+          event.target.blur();
+        });
+      </script>`,
+  );
+  assert.equal(coverage.visitedStops, 3);
+  assert.equal(coverage.status, 'partial');
+  assert.ok(coverage.reasons.includes('unreached-stops'));
+});
+
+test('the backward walk does not require controls in a dialog it already closed', async () => {
+  const coverage = await coverageOf(
+    '<div id="box" role="dialog" aria-label="Cookies"><input autofocus aria-label="Email"><button>Close</button></div>' +
+      '<a href="/after">After</a>' +
+      trapScript(false) +
+      `<script>
+        document.querySelector('#box button').addEventListener('click', () => {
+          document.getElementById('box').remove();
+        });
+      </script>`,
+  );
+  assert.equal(coverage.status, 'completed');
+  assert.deepEqual(coverage.reasons, []);
+});
+
+test('a trap before the last control in an open shadow root cannot look completed', async () => {
+  const coverage = await coverageOf(
+    `<div id="host"></div><script>
+      const shadow = document.getElementById('host').attachShadow({ mode: 'open' });
+      shadow.innerHTML = '<button id="first">One</button><button id="second">Two</button><button>Three</button>';
+      shadow.addEventListener('keydown', (event) => {
+        if (event.key !== 'Tab') return;
+        const first = shadow.getElementById('first');
+        const second = shadow.getElementById('second');
+        if (!event.shiftKey && shadow.activeElement === second) {
+          event.preventDefault();
+          first.focus();
+        } else if (event.shiftKey && shadow.activeElement === first) {
+          event.preventDefault();
+          second.focus();
+        }
+      });
+    </script>`,
+  );
+  assert.equal(coverage.visitedStops, 2);
+  assert.equal(coverage.status, 'partial');
+  assert.ok(coverage.reasons.includes('keyboard-trap'));
+});
+
+test('a finished walk through nested open shadow roots remains completed', async () => {
+  const coverage = await coverageOf(
+    `<div id="host"></div><script>
+      const shadow = document.getElementById('host').attachShadow({ mode: 'open' });
+      shadow.innerHTML = '<button>One</button><div id="inner"></div>';
+      shadow.getElementById('inner').attachShadow({ mode: 'open' }).innerHTML =
+        '<button>Two</button><button>Three</button>';
+    </script>`,
+  );
+  assert.equal(coverage.visitedStops, 3);
+  assert.equal(coverage.status, 'completed');
+  assert.deepEqual(coverage.reasons, []);
+});
+
+test('inert open shadow roots do not count as unreached keyboard controls', async () => {
+  const coverage = await coverageOf(
+    `<button>One</button><div id="host" inert></div><script>
+      document.getElementById('host').attachShadow({ mode: 'open' }).innerHTML =
+        '<button>Unavailable</button>';
+    </script>`,
+  );
+  assert.equal(coverage.visitedStops, 1);
+  assert.equal(coverage.status, 'completed');
+  assert.deepEqual(coverage.reasons, []);
+});
+
+test('a trapped walk records partial coverage even when it reports the trap', async () => {
+  const coverage = await coverageOf(
+    '<a href="/before">Before</a><div id="box"><input aria-label="Email"><button>Sign up</button></div>' +
+      '<a href="/after">After</a>' +
+      trapScript(false),
+  );
+  assert.equal(coverage.status, 'partial');
+  assert.ok(coverage.reasons.includes('keyboard-trap'));
+});
+
+test('the step cap is visible even when all visited controls have focus styles', async () => {
+  const buttons = Array.from({ length: 310 }, (_, i) => `<button>Button ${i}</button>`).join('');
+  const coverage = await coverageOf(buttons);
+  assert.equal(coverage.status, 'partial');
+  assert.ok(coverage.reasons.includes('step-limit'));
+  assert.equal(coverage.forwardSteps, 300);
+  assert.equal(coverage.visitedStops, 300);
+});
+
+test('unverified focus styles beyond the visual cap are reported', async () => {
+  const buttons = Array.from(
+    { length: 45 },
+    (_, i) => `<button class="focus-${i}" style="border-radius:${i}px">Button ${i}</button>`,
+  ).join('');
+  const coverage = await coverageOf(buttons);
+  assert.equal(coverage.status, 'partial');
+  assert.ok(coverage.reasons.includes('focus-limit'));
+  assert.equal(coverage.focusChecks, 40);
+  assert.ok(coverage.focusStylesSkipped > 0);
+});
+
+test('running out of time is recorded even if no violation was detected', async (t) => {
+  const page = await browser.newPage();
+  await page.setContent('<button>One</button><button>Two</button>');
+  let now = Date.now();
+  t.mock.method(Date, 'now', () => now);
+  const original = page.keyboard.press.bind(page.keyboard);
+  t.mock.method(page.keyboard, 'press', async (key: string) => {
+    now += 21_000;
+    await original(key);
+  });
+  let coverage: KeyboardCoverage | undefined;
+  await keyboardChecker.run(page, {
+    onKeyboardCoverage: (value) => {
+      coverage = value;
+    },
+  });
+  await page.close();
+  assert.ok(coverage);
+  assert.equal(coverage.status, 'partial');
+  assert.ok(coverage.reasons.includes('time-limit'));
+  assert.equal(coverage.visitedStops, 1);
+});
+
+test('a checker error cannot look like a completed walk', async () => {
+  const page = await browser.newPage();
+  await page.close();
+  let coverage: KeyboardCoverage | undefined;
+  await keyboardChecker.run(page, {
+    onKeyboardCoverage: (value) => {
+      coverage = value;
+    },
+  });
+  assert.ok(coverage);
+  assert.equal(coverage.status, 'partial');
+  assert.ok(coverage.reasons.includes('error'));
+});
 
 function only(findings: CheckFinding[], ruleId: string): CheckFinding[] {
   return findings.filter((f) => f.ruleId === ruleId);

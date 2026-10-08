@@ -1,5 +1,11 @@
 import type { Page } from 'playwright';
-import type { Checker, CheckFinding } from '../types.js';
+import type {
+  Checker,
+  CheckFinding,
+  CheckOptions,
+  KeyboardCoverage,
+  KeyboardCoverageReason,
+} from '../types.js';
 import {
   type Box,
   type Described,
@@ -68,6 +74,10 @@ interface Walk {
   visible: Map<string, boolean>;
   obscured: Map<number, { stop: Stop; how: keyof typeof APPROACH }>;
   findings: CheckFinding[];
+  reasons: Set<KeyboardCoverageReason>;
+  forwardSteps: number;
+  backwardSteps: number;
+  focusChecks: number;
 }
 
 function finding(
@@ -250,7 +260,11 @@ async function tryToLeave(page: Page, cycle: Stop[]): Promise<CheckFinding | 'le
 
 async function walk(page: Page, result: Walk): Promise<void> {
   const deadline = Date.now() + TIME_BUDGET_MS;
-  const inTime = () => Date.now() < deadline;
+  const inTime = () => {
+    if (Date.now() < deadline) return true;
+    result.reasons.add('time-limit');
+    return false;
+  };
   const { stops, visible, obscured, findings } = result;
 
   await page.evaluate(INSTALL);
@@ -263,7 +277,6 @@ async function walk(page: Page, result: Walk): Promise<void> {
       (ids) => window.__tabwalkKeyboard?.unreached(ids) ?? 0,
       stops.map((s) => s.id),
     );
-  let visualChecks = 0;
   let scroll: string | null = null;
   let ended = false;
   let lostFocus = 0;
@@ -285,12 +298,14 @@ async function walk(page: Page, result: Walk): Promise<void> {
   };
 
   for (let i = 0; i < MAX_STOPS && inTime(); i++) {
+    result.forwardSteps++;
     const stop = await press(page, 'Tab', scroll);
     if (!stop) {
       if (lostFocus < 2 && (await unreached()) > 0) {
         lostFocus++;
         continue;
       }
+      if ((await unreached()) > 0) result.reasons.add('unreached-stops');
       ended = true;
       break;
     }
@@ -316,6 +331,7 @@ async function walk(page: Page, result: Walk): Promise<void> {
             'Check that keyboard users can get out of it.',
         ),
       );
+      result.reasons.add('frame-limit');
       if (floating) return;
       break;
     }
@@ -325,6 +341,7 @@ async function walk(page: Page, result: Walk): Promise<void> {
     const seen = index.get(stop.id);
     if (seen !== undefined) {
       if (seen === 0 && (lostFocus > 0 || (await unreached()) === 0)) {
+        if ((await unreached()) > 0) result.reasons.add('unreached-stops');
         ended = true;
         break;
       }
@@ -345,6 +362,7 @@ async function walk(page: Page, result: Walk): Promise<void> {
               'Check that keyboard users can close it and reach the rest of the page.',
           ),
         );
+        result.reasons.add('dialog-blocked');
         return;
       }
       const trap = await tryToLeave(page, cycle);
@@ -353,6 +371,7 @@ async function walk(page: Page, result: Walk): Promise<void> {
         continue;
       }
       if (trap !== 'left') findings.push(trap);
+      result.reasons.add('keyboard-trap');
       break;
     }
     index.set(stop.id, run.length);
@@ -360,16 +379,19 @@ async function walk(page: Page, result: Walk): Promise<void> {
     if (recorded.has(stop.id)) continue;
     recorded.add(stop.id);
     stops.push(stop);
+    if (stop.frame) result.reasons.add('frame-content');
 
     const key = visualKey(stop);
     if (stop.obscurer) {
       obscured.set(stop.id, { stop, how: 'forward' });
-    } else if (!stop.frame && !visible.has(key) && visualChecks < MAX_VISUAL_CHECKS) {
-      visualChecks++;
+    } else if (!stop.frame && !visible.has(key) && result.focusChecks < MAX_VISUAL_CHECKS) {
+      result.focusChecks++;
       const shows = await focusShows(page, stop);
       if (shows !== null) visible.set(key, shows);
     }
   }
+
+  if (!ended && result.forwardSteps >= MAX_STOPS) result.reasons.add('step-limit');
 
   let last: Stop | null = null;
   if (!ended && inTime()) {
@@ -378,6 +400,8 @@ async function walk(page: Page, result: Walk): Promise<void> {
     if (!last) return;
   }
   const back = new Set<number>();
+  const backUnreached = () =>
+    page.evaluate((ids) => window.__tabwalkKeyboard?.unreached(ids) ?? 0, [...back]);
   if (last) {
     back.add(last.id);
     if (last.obscurer && !obscured.has(last.id)) {
@@ -386,22 +410,38 @@ async function walk(page: Page, result: Walk): Promise<void> {
   }
   frame = -1;
   frameRun = 0;
+  let backEnded = false;
   for (let i = 0; i < MAX_STOPS && inTime(); i++) {
+    result.backwardSteps++;
     const stop: Stop | null = await press(page, 'Shift+Tab', last?.scroll ?? null);
-    if (!stop) break;
+    if (!stop) {
+      if ((await backUnreached()) > 0) result.reasons.add('unreached-stops');
+      backEnded = true;
+      break;
+    }
     last = stop;
     if (stop.frame && stop.id === frame) {
-      if (++frameRun > MAX_FRAME_STOPS) break;
+      if (++frameRun > MAX_FRAME_STOPS) {
+        result.reasons.add('frame-limit');
+        break;
+      }
       continue;
     }
     frame = stop.frame ? stop.id : -1;
     frameRun = 0;
-    if (back.has(stop.id)) break;
+    if (stop.frame) result.reasons.add('frame-content');
+    if (back.has(stop.id)) {
+      if ((await backUnreached()) > 0) result.reasons.add('unreached-stops');
+      backEnded = true;
+      break;
+    }
     back.add(stop.id);
     if (stop.obscurer && !obscured.has(stop.id)) {
       obscured.set(stop.id, { stop, how: 'backward' });
     }
   }
+
+  if (!backEnded && result.backwardSteps >= MAX_STOPS) result.reasons.add('step-limit');
 
   const first = stops[start];
   if (!first || !inTime()) return;
@@ -513,13 +553,23 @@ function report({ stops, visible, obscured, findings: walked }: Walk): CheckFind
 }
 
 function emptyWalk(): Walk {
-  return { stops: [], visible: new Map(), obscured: new Map(), findings: [] };
+  return {
+    stops: [],
+    visible: new Map(),
+    obscured: new Map(),
+    findings: [],
+    reasons: new Set(),
+    forwardSteps: 0,
+    backwardSteps: 0,
+    focusChecks: 0,
+  };
 }
 
 export const keyboardChecker: Checker = {
   name: 'keyboard',
 
-  async run(page: Page): Promise<CheckFinding[]> {
+  async run(page: Page, options?: CheckOptions): Promise<CheckFinding[]> {
+    const started = Date.now();
     let result = emptyWalk();
     for (let attempt = 0; ; attempt++) {
       try {
@@ -533,6 +583,7 @@ export const keyboardChecker: Checker = {
           result = emptyWalk();
           continue;
         }
+        result.reasons.add('error');
         console.warn(`[keyboard] ${page.url()}: ${message}`);
       }
       await page
@@ -541,6 +592,34 @@ export const keyboardChecker: Checker = {
           result.stops.map((s) => ({ id: s.id, visible: s.onScreen })),
         )
         .catch(() => {});
+      const pendingStyles = new Set(
+        result.stops
+          .filter((stop) => !stop.frame && !result.obscured.has(stop.id))
+          .map(visualKey)
+          .filter((key) => !result.visible.has(key)),
+      );
+      if (pendingStyles.size > 0) {
+        result.reasons.add(
+          result.focusChecks >= MAX_VISUAL_CHECKS ? 'focus-limit' : 'focus-unavailable',
+        );
+      }
+      const coverage: KeyboardCoverage = {
+        status: result.reasons.size > 0 ? 'partial' : 'completed',
+        reasons: [...result.reasons],
+        visitedStops: result.stops.length,
+        forwardSteps: result.forwardSteps,
+        backwardSteps: result.backwardSteps,
+        focusChecks: result.focusChecks,
+        focusStylesTested: result.visible.size,
+        focusStylesSkipped: pendingStyles.size,
+        elapsedMs: Math.max(0, Date.now() - started),
+        limits: {
+          timeMs: TIME_BUDGET_MS,
+          stepsPerDirection: MAX_STOPS,
+          focusChecks: MAX_VISUAL_CHECKS,
+        },
+      };
+      options?.onKeyboardCoverage?.(coverage);
       return report(result);
     }
   },

@@ -1,5 +1,12 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
+import type { SiteScenario } from '../scanner/scenarios.js';
+import type {
+  KeyboardCoverage,
+  ScenarioEvidence,
+  ScenarioSummary,
+  StoredScenarioRun,
+} from '../scanner/types.js';
 
 // clears the sites and users tables, so it only runs against a database named for tests;
 // run it with --test-concurrency=1 next to auth/routes.test.ts, which clears users too
@@ -316,4 +323,356 @@ test('a pictured problem shows the element in its picture as the example', { ski
   assert.equal(picture.headers.get('content-type'), 'image/webp');
   assert.deepEqual(Buffer.from(await picture.arrayBuffer()), image);
   assert.equal((await get(`/api/scans/${scan.id}/shots/nopic`)).status, 404);
+});
+
+test('a legacy picture shared by multiple finding kinds cannot replace either group element evidence', {
+  skip,
+}, async () => {
+  const site = await seedSite();
+  const [scan] = await db
+    .insert(schema.scans)
+    .values({
+      siteId: site.id,
+      status: 'done',
+      pagesScanned: 1,
+    })
+    .returning();
+  assert.ok(scan);
+  const [page] = await db
+    .insert(schema.pages)
+    .values({
+      scanId: scan.id,
+      url: 'https://noise.test/',
+    })
+    .returning();
+  assert.ok(page);
+  const violation = {
+    kind: 'violation' as const,
+    html: '<p id="violation">Confirmed contrast problem</p>',
+    target: ['#violation'],
+  };
+  const review = {
+    kind: 'incomplete' as const,
+    html: '<p id="review">Contrast requires a human check</p>',
+    target: ['#review'],
+  };
+  await db.insert(schema.issues).values(
+    [violation, review].map((finding) => ({
+      scanId: scan.id,
+      pageId: page.id,
+      fingerprint: 'shared-picture',
+      checker: 'axe-core',
+      ruleId: 'color-contrast',
+      impact: 'serious',
+      help: 'Elements must have sufficient color contrast',
+      ...finding,
+    })),
+  );
+  await db.insert(schema.issueShots).values({
+    scanId: scan.id,
+    fingerprint: 'shared-picture',
+    html: violation.html,
+    target: violation.target,
+    image: Buffer.from('RIFF0000WEBP'),
+    width: 120,
+    height: 80,
+  });
+  const response = await get(`/api/scans/${scan.id}/issues`);
+  assert.equal(response.status, 200);
+  const rows = (await response.json()) as {
+    fingerprint: string;
+    kind: string;
+    shot: boolean;
+    sampleHtml: string;
+    sampleTarget: string;
+  }[];
+  const shared = rows.filter((row) => row.fingerprint === 'shared-picture');
+  assert.equal(shared.length, 2);
+  for (const expected of [violation, review]) {
+    const row = shared.find((finding) => finding.kind === expected.kind);
+    assert.ok(row);
+    assert.equal(row.shot, false);
+    assert.equal(row.sampleHtml, expected.html);
+    assert.deepEqual(JSON.parse(row.sampleTarget), expected.target);
+  }
+});
+
+test('page endpoints preserve partial coverage and unknown coverage on older scans', {
+  skip,
+}, async () => {
+  const site = await seedSite();
+  const scan = await seedScan(site.id, '2026-10-08T10:00:00Z', [{ fingerprint: 'coverage' }]);
+  const coverage: KeyboardCoverage = {
+    status: 'partial',
+    reasons: ['time-limit'],
+    visitedStops: 12,
+    forwardSteps: 14,
+    backwardSteps: 0,
+    focusChecks: 3,
+    focusStylesTested: 3,
+    focusStylesSkipped: 0,
+    elapsedMs: 20_001,
+    limits: { timeMs: 20_000, stepsPerDirection: 300, focusChecks: 40 },
+  };
+  const [partial] = await db
+    .insert(schema.pages)
+    .values({
+      scanId: scan.id,
+      url: 'https://noise.test/partial',
+      keyboardCoverage: coverage,
+    })
+    .returning();
+  assert.ok(partial);
+  const response = await get(`/api/scans/${scan.id}/pages`);
+  assert.equal(response.status, 200);
+  const rows = (await response.json()) as {
+    id: string;
+    keyboardCoverage: KeyboardCoverage | null;
+  }[];
+  assert.deepEqual(rows.find((p) => p.id === partial.id)?.keyboardCoverage, coverage);
+  const legacy = rows.find((p) => p.id !== partial.id);
+  assert.ok(legacy);
+  assert.equal(legacy.keyboardCoverage, null);
+
+  const detail = await get(`/api/pages/${partial.id}`);
+  assert.equal(detail.status, 200);
+  assert.deepEqual(
+    ((await detail.json()) as { keyboardCoverage: unknown }).keyboardCoverage,
+    coverage,
+  );
+  const old = await get(`/api/pages/${legacy.id}`);
+  assert.equal(old.status, 200);
+  assert.equal(((await old.json()) as { keyboardCoverage: unknown }).keyboardCoverage, null);
+});
+
+test('a site validates, stores and clears its scenario configuration', { skip }, async () => {
+  const site = await seedSite();
+  const scenarios: SiteScenario[] = [
+    {
+      name: 'Profile dialog',
+      path: '/settings',
+      steps: [
+        { action: 'click', selector: '#open' },
+        { action: 'waitFor', selector: '#dialog', state: 'visible' },
+        { action: 'fill', selector: '#email', value: 'demo@example.test' },
+        { action: 'press', key: 'Escape' },
+        { action: 'expectFocus', selector: '#open' },
+      ],
+    },
+  ];
+  const saved = await send('PATCH', `/api/sites/${site.id}`, { scenarios });
+  assert.equal(saved.status, 200);
+  assert.deepEqual(((await saved.json()) as { scenarios: SiteScenario[] }).scenarios, scenarios);
+  assert.deepEqual(
+    ((await (await get(`/api/sites/${site.id}`)).json()) as { scenarios: SiteScenario[] })
+      .scenarios,
+    scenarios,
+  );
+  for (const invalid of [
+    [{ ...scenarios[0], path: '/settings?tab=profile' }],
+    [{ ...scenarios[0], steps: [] }],
+    [{ ...scenarios[0], steps: [{ action: 'evaluate', script: 'void 0' }] }],
+    [{ ...scenarios[0], steps: [{ action: 'click', selector: '#open', value: 'extra' }] }],
+    [scenarios[0], { ...scenarios[0], name: 'PROFILE DIALOG' }],
+    Array.from({ length: 6 }, (_, index) => ({ ...scenarios[0], name: `State ${index}` })),
+  ]) {
+    const bad = await send('PATCH', `/api/sites/${site.id}`, { scenarios: invalid });
+    assert.equal(bad.status, 400);
+  }
+  const unchanged = (await (await get(`/api/sites/${site.id}`)).json()) as {
+    scenarios: SiteScenario[];
+  };
+  assert.deepEqual(unchanged.scenarios, scenarios, 'invalid patches never change stored scenarios');
+  const cleared = await send('PATCH', `/api/sites/${site.id}`, { scenarios: [] });
+  assert.equal(cleared.status, 200);
+  assert.deepEqual(((await cleared.json()) as { scenarios: SiteScenario[] }).scenarios, []);
+});
+
+test('page and scan endpoints preserve scenario execution evidence and legacy defaults', {
+  skip,
+}, async () => {
+  const site = await seedSite();
+  const summary: ScenarioSummary = {
+    completed: 1,
+    failed: 1,
+    unmatched: [{ name: 'Checkout', path: '/checkout' }],
+  };
+  const [scan] = await db
+    .insert(schema.scans)
+    .values({
+      siteId: site.id,
+      status: 'done',
+      pagesScanned: 2,
+      scenarioSummary: summary,
+    })
+    .returning();
+  assert.ok(scan);
+  const runs: StoredScenarioRun[] = [
+    {
+      name: 'Profile dialog',
+      path: '/settings',
+      status: 'completed',
+      steps: [{ action: 'click', selector: '#open', status: 'completed' }],
+      error: null,
+      keyboardCoverage: null,
+      findings: 2,
+    },
+    {
+      name: 'Focus returns',
+      path: '/settings',
+      status: 'failed',
+      steps: [
+        { action: 'expectFocus', selector: '#open', status: 'failed', actualFocus: '#other' },
+      ],
+      error: 'Step 1 (expectFocus) failed: the expected element did not have focus.',
+      keyboardCoverage: null,
+      findings: 0,
+    },
+  ];
+  const [current] = await db
+    .insert(schema.pages)
+    .values({
+      scanId: scan.id,
+      url: 'https://noise.test/settings',
+      scenarioRuns: runs,
+    })
+    .returning();
+  const [legacy] = await db
+    .insert(schema.pages)
+    .values({
+      scanId: scan.id,
+      url: 'https://noise.test/',
+    })
+    .returning();
+  assert.ok(current);
+  assert.ok(legacy);
+  const listed = await get(`/api/scans/${scan.id}/pages`);
+  assert.equal(listed.status, 200);
+  const rows = (await listed.json()) as { id: string; scenarioRuns: StoredScenarioRun[] }[];
+  assert.deepEqual(rows.find((page) => page.id === current.id)?.scenarioRuns, runs);
+  assert.deepEqual(rows.find((page) => page.id === legacy.id)?.scenarioRuns, []);
+  for (const [page, expected] of [
+    [current, runs],
+    [legacy, []],
+  ] as const) {
+    const detail = await get(`/api/pages/${page.id}`);
+    assert.equal(detail.status, 200);
+    assert.deepEqual(
+      ((await detail.json()) as { scenarioRuns: StoredScenarioRun[] }).scenarioRuns,
+      expected,
+    );
+  }
+  const scanDetail = await get(`/api/scans/${scan.id}`);
+  assert.equal(scanDetail.status, 200);
+  assert.deepEqual(
+    ((await scanDetail.json()) as { scenarioSummary: ScenarioSummary }).scenarioSummary,
+    summary,
+  );
+  const scanRows = (await (await get(`/api/sites/${site.id}/scans`)).json()) as {
+    id: string;
+    scenarioSummary: ScenarioSummary | null;
+  }[];
+  assert.deepEqual(scanRows.find((row) => row.id === scan.id)?.scenarioSummary, summary);
+  const older = await seedScan(site.id, '2026-09-01T10:00:00Z', [
+    { fingerprint: 'legacy-scenario' },
+  ]);
+  const olderDetail = await get(`/api/scans/${older.id}`);
+  assert.equal(olderDetail.status, 200);
+  assert.equal(
+    ((await olderDetail.json()) as { scenarioSummary: ScenarioSummary | null }).scenarioSummary,
+    null,
+  );
+});
+
+test('grouped scenario contexts keep their steps and page URLs within each finding kind', {
+  skip,
+}, async () => {
+  const site = await seedSite();
+  const scan = await seedScan(site.id, '2026-10-08T11:00:00Z', [
+    { fingerprint: 'shared-scenario', kind: 'violation' },
+    { fingerprint: 'shared-scenario', kind: 'incomplete' },
+  ]);
+  const [settings] = await db
+    .insert(schema.pages)
+    .values({
+      scanId: scan.id,
+      url: 'https://noise.test/settings?tab=profile',
+    })
+    .returning();
+  const [checkout] = await db
+    .insert(schema.pages)
+    .values({
+      scanId: scan.id,
+      url: 'https://noise.test/checkout',
+    })
+    .returning();
+  assert.ok(settings);
+  assert.ok(checkout);
+  const profile: ScenarioEvidence = {
+    name: 'Profile dialog',
+    path: '/settings',
+    steps: [
+      { action: 'click', selector: '#open', status: 'completed' },
+      { action: 'fill', selector: '#email', status: 'completed' },
+    ],
+  };
+  const payment: ScenarioEvidence = {
+    name: 'Payment dialog',
+    path: '/checkout',
+    steps: [{ action: 'expectFocus', selector: '#pay', status: 'completed', actualFocus: '#pay' }],
+  };
+  const review: ScenarioEvidence = {
+    name: 'Review focus',
+    path: '/settings',
+    steps: [{ action: 'press', key: 'Tab', status: 'completed' }],
+  };
+  await db.insert(schema.issues).values(
+    [
+      { page: settings, kind: 'violation' as const, scenario: profile },
+      { page: settings, kind: 'violation' as const, scenario: profile },
+      { page: checkout, kind: 'violation' as const, scenario: payment },
+      { page: settings, kind: 'incomplete' as const, scenario: review },
+    ].map(({ page, kind, scenario }) => ({
+      scanId: scan.id,
+      pageId: page.id,
+      fingerprint: 'shared-scenario',
+      kind,
+      checker: 'axe-core',
+      ruleId: 'image-alt',
+      impact: 'serious',
+      help: 'Problem shared-scenario',
+      html: '<img data-f="shared-scenario">',
+      scenario,
+    })),
+  );
+  const response = await get(`/api/scans/${scan.id}/issues`);
+  assert.equal(response.status, 200);
+  const rows = (await response.json()) as {
+    fingerprint: string;
+    kind: string;
+    occurrences: number;
+    pagesAffected: number;
+    scenarios: (ScenarioEvidence & { url: string })[];
+  }[];
+  const violations = rows.find(
+    (row) => row.fingerprint === 'shared-scenario' && row.kind === 'violation',
+  );
+  const incomplete = rows.find(
+    (row) => row.fingerprint === 'shared-scenario' && row.kind === 'incomplete',
+  );
+  assert.ok(violations);
+  assert.ok(incomplete);
+  assert.equal(violations.occurrences, 4);
+  assert.equal(violations.pagesAffected, 3);
+  assert.deepEqual(
+    violations.scenarios.sort((a, b) => a.name.localeCompare(b.name)),
+    [
+      { ...payment, url: checkout.url },
+      { ...profile, url: settings.url },
+    ],
+    'duplicate evidence is collapsed without merging classification contexts',
+  );
+  assert.equal(incomplete.occurrences, 2);
+  assert.equal(incomplete.pagesAffected, 2);
+  assert.deepEqual(incomplete.scenarios, [{ ...review, url: settings.url }]);
 });

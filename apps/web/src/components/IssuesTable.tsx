@@ -4,6 +4,7 @@ import { useI18n } from '../i18n/context';
 import { useRuleHelp } from '../i18n/ruleHelp';
 import { api, DISMISSAL_REASONS, type DismissalReason, type IssueGroup } from '../lib/api';
 import { formatDay, standardLabel } from '../lib/format';
+import { FindingScenarios } from './ScenarioResults';
 import { Button, Card, Field, ImpactBadge } from './ui';
 
 type SortKey = 'pagesAffected' | 'impact' | 'ruleId';
@@ -350,6 +351,7 @@ export function IssuesTable({
                       </p>
                     )}
                   </details>
+                  <FindingScenarios scenarios={issue.scenarios} />
                   {actions && variant === 'dismissed' && (
                     <Dismissed
                       issue={issue}

@@ -11,7 +11,14 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import type { SiteLogin } from '../scanner/types.js';
+import type { SiteScenario } from '../scanner/scenarios.js';
+import type {
+  KeyboardCoverage,
+  ScenarioEvidence,
+  ScenarioSummary,
+  SiteLogin,
+  StoredScenarioRun,
+} from '../scanner/types.js';
 
 export const organizations = pgTable('organizations', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -83,6 +90,7 @@ export const sites = pgTable(
     ignoreSelectors: jsonb('ignore_selectors').$type<string[]>().notNull().default([]),
     // kept as entered, like notification webhooks, and never sent back to the dashboard
     login: jsonb('login').$type<SiteLogin>(),
+    scenarios: jsonb('scenarios').$type<SiteScenario[]>().notNull().default([]),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('sites_org_idx').on(t.orgId)],
@@ -102,6 +110,7 @@ export const scans = pgTable(
     finishedAt: timestamp('finished_at', { withTimezone: true }),
     pagesScanned: integer('pages_scanned').notNull().default(0),
     pagesFailed: integer('pages_failed').notNull().default(0),
+    scenarioSummary: jsonb('scenario_summary').$type<ScenarioSummary>(),
     error: text('error'),
     // what the site told this scan to leave out, so the report can say so
     ignored: jsonb('ignored').$type<{ rules: string[]; selectors: string[] }>(),
@@ -120,6 +129,8 @@ export const pages = pgTable(
     url: text('url').notNull(),
     title: text('title'),
     error: text('error'),
+    keyboardCoverage: jsonb('keyboard_coverage').$type<KeyboardCoverage>(),
+    scenarioRuns: jsonb('scenario_runs').$type<StoredScenarioRun[]>().notNull().default([]),
     scannedAt: timestamp('scanned_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex('pages_scan_url_idx').on(t.scanId, t.url)],
@@ -167,6 +178,7 @@ export const issues = pgTable(
     target: jsonb('target').$type<string[]>().notNull().default([]),
     html: text('html').notNull(),
     failureSummary: text('failure_summary'),
+    scenario: jsonb('scenario').$type<ScenarioEvidence>(),
   },
   (t) => [
     index('issues_scan_idx').on(t.scanId),
