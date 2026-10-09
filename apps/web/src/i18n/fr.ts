@@ -293,7 +293,7 @@ export const fr: Messages = {
     heading: 'Scénarios d’interaction',
     intro:
       'Tabwalk vérifie l’état initial puis ouvre une nouvelle page pour chaque scénario à son chemin exact. Jusqu’à 5 scénarios de 20 étapes chacun.',
-    note: 'Les étapes s’exécutent sur le site et peuvent modifier ses données. Utilisez des comptes et des données de test. Les changements s’appliquent au prochain scan.',
+    note: 'Les étapes s’exécutent sur le site et peuvent modifier ses données. Utilisez des comptes et des données de test. Les changements s’appliquent à la prochaine analyse.',
     empty:
       'Aucun scénario. Ajoutez-en un pour vérifier un menu, une boîte de dialogue ou un état de formulaire.',
     add: 'Ajouter un scénario',

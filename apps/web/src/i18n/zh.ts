@@ -275,7 +275,7 @@ export const zh: Messages = {
     heading: '交互场景',
     intro:
       'Tabwalk 检查页面初始状态，然后为每个场景在指定的精确路径打开一个新页面。最多 5 个场景，每个场景最多 20 个步骤。',
-    note: '步骤会在网站上执行，可能更改网站数据。请使用测试账号和测试数据。更改从下一次扫描开始生效。',
+    note: '步骤会在网站上执行，可能更改网站数据。请使用测试账号和测试数据。更改从下一次检测开始生效。',
     empty: '尚无场景。添加一个场景来检查菜单、对话框或表单状态。',
     add: '添加场景',
     remove: '删除场景',
@@ -323,8 +323,8 @@ export const zh: Messages = {
     actualFocus: (selector: string) => `实际焦点：${selector}`,
     completedCount: (n: number) => `已完成的场景：${n}`,
     failedCount: (n: number) => `失败的场景：${n}`,
-    unmatched: '未扫描的路径',
-    incomplete: '部分场景无法检查。请查看失败的步骤和未扫描的页面路径。',
+    unmatched: '未检测的路径',
+    incomplete: '部分场景无法检查。请查看失败的步骤和未检测的页面路径。',
   },
   manualReview: {
     heading: '人工评估',
@@ -340,15 +340,15 @@ export const zh: Messages = {
     note: '备注（可选）',
     save: '保存评估',
     reset: '恢复待审核',
-    savedNotice: '已保存本次扫描的评估。',
+    savedNotice: '已保存本次检测的评估。',
     resetNotice: '评估已删除，此项发现需要重新审核。',
-    scope: '决定仅适用于本次扫描。新扫描需要重新评估。',
+    scope: '决定仅适用于本次检测。新的检测需要重新评估。',
     automatic: '自动检测到的问题',
     confirmedHeading: '人工确认的问题',
   },
   environments: {
     incomplete: '部分环境无法检查：',
-    heading: '扫描环境',
+    heading: '检测环境',
     labels: {
       desktop: '桌面',
       mobile: '窄屏幕',
@@ -357,7 +357,7 @@ export const zh: Messages = {
       'forced-colors': '强制颜色',
     },
     intro:
-      '始终检查桌面。附加环境会检查初始状态和所有匹配的场景，增加扫描时间。更改适用于下次扫描。',
+      '始终检查桌面。附加环境会检查初始状态和所有匹配的场景，增加检测时间。更改适用于下次检测。',
     descriptions: {
       mobile: '390 × 844 CSS px；窄窗口桌面浏览器。',
       'zoom-200': '640 × 360 CSS px，设备比例2×；模拟200%缩放下的布局重排。',
@@ -365,7 +365,7 @@ export const zh: Messages = {
       'forced-colors': '1280 × 720；浏览器模拟强制系统颜色。',
     },
     save: '保存环境',
-    saved: '已保存，将用于下次扫描。',
+    saved: '已保存，将用于下次检测。',
     foundIn: '发现于',
     picture: '截图来源',
     results: '各环境结果',

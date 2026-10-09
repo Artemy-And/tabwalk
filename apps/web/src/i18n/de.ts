@@ -292,9 +292,9 @@ export const de: Messages = {
     heading: 'Interaktionsszenarien',
     intro:
       'Tabwalk prüft den Ausgangszustand und öffnet für jedes Szenario eine neue Seite am exakten Pfad. Bis zu 5 Szenarien mit je 20 Schritten.',
-    note: 'Die Schritte werden auf der Website ausgeführt und können deren Daten ändern. Verwende Testkonten und Testdaten. Änderungen gelten ab dem nächsten Scan.',
+    note: 'Die Schritte werden auf der Website ausgeführt und können deren Daten ändern. Verwenden Sie Testkonten und Testdaten. Änderungen gelten ab dem nächsten Scan.',
     empty:
-      'Noch keine Szenarien. Füge eines hinzu, um ein Menü, einen Dialog oder einen Formularzustand zu prüfen.',
+      'Noch keine Szenarien. Fügen Sie eines hinzu, um ein Menü, einen Dialog oder einen Formularzustand zu prüfen.',
     add: 'Szenario hinzufügen',
     remove: 'Szenario entfernen',
     name: 'Name',
@@ -330,7 +330,8 @@ export const de: Messages = {
     saved: 'Szenarien gespeichert.',
     duplicateNames:
       'Jedes Szenario braucht einen eindeutigen Namen, unabhängig von Groß- und Kleinschreibung.',
-    badPath: 'Gib einen exakten Seitenpfad ab / ein, ohne Abfragen, Fragmente oder Platzhalter.',
+    badPath:
+      'Geben Sie einen exakten Seitenpfad ab / ein, ohne Abfragen, Fragmente oder Platzhalter.',
     badSelector: (selector: string) => `„${selector}“ ist kein gültiger CSS-Selektor.`,
     needsStep: 'Jedes Szenario braucht mindestens einen Schritt.',
     resultsHeading: 'Szenarioergebnisse',
@@ -345,7 +346,7 @@ export const de: Messages = {
     failedCount: (n: number) => `Fehlgeschlagene Szenarien: ${n}`,
     unmatched: 'Nicht gescannte Pfade',
     incomplete:
-      'Einige Szenarien konnten nicht geprüft werden. Prüfe fehlgeschlagene Schritte und nicht gescannte Seitenpfade.',
+      'Einige Szenarien konnten nicht geprüft werden. Prüfen Sie fehlgeschlagene Schritte und nicht gescannte Seitenpfade.',
   },
   manualReview: {
     heading: 'Manuelle Bewertung',
