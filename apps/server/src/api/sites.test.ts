@@ -430,6 +430,34 @@ test('a dismissed finding stays in the report but counts nowhere', { skip }, asy
   assert.equal(missing.status, 404);
 });
 
+test('a dismissed uncertain finding stays out of the review queue on later scans', {
+  skip,
+}, async () => {
+  const site = await seedSite();
+  const findings: Finding[] = [
+    { fingerprint: 'uncertain-dismissed', kind: 'incomplete' },
+    { fingerprint: 'uncertain-open', kind: 'incomplete' },
+  ];
+  await seedScan(site.id, '2026-10-01T10:00:00Z', findings);
+  const put = await send('PUT', `/api/sites/${site.id}/dismissals`, {
+    fingerprint: 'uncertain-dismissed',
+    reason: 'false_positive',
+  });
+  assert.equal(put.status, 200);
+
+  const later = await seedScan(site.id, '2026-10-08T10:00:00Z', findings);
+  const detail = (await (await get(`/api/scans/${later.id}`)).json()) as {
+    summary: { incomplete: number };
+    manualSummary: { total: number; pending: number };
+  };
+  assert.equal(detail.summary.incomplete, 1);
+  assert.equal(detail.manualSummary.total, 1);
+  assert.equal(detail.manualSummary.pending, 1);
+  const rows = (await (await get(`/api/scans/${later.id}/issues`)).json()) as DismissedRow[];
+  const dismissed = rows.find((row) => row.fingerprint === 'uncertain-dismissed');
+  assert.equal(dismissed?.dismissal?.reason, 'false_positive');
+});
+
 test('a site keeps its login, and the dashboard only learns what kind it is', {
   skip,
 }, async () => {

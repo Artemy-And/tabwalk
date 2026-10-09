@@ -21,9 +21,10 @@ assessment, not a versioned audit log. Attribution survives account removal.
 
 Findings are grouped by repeated markup. Assess the listed pages, scenario
 states and environments before deciding for that group. A decision belongs to
-this scan only: subsequent scans require a fresh assessment. Existing site-level
-dismissals remain available for automatic findings; reopen a legacy dismissed
-uncertain finding before assessing it.
+this scan only: subsequent scans require a fresh assessment. To stop a finding
+from coming back on every scan, dismiss it as a false positive or as won't fix
+instead: a dismissal belongs to the site, as it does for automatic findings.
+Reopen a dismissed finding before assessing it.
 
 Automatic violation totals retain their original meaning. Human-confirmed
 problems have a separate count and report section. Pending counts decrease as

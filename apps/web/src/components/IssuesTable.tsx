@@ -377,15 +377,13 @@ export function IssuesTable({
                       actions={actions}
                     />
                   )}
-                  {actions &&
-                    issue.kind !== 'incomplete' &&
-                    (variant === 'current' || variant === 'recommendations') && (
-                      <DismissForm
-                        issue={issue}
-                        title={ruleHelp(issue.ruleId, issue.help)}
-                        actions={actions}
-                      />
-                    )}
+                  {actions && (variant === 'current' || variant === 'recommendations') && (
+                    <DismissForm
+                      issue={issue}
+                      title={ruleHelp(issue.ruleId, issue.help)}
+                      actions={actions}
+                    />
+                  )}
                 </td>
                 <td className={`${TD} font-mono text-[13px] text-muted`}>
                   {issue.helpUrl ? (
