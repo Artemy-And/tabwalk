@@ -16,6 +16,8 @@ import {
 
 const MAX_STOPS = 300;
 const MAX_FRAME_STOPS = 100;
+// a date field or a media player keeps focus while Tab moves through its own parts
+const MAX_INNER_STOPS = 10;
 const MAX_VISUAL_CHECKS = 40;
 const MAX_EXITS = 3;
 const ORDER_MAX_HEIGHT = 6000;
@@ -282,6 +284,7 @@ async function walk(page: Page, result: Walk): Promise<void> {
   let lostFocus = 0;
   let frame = -1;
   let frameRun = 0;
+  let inner = 0;
   let exits = 0;
   let start = 0;
 
@@ -337,6 +340,10 @@ async function walk(page: Page, result: Walk): Promise<void> {
     }
     frame = stop.frame ? stop.id : -1;
     frameRun = 0;
+
+    if (run.at(-1)?.id === stop.id) {
+      if (++inner < MAX_INNER_STOPS) continue;
+    } else inner = 0;
 
     const seen = index.get(stop.id);
     if (seen !== undefined) {
@@ -410,6 +417,7 @@ async function walk(page: Page, result: Walk): Promise<void> {
   }
   frame = -1;
   frameRun = 0;
+  inner = 0;
   let backEnded = false;
   for (let i = 0; i < MAX_STOPS && inTime(); i++) {
     result.backwardSteps++;
@@ -419,6 +427,9 @@ async function walk(page: Page, result: Walk): Promise<void> {
       backEnded = true;
       break;
     }
+    if (!stop.frame && last?.id === stop.id) {
+      if (++inner < MAX_INNER_STOPS) continue;
+    } else inner = 0;
     last = stop;
     if (stop.frame && stop.id === frame) {
       if (++frameRun > MAX_FRAME_STOPS) {
