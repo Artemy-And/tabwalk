@@ -56,7 +56,15 @@ browser's zoom menu. The 320 CSS px width corresponds to the vertical-scrolling
 case in [WCAG 1.4.10 Reflow](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html).
 `forced-colors` enables Chromium's forced-color media emulation. Actual OS
 contrast settings still need manual testing. These runs repeat the existing axe
-and keyboard checks, plus the geometry checks below in narrow viewports.
+and keyboard checks, plus the geometry checks below in narrow viewports. Under
+`forced-colors` the axe rules `color-contrast` and `link-in-text-block` do not
+run: the reader's system picks the colors there, and the site's own colors are
+already checked on `desktop`. A focus indicator that disappears in this mode is
+still reported.
+
+Each extra profile and scenario state loads the page again. A load whose
+connection drops is tried once more; a profile that still fails is recorded as
+failed with the network error, such as `net::ERR_CONNECTION_CLOSED`.
 
 Each initial state and matching scenario opens in a fresh context with the
 site's existing login. Scenarios check their final states independently in each

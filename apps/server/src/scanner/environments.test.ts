@@ -19,8 +19,21 @@ document.getElementById('open').onclick=()=>{if(localStorage.getItem('opened'))r
 if(matchMedia('(forced-colors: active)').matches){const img=document.createElement('img');img.id='forced';img.src='data:,';img.width=40;img.height=40;document.querySelector('main').append(img)}
 </script></body></html>`;
 
+// pale text, a link told apart by color alone, and an image without alt text
+const COLORS_PAGE = `<!doctype html><html lang="en"><head><title>Colors fixture</title>
+<style>body{color:#000;background:#fff}.pale{color:#c8c8c8}a{color:#1a1a80;text-decoration:none}</style></head>
+<body><main><h1>Colors</h1><p class="pale">Pale text</p><p>Read the <a href="/terms">terms</a> first.</p>
+<img src="data:," width="40" height="40"></main></body></html>`;
+let dropped = 0;
+
 before(async () => {
-  server = createServer((_, res) => res.writeHead(200, { 'content-type': 'text/html' }).end(PAGE));
+  server = createServer((req, res) => {
+    if (req.url === '/colors')
+      return res.writeHead(200, { 'content-type': 'text/html' }).end(COLORS_PAGE);
+    // the first request for this page loses its connection, as on a flaky network
+    if (req.url === '/drop-once' && dropped++ === 0) return req.socket.destroy();
+    res.writeHead(200, { 'content-type': 'text/html' }).end(PAGE);
+  });
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/`;
   browser = await chromium.launch();
@@ -120,11 +133,56 @@ test('an extra environment failure preserves baseline findings and is recorded a
     environments: ['mobile', 'forced-colors'],
   });
   assert.equal(result.environmentRuns[2]?.status, 'failed');
+  assert.equal(
+    result.environmentRuns[2]?.error,
+    'The page could not be loaded or checked in this environment.',
+  );
   assert.equal(result.environmentRuns[2]?.keyboardCoverage, null);
   assert.ok(
     result.findings.some((f) => f.environment?.id === 'mobile' && f.ruleId === 'button-name'),
   );
   assert.equal(result.environmentRuns[0]?.status, 'completed');
+});
+
+test('a failed environment names the network error, and nothing else from the message', async () => {
+  const failing = new Proxy(browser, {
+    get(target, property) {
+      if (property === 'newContext')
+        return (options: Parameters<Browser['newContext']>[0]) => {
+          if (options?.viewport?.width === 390)
+            throw new Error(
+              `page.goto: net::ERR_CONNECTION_CLOSED at ${url}\nCall log:\n  - navigating to "${url}?token=secret"`,
+            );
+          return target.newContext(options);
+        };
+      return Reflect.get(target, property);
+    },
+  });
+  const result = await checkPageInEnvironments(failing, url, 10_000, { environments: ['mobile'] });
+  assert.equal(
+    result.environmentRuns[1]?.error,
+    'The page could not be loaded or checked in this environment (net::ERR_CONNECTION_CLOSED).',
+  );
+});
+
+test('a connection that drops once is tried again', async () => {
+  const result = await checkPageInEnvironments(browser, `${url}drop-once`, 10_000);
+  assert.equal(dropped, 2);
+  assert.equal(result.environmentRuns[0]?.status, 'completed');
+  assert.equal(result.title, 'Responsive fixture');
+});
+
+test('forced colors leave the contrast rules out, since the reader picks the colors', async () => {
+  const result = await checkPageInEnvironments(browser, `${url}colors`, 10_000, {
+    environments: ['forced-colors'],
+  });
+  const rules = (id: string) =>
+    new Set(result.findings.filter((f) => f.environment?.id === id).map((f) => f.ruleId));
+  for (const rule of ['color-contrast', 'link-in-text-block']) {
+    assert.ok(rules('desktop').has(rule), `${rule} is found with the site's own colors`);
+    assert.ok(!rules('forced-colors').has(rule), `${rule} is left out under forced colors`);
+  }
+  assert.ok(rules('forced-colors').has('image-alt'), 'other rules still run under forced colors');
 });
 
 test('unknown and repeated environments are rejected', () => {

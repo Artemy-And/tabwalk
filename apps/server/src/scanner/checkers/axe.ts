@@ -70,6 +70,8 @@ export const axeChecker: Checker = {
       options.ignoreSelectors ?? [],
     );
     for (const selector of selectors) builder.exclude(selector);
+    // the colors on screen are the reader's own then; the site's contrast is checked without them
+    if (options.forcedColors) builder.disableRules(['color-contrast', 'link-in-text-block']);
     const results = await builder.analyze();
 
     const violations = results.violations as unknown as AxeResult[];

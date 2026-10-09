@@ -90,6 +90,28 @@ export function launchBrowser(executablePath?: string): Promise<Browser> {
   });
 }
 
+// A connection that drops once is worth one more try. A timeout is not: it would double the wait.
+const DROPPED =
+  /net::ERR_(CONNECTION_(CLOSED|RESET|ABORTED|FAILED)|EMPTY_RESPONSE|NETWORK_CHANGED)\b/;
+
+async function open(page: Page, url: string, timeoutMs: number) {
+  try {
+    return await page.goto(url, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
+  } catch (err) {
+    if (!(err instanceof Error) || !DROPPED.test(err.message)) throw err;
+    await page.waitForTimeout(1_000);
+    return page.goto(url, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
+  }
+}
+
+// Only the network error code or a timeout: Playwright's message also carries call logs and page details.
+function failureCause(err: unknown): string {
+  const message = err instanceof Error ? err.message : '';
+  const code = /net::ERR_[A-Z0-9_]+/.exec(message)?.[0];
+  if (code) return ` (${code})`;
+  return /Timeout \d+ms exceeded/.test(message) ? ' (timed out)' : '';
+}
+
 export async function checkPage(
   browser: Browser,
   url: string,
@@ -133,14 +155,12 @@ export async function checkPage(
   const page = await context.newPage();
 
   try {
-    const response = await page
-      .goto(url, { waitUntil: 'domcontentloaded', timeout: timeoutMs })
-      .catch((err: unknown) => {
-        if (err instanceof Error && err.message.includes('Download is starting')) {
-          throw new NotAPageError(`Not a web page: ${url}`);
-        }
-        throw err;
-      });
+    const response = await open(page, url, timeoutMs).catch((err: unknown) => {
+      if (err instanceof Error && err.message.includes('Download is starting')) {
+        throw new NotAPageError(`Not a web page: ${url}`);
+      }
+      throw err;
+    });
     // checking the "Unauthorized" page itself would tell nobody anything
     if (response?.status() === 401) {
       throw new Error('The page asks for a login (HTTP 401)');
@@ -181,6 +201,7 @@ export async function checkPage(
     for (const checker of CHECKERS) {
       for (const f of await checker.run(page, {
         ignoreSelectors: ignore.selectors,
+        forcedColors: environment.forcedColors === 'active',
         onKeyboardCoverage: (coverage) => {
           keyboardCoverage = coverage;
         },
@@ -251,14 +272,14 @@ export async function checkPageWithScenarios(
       initial.findings.push(...result.findings);
       initial.shots.push(...result.shots);
       initial.links.push(...result.links);
-    } catch {
+    } catch (error) {
       scenarioRuns.push({
         environment: options.environment?.id ?? 'desktop',
         name: scenario.name,
         path: scenario.path,
         status: 'failed',
         steps: [],
-        error: 'The scenario page could not be loaded or checked.',
+        error: `The scenario page could not be loaded or checked${failureCause(error)}.`,
         keyboardCoverage: null,
         findings: 0,
       });
@@ -308,7 +329,7 @@ export async function checkPageInEnvironments(
       environmentRuns.push({
         environment,
         status: 'failed',
-        error: 'The page could not be loaded or checked in this environment.',
+        error: `The page could not be loaded or checked in this environment${failureCause(error)}.`,
         elapsedMs: Date.now() - started,
         findings: 0,
         keyboardCoverage: null,

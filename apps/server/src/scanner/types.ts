@@ -70,6 +70,8 @@ export interface KeyboardCoverage {
 export interface CheckOptions {
   // problems inside elements that match these CSS selectors are left out
   ignoreSelectors?: string[];
+  // the page runs with forced colors, so the system, not the site, picks text and background colors
+  forcedColors?: boolean;
   onKeyboardCoverage?: (coverage: KeyboardCoverage) => void;
 }
 
