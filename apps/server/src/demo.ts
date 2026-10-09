@@ -237,7 +237,7 @@ try {
             : f.impact;
       const tone =
         f.kind !== 'violation' ? 'c-review' : f.impact === 'critical' ? 'c-critical' : 'c-serious';
-      return `<details class="finding" data-checker="${esc(f.checker)}" data-kind="${esc(f.kind)}"${i === 0 ? ' open' : ''}><summary><span class="badge ${tone}">${esc(label)}</span>${esc(f.help)}</summary>
+      return `<details class="finding" data-checker="${esc(f.checker)}" data-kind="${esc(f.kind)}"${i === 0 ? ' open' : ''}><summary><span class="badge ${tone}">${esc(label)}</span>${esc(f.help)}<span class="finding-where">${esc(f.target.join(' '))} · ${f.pages.length} page${f.pages.length === 1 ? '' : 's'}</span></summary>
 <p class="finding-meta">${esc(f.checker)} · ${esc(f.ruleId)} · ${f.pages.length} page(s) · ${f.occurrences} element(s)</p>
 <p class="finding-meta">${esc([...f.wcagTags, ...f.standards].join(' · '))}</p>
 ${f.shot ? `<img src="${esc(f.shot.image)}" width="${f.shot.width}" height="${f.shot.height}" loading="lazy" alt="An affected element, outlined on the demo page"><p class="finding-meta">Pictured on: ${esc(f.shot.sourcePath)}. The HTML and selector below describe this element.</p>` : ''}
@@ -257,8 +257,47 @@ ${f.helpUrl ? `<p><a href="${esc(f.helpUrl)}">Read the rule guidance</a></p>` : 
 ${p.tabOrder ? `<img src="${esc(p.tabOrder.image)}" width="${p.tabOrder.width}" height="${p.tabOrder.height}" loading="lazy" alt="Numbered keyboard stops on ${esc(p.path)}"><ol>${p.tabOrder.stops.map((s) => `<li>${esc(s.label || 'No text')} <code>${esc(s.selector)}</code></li>`).join('')}</ol>` : ''}</details>`;
     })
     .join('\n');
+  // The form to try is the keyboard example's own markup. Its headings move down two levels to
+  // fit the page, and report.js adds the same focus loop, which lets go after a few rounds.
+  const example = await readFile(resolve(fixtureDir, 'index.html'), 'utf8');
+  const part = (tag: string) => {
+    const match = new RegExp(`<${tag}[^>]*>[\\s\\S]*?</${tag}>`).exec(example);
+    assert.ok(match, `The keyboard example has a <${tag}>`);
+    return match[0];
+  };
+  const exampleMain = part('main')
+    .replace(/<(\/?)h2\b/g, '<$1h4')
+    .replace(/<(\/?)h1\b/g, '<$1h3')
+    .replace(/^<main>/, '<div class="tryit-main">')
+    .replace(/<\/main>$/, '</div>');
+  const tryIt = `<div class="tryit" id="tryit" data-variant="broken">
+<a class="tryit-skip" href="#story-evidence">Skip the example</a>
+<div class="tryit-controls"><div class="segmented" role="group" aria-label="Version of the form"><button type="button" data-variant="broken" aria-pressed="true">Broken</button><button type="button" data-variant="fixed" aria-pressed="false">Fixed</button></div><button type="button" class="btn btn-light" id="tryit-start">Start with the keyboard</button></div>
+<div class="tryit-page">${part('header')}${part('aside')}${exampleMain}</div>
+<p class="tryit-status" id="tryit-status" aria-live="polite">Press Start, then Tab. Try to reach “Read our privacy policy”.</p>
+</div>`;
+  assert.ok(broken.tabOrder && fixed.tabOrder, 'Both keyboard example versions have a Tab order');
+  const brokenStops = broken.tabOrder.stops;
+  const fixedStops = fixed.tabOrder.stops;
+  const exit = fixedStops.at(-1)?.label ?? '';
+  assert.ok(!brokenStops.some((s) => s.label === exit), 'The broken form never reaches the exit');
+  const orderFigure = (sample: SamplePage, caption: string) =>
+    `<figure><img src="${esc(sample.tabOrder?.image)}" width="${sample.tabOrder?.width}" height="${sample.tabOrder?.height}" loading="lazy" alt="Numbered Tab stops: ${esc(sample.tabOrder?.stops.map((s) => s.label || 'no text').join(', '))}"><figcaption>${caption}</figcaption></figure>`;
+  const orderCompare = [
+    orderFigure(
+      broken,
+      `<strong class="c-critical">Broken: ${brokenStops.length} stops.</strong> After “${esc(brokenStops.at(-1)?.label)}”, Tab goes back to the email field, so “${esc(exit)}” is never reached.`,
+    ),
+    orderFigure(
+      fixed,
+      `<strong class="c-good">Fixed: ${fixedStops.length} stops.</strong> Tab leaves the form and reaches “${esc(exit)}”.`,
+    ),
+  ].join('\n');
+
   let html = await readFile(resolve(root, 'examples/public-demo/report.html'), 'utf8');
   const values: Record<string, string> = {
+    TRY_IT: tryIt,
+    ORDER_COMPARE: orderCompare,
     COMPARISON: comparison,
     STATS: stats,
     FINDINGS: findingHtml,

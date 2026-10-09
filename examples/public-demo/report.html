@@ -26,18 +26,23 @@
     <div class="demo-intro">
       <p class="eyebrow">A real browser. A reproducible result.</p>
       <h1>The page looks fine.<br>Try leaving the form.</h1>
-      <p class="lede">Tabwalk presses Tab and Shift+Tab, tries Escape, and shows where keyboard navigation breaks. Start with this small example, then explore the report below.</p>
+      <p class="lede">Tabwalk presses Tab and Shift+Tab, tries Escape, and shows where keyboard navigation breaks. Try it yourself on the form below, then explore a full report.</p>
+      <div class="hero-actions"><a class="btn btn-light" href="https://github.com/Artemy-And/tabwalk">Star on GitHub</a><a class="btn btn-dark" href="https://github.com/Artemy-And/tabwalk#quick-start">Install with one command</a></div>
     </div>
     <section class="story" aria-labelledby="story-heading">
-      <div class="recording">
+      <div class="story-try">
         <h2 id="story-heading" class="sr-only">The keyboard trap and its fix</h2>
-        <video controls preload="metadata" poster="keyboard-poster.webp" width="1280" height="800" aria-describedby="transcript">
-          <source src="keyboard-demo.webm" type="video/webm">
-          <a href="keyboard-demo.webm">Download the keyboard demonstration</a>
-        </video>
-        <p id="transcript"><strong>Recording transcript:</strong> Tab enters the email field, then Subscribe. Tab cycles back to email. Shift+Tab and Escape cannot leave the form. After removing the custom focus loop, Tab reaches the privacy link and Shift+Tab leaves the form.</p>
+        {{TRY_IT}}
+        <p class="touch-note">On a computer you can try this form with your own keyboard. Here is the recording.</p>
+        <details class="recording" id="recording"><summary>Watch the 23-second recording</summary>
+          <video controls preload="none" poster="keyboard-poster.webp" width="1280" height="800" aria-describedby="transcript">
+            <source src="keyboard-demo.webm" type="video/webm">
+            <a href="keyboard-demo.webm">Download the keyboard demonstration</a>
+          </video>
+          <p id="transcript"><strong>Recording transcript:</strong> Tab enters the email field, then Subscribe. Tab cycles back to email. Shift+Tab and Escape cannot leave the form. After removing the custom focus loop, Tab reaches the privacy link and Shift+Tab leaves the form.</p>
+        </details>
       </div>
-      <div class="story-evidence">
+      <div class="story-evidence" id="story-evidence">
         <p class="eyebrow">Same markup. Different keyboard behaviour.</p>
         <h2>Static checks alone miss this trap.</h2>
         {{COMPARISON}}
@@ -52,6 +57,23 @@ if (!event.shiftKey &amp;&amp; active === last) {
           <a href="https://github.com/Artemy-And/tabwalk/tree/develop/examples/keyboard-trap">Both versions and their source</a>
         </details>
       </div>
+    </section>
+    <section class="order-compare" aria-labelledby="order-heading">
+      <p class="eyebrow">What Tabwalk draws for every page</p>
+      <h2 id="order-heading">The Tab order, before and after the fix.</h2>
+      <div class="order-pair">{{ORDER_COMPARE}}</div>
+    </section>
+    <section class="tour" aria-labelledby="tour-heading">
+      <div class="report-heading">
+        <div><p class="eyebrow">On your own server</p><h2 id="tour-heading">The same checks in the Tabwalk dashboard.</h2><p class="muted">What is new and what got fixed since the last scan, a picture of every problem, the Tab order of every page, and a report to print or save as PDF.</p></div>
+        <button class="btn btn-dark tour-toggle" id="tour-toggle" type="button" aria-pressed="false" hidden>Pause animation</button>
+      </div>
+      <picture id="tour">
+        <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="dashboard-still-dark.png">
+        <source media="(prefers-reduced-motion: reduce)" srcset="dashboard-still-light.png">
+        <source media="(prefers-color-scheme: dark)" srcset="dashboard-tour-dark.gif">
+        <img src="dashboard-tour-light.gif" width="1200" height="750" loading="lazy" alt="A 23-second tour of the Tabwalk dashboard for the demo shop: 17 unique problems on 81 elements, the filters for new and fixed problems, the keyboard trap shown with a picture of the form, the Tab order walked stop by stop, and the report to print or save as PDF">
+      </picture>
     </section>
     <section class="demo-report" aria-labelledby="report-heading">
       <div class="report-heading">

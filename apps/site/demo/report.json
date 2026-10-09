@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-08T15:46:16.167Z",
+  "generatedAt": "2026-10-09T19:31:34.066Z",
   "source": {
     "repository": "https://github.com/Artemy-And/tabwalk",
     "branch": "develop",
@@ -37,6 +37,15 @@
           "failureSummary": "Focus cycles between 2 elements and never leaves: #email, button. Tab, Shift+Tab and Escape do not get out.",
           "checker": "keyboard",
           "fingerprint": "b004d97a19232b08",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         }
       ],
@@ -49,7 +58,7 @@
         "focusChecks": 3,
         "focusStylesTested": 3,
         "focusStylesSkipped": 0,
-        "elapsedMs": 527,
+        "elapsedMs": 483,
         "limits": {
           "timeMs": 20000,
           "stepsPerDirection": 300,
@@ -142,6 +151,15 @@
       "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
       "checker": "axe-core",
       "fingerprint": "cf24049f75ec95fc",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": [
         "/about.html",
@@ -172,6 +190,15 @@
       "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
       "checker": "axe-core",
       "fingerprint": "2dd66b0cfa92901f",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": [
         "/about.html",
@@ -202,6 +229,15 @@
       "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
       "checker": "axe-core",
       "fingerprint": "c60f07a6c6ce46f7",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/", "/products/apron.html", "/products/kettle.html", "/products/pan.html"],
       "occurrences": 6,
@@ -225,6 +261,15 @@
       "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
       "checker": "axe-core",
       "fingerprint": "48ab440cf9e669e4",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/products/apron.html", "/products/kettle.html", "/products/pan.html"],
       "occurrences": 3,
@@ -248,6 +293,15 @@
       "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
       "checker": "axe-core",
       "fingerprint": "76fdb5addaf105b6",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/about.html", "/contact.html"],
       "occurrences": 2,
@@ -271,6 +325,15 @@
       "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
       "checker": "axe-core",
       "fingerprint": "6ab517baec07f395",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/about.html"],
       "occurrences": 1,
@@ -294,6 +357,15 @@
       "failureSummary": "Focus cycles between 2 elements and never leaves: #newsletter > form > input, #newsletter > form > button. Tab, Shift+Tab and Escape do not get out.",
       "checker": "keyboard",
       "fingerprint": "8e7c97039b64a25b",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/contact.html"],
       "occurrences": 1,
@@ -317,6 +389,15 @@
       "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
       "checker": "axe-core",
       "fingerprint": "524030381c64215a",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": [
         "/about.html",
@@ -347,6 +428,15 @@
       "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
       "checker": "axe-core",
       "fingerprint": "f16feb8dd1a9dca2",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": [
         "/about.html",
@@ -377,6 +467,15 @@
       "failureSummary": "Keyboard focus moves to this element, but it is not visible on the screen.",
       "checker": "keyboard",
       "fingerprint": "ec44cfad21c87ded",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": [
         "/about.html",
@@ -401,6 +500,15 @@
       "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
       "checker": "axe-core",
       "fingerprint": "1ecebddde24e48e7",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": [
         "/about.html",
@@ -431,6 +539,15 @@
       "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
       "checker": "axe-core",
       "fingerprint": "1beb894d0e4dbf64",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/", "/products/apron.html", "/products/kettle.html", "/products/pan.html"],
       "occurrences": 6,
@@ -454,6 +571,15 @@
       "failureSummary": "Nothing on the screen changes when this element receives keyboard focus.",
       "checker": "keyboard",
       "fingerprint": "14af16840632b5cc",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/", "/products/apron.html", "/products/kettle.html", "/products/pan.html"],
       "occurrences": 6,
@@ -477,6 +603,15 @@
       "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 2.2:1 with the surrounding text. (Minimum contrast is 3:1, link text: #333333, surrounding text: #666666)\n  The link has no styling (such as underline) to distinguish it from the surrounding text",
       "checker": "axe-core",
       "fingerprint": "483fe41fe13b5611",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": [
         "/about.html",
@@ -505,6 +640,15 @@
       "failureSummary": "Covers p.crumbs:nth-of-type(1) > a when it receives keyboard focus after the skip link.",
       "checker": "keyboard",
       "fingerprint": "d86447b25f511f64",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/about.html"],
       "occurrences": 1,
@@ -528,6 +672,15 @@
       "failureSummary": "Fix any of the following:\n  Element has no title attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
       "checker": "axe-core",
       "fingerprint": "a985803575233245",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/about.html"],
       "occurrences": 1,
@@ -551,6 +704,15 @@
       "failureSummary": "Fix any of the following:\n  Target has insufficient size (177px by 21px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 21px instead of at least 24px.",
       "checker": "axe-core",
       "fingerprint": "b9161a951fa66712",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/about.html"],
       "occurrences": 1,
@@ -574,6 +736,15 @@
       "failureSummary": "Fix any of the following:\n  Element's background color could not be determined due to a background image",
       "checker": "axe-core",
       "fingerprint": "78f52413d430cbbf",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/"],
       "occurrences": 1,
@@ -597,6 +768,15 @@
       "failureSummary": "Fix any of the following:\n  Element's background color could not be determined due to a background image",
       "checker": "axe-core",
       "fingerprint": "f16feb8dd1a9dca2",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/"],
       "occurrences": 1
@@ -614,6 +794,15 @@
       "failureSummary": "Focus stayed inside this frame for 100 presses of Tab. Check that keyboard users can get out of it.",
       "checker": "keyboard",
       "fingerprint": "3016990bfbf5bb04",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/about.html"],
       "occurrences": 1,
@@ -637,6 +826,15 @@
       "failureSummary": "Fix all of the following:\n  Check that captions are available for the element",
       "checker": "axe-core",
       "fingerprint": "25eac4a00fdf4ea3",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/about.html"],
       "occurrences": 1,
@@ -660,6 +858,15 @@
       "failureSummary": "Fix any of the following:\n  Heading order invalid",
       "checker": "axe-core",
       "fingerprint": "1c624e995f13ffb2",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/", "/products/apron.html", "/products/kettle.html", "/products/pan.html"],
       "occurrences": 4
@@ -677,6 +884,15 @@
       "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks",
       "checker": "axe-core",
       "fingerprint": "c7fdd86859ccaef4",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/products/apron.html", "/products/kettle.html", "/products/pan.html"],
       "occurrences": 3
@@ -694,6 +910,15 @@
       "failureSummary": "Fix any of the following:\n  No skip link target",
       "checker": "axe-core",
       "fingerprint": "0176891dbf05d0ab",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/products/apron.html", "/products/kettle.html", "/products/pan.html"],
       "occurrences": 3
@@ -711,6 +936,15 @@
       "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
       "checker": "axe-core",
       "fingerprint": "3115e7618f59f4a2",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/about.html"],
       "occurrences": 1
@@ -728,6 +962,15 @@
       "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
       "checker": "axe-core",
       "fingerprint": "5a1da12371b3bc86",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/about.html"],
       "occurrences": 1
@@ -745,6 +988,15 @@
       "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
       "checker": "axe-core",
       "fingerprint": "94294a72fcca836f",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/about.html"],
       "occurrences": 1
@@ -762,6 +1014,15 @@
       "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
       "checker": "axe-core",
       "fingerprint": "8dcb9e8c2f720a02",
+      "environment": {
+        "id": "desktop",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "forcedColors": "none"
+      },
       "scenario": null,
       "pages": ["/about.html"],
       "occurrences": 1
@@ -785,6 +1046,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "76fdb5addaf105b6",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -800,6 +1070,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "524030381c64215a",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -815,6 +1094,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "f16feb8dd1a9dca2",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -830,6 +1118,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "524030381c64215a",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -845,6 +1142,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "f16feb8dd1a9dca2",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -860,6 +1166,15 @@
           "failureSummary": "Fix any of the following:\n  Element has no title attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "a985803575233245",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -875,6 +1190,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "cf24049f75ec95fc",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -890,6 +1214,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "6ab517baec07f395",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -905,6 +1238,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "cf24049f75ec95fc",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -920,6 +1262,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "2dd66b0cfa92901f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -935,6 +1286,15 @@
           "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 2.2:1 with the surrounding text. (Minimum contrast is 3:1, link text: #333333, surrounding text: #666666)\n  The link has no styling (such as underline) to distinguish it from the surrounding text",
           "checker": "axe-core",
           "fingerprint": "483fe41fe13b5611",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -950,6 +1310,15 @@
           "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 1.25:1 with the surrounding text. (Minimum contrast is 3:1, link text: #333333, surrounding text: #222222)\n  The link has no styling (such as underline) to distinguish it from the surrounding text",
           "checker": "axe-core",
           "fingerprint": "483fe41fe13b5611",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -965,6 +1334,15 @@
           "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
           "checker": "axe-core",
           "fingerprint": "1ecebddde24e48e7",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -980,6 +1358,15 @@
           "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
           "checker": "axe-core",
           "fingerprint": "1ecebddde24e48e7",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -995,6 +1382,15 @@
           "failureSummary": "Fix any of the following:\n  Target has insufficient size (177px by 21px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 21px instead of at least 24px.",
           "checker": "axe-core",
           "fingerprint": "b9161a951fa66712",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1010,6 +1406,15 @@
           "failureSummary": "Fix all of the following:\n  Check that captions are available for the element",
           "checker": "axe-core",
           "fingerprint": "25eac4a00fdf4ea3",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1025,6 +1430,15 @@
           "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
           "checker": "axe-core",
           "fingerprint": "3115e7618f59f4a2",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1040,6 +1454,15 @@
           "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
           "checker": "axe-core",
           "fingerprint": "5a1da12371b3bc86",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1055,6 +1478,15 @@
           "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
           "checker": "axe-core",
           "fingerprint": "94294a72fcca836f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1070,6 +1502,15 @@
           "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable",
           "checker": "axe-core",
           "fingerprint": "8dcb9e8c2f720a02",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1085,6 +1526,15 @@
           "failureSummary": "Focus stayed inside this frame for 100 presses of Tab. Check that keyboard users can get out of it.",
           "checker": "keyboard",
           "fingerprint": "3016990bfbf5bb04",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1100,6 +1550,15 @@
           "failureSummary": "Keyboard focus moves to this element, but it is not visible on the screen.",
           "checker": "keyboard",
           "fingerprint": "ec44cfad21c87ded",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1115,6 +1574,15 @@
           "failureSummary": "Covers p.crumbs:nth-of-type(1) > a when it receives keyboard focus after the skip link.",
           "checker": "keyboard",
           "fingerprint": "d86447b25f511f64",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         }
       ],
@@ -1127,7 +1595,7 @@
         "focusChecks": 6,
         "focusStylesTested": 6,
         "focusStylesSkipped": 0,
-        "elapsedMs": 1646,
+        "elapsedMs": 1713,
         "limits": {
           "timeMs": 20000,
           "stepsPerDirection": 300,
@@ -1209,6 +1677,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "76fdb5addaf105b6",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1224,6 +1701,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "524030381c64215a",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1239,6 +1725,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "f16feb8dd1a9dca2",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1254,6 +1749,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "cf24049f75ec95fc",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1269,6 +1773,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "2dd66b0cfa92901f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1284,6 +1797,15 @@
           "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
           "checker": "axe-core",
           "fingerprint": "1ecebddde24e48e7",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1299,6 +1821,15 @@
           "failureSummary": "Focus cycles between 2 elements and never leaves: #newsletter > form > input, #newsletter > form > button. Tab, Shift+Tab and Escape do not get out.",
           "checker": "keyboard",
           "fingerprint": "8e7c97039b64a25b",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1314,6 +1845,15 @@
           "failureSummary": "Keyboard focus moves to this element, but it is not visible on the screen.",
           "checker": "keyboard",
           "fingerprint": "ec44cfad21c87ded",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         }
       ],
@@ -1326,7 +1866,7 @@
         "focusChecks": 10,
         "focusStylesTested": 10,
         "focusStylesSkipped": 0,
-        "elapsedMs": 862,
+        "elapsedMs": 879,
         "limits": {
           "timeMs": 20000,
           "stepsPerDirection": 300,
@@ -1423,6 +1963,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "c60f07a6c6ce46f7",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1438,6 +1987,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "c60f07a6c6ce46f7",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1453,6 +2011,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "c60f07a6c6ce46f7",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1468,6 +2035,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "1beb894d0e4dbf64",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1483,6 +2059,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "1beb894d0e4dbf64",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1498,6 +2083,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "1beb894d0e4dbf64",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1513,6 +2107,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "524030381c64215a",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1528,6 +2131,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "f16feb8dd1a9dca2",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1543,6 +2155,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "cf24049f75ec95fc",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1558,6 +2179,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "2dd66b0cfa92901f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1573,6 +2203,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "2dd66b0cfa92901f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1588,6 +2227,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "2dd66b0cfa92901f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1603,6 +2251,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "2dd66b0cfa92901f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1618,6 +2275,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "2dd66b0cfa92901f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1633,6 +2299,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "2dd66b0cfa92901f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1648,6 +2323,15 @@
           "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
           "checker": "axe-core",
           "fingerprint": "1ecebddde24e48e7",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1663,6 +2347,15 @@
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined due to a background image",
           "checker": "axe-core",
           "fingerprint": "78f52413d430cbbf",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1678,6 +2371,15 @@
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined due to a background image",
           "checker": "axe-core",
           "fingerprint": "f16feb8dd1a9dca2",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1693,6 +2395,15 @@
           "failureSummary": "Fix any of the following:\n  Heading order invalid",
           "checker": "axe-core",
           "fingerprint": "1c624e995f13ffb2",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1708,6 +2419,15 @@
           "failureSummary": "Keyboard focus moves to this element, but it is not visible on the screen.",
           "checker": "keyboard",
           "fingerprint": "ec44cfad21c87ded",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1723,6 +2443,15 @@
           "failureSummary": "Nothing on the screen changes when this element receives keyboard focus.",
           "checker": "keyboard",
           "fingerprint": "14af16840632b5cc",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1738,6 +2467,15 @@
           "failureSummary": "Nothing on the screen changes when this element receives keyboard focus.",
           "checker": "keyboard",
           "fingerprint": "14af16840632b5cc",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1753,6 +2491,15 @@
           "failureSummary": "Nothing on the screen changes when this element receives keyboard focus.",
           "checker": "keyboard",
           "fingerprint": "14af16840632b5cc",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         }
       ],
@@ -1765,7 +2512,7 @@
         "focusChecks": 6,
         "focusStylesTested": 6,
         "focusStylesSkipped": 0,
-        "elapsedMs": 1233,
+        "elapsedMs": 1304,
         "limits": {
           "timeMs": 20000,
           "stepsPerDirection": 300,
@@ -1862,6 +2609,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "c60f07a6c6ce46f7",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1877,6 +2633,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "1beb894d0e4dbf64",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1892,6 +2657,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "524030381c64215a",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1907,6 +2681,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "f16feb8dd1a9dca2",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1922,6 +2705,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "cf24049f75ec95fc",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1937,6 +2729,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "2dd66b0cfa92901f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1952,6 +2753,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "2dd66b0cfa92901f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1967,6 +2777,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "48ab440cf9e669e4",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1982,6 +2801,15 @@
           "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 1.25:1 with the surrounding text. (Minimum contrast is 3:1, link text: #333333, surrounding text: #222222)\n  The link has no styling (such as underline) to distinguish it from the surrounding text",
           "checker": "axe-core",
           "fingerprint": "483fe41fe13b5611",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -1997,6 +2825,15 @@
           "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
           "checker": "axe-core",
           "fingerprint": "1ecebddde24e48e7",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2012,6 +2849,15 @@
           "failureSummary": "Fix any of the following:\n  Heading order invalid",
           "checker": "axe-core",
           "fingerprint": "1c624e995f13ffb2",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2027,6 +2873,15 @@
           "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks",
           "checker": "axe-core",
           "fingerprint": "c7fdd86859ccaef4",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2042,6 +2897,15 @@
           "failureSummary": "Fix any of the following:\n  No skip link target",
           "checker": "axe-core",
           "fingerprint": "0176891dbf05d0ab",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2057,6 +2921,15 @@
           "failureSummary": "Keyboard focus moves to this element, but it is not visible on the screen.",
           "checker": "keyboard",
           "fingerprint": "ec44cfad21c87ded",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2072,6 +2945,15 @@
           "failureSummary": "Nothing on the screen changes when this element receives keyboard focus.",
           "checker": "keyboard",
           "fingerprint": "14af16840632b5cc",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         }
       ],
@@ -2084,7 +2966,7 @@
         "focusChecks": 7,
         "focusStylesTested": 7,
         "focusStylesSkipped": 0,
-        "elapsedMs": 905,
+        "elapsedMs": 903,
         "limits": {
           "timeMs": 20000,
           "stepsPerDirection": 300,
@@ -2166,6 +3048,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "c60f07a6c6ce46f7",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2181,6 +3072,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "1beb894d0e4dbf64",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2196,6 +3096,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "524030381c64215a",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2211,6 +3120,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "f16feb8dd1a9dca2",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2226,6 +3144,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "cf24049f75ec95fc",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2241,6 +3168,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "2dd66b0cfa92901f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2256,6 +3192,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "2dd66b0cfa92901f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2271,6 +3216,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "48ab440cf9e669e4",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2286,6 +3240,15 @@
           "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 1.25:1 with the surrounding text. (Minimum contrast is 3:1, link text: #333333, surrounding text: #222222)\n  The link has no styling (such as underline) to distinguish it from the surrounding text",
           "checker": "axe-core",
           "fingerprint": "483fe41fe13b5611",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2301,6 +3264,15 @@
           "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
           "checker": "axe-core",
           "fingerprint": "1ecebddde24e48e7",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2316,6 +3288,15 @@
           "failureSummary": "Fix any of the following:\n  Heading order invalid",
           "checker": "axe-core",
           "fingerprint": "1c624e995f13ffb2",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2331,6 +3312,15 @@
           "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks",
           "checker": "axe-core",
           "fingerprint": "c7fdd86859ccaef4",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2346,6 +3336,15 @@
           "failureSummary": "Fix any of the following:\n  No skip link target",
           "checker": "axe-core",
           "fingerprint": "0176891dbf05d0ab",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2361,6 +3360,15 @@
           "failureSummary": "Keyboard focus moves to this element, but it is not visible on the screen.",
           "checker": "keyboard",
           "fingerprint": "ec44cfad21c87ded",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2376,6 +3384,15 @@
           "failureSummary": "Nothing on the screen changes when this element receives keyboard focus.",
           "checker": "keyboard",
           "fingerprint": "14af16840632b5cc",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         }
       ],
@@ -2388,7 +3405,7 @@
         "focusChecks": 7,
         "focusStylesTested": 7,
         "focusStylesSkipped": 0,
-        "elapsedMs": 899,
+        "elapsedMs": 906,
         "limits": {
           "timeMs": 20000,
           "stepsPerDirection": 300,
@@ -2470,6 +3487,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "c60f07a6c6ce46f7",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2485,6 +3511,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.09 (foreground color: #b3b3b3, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "1beb894d0e4dbf64",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2500,6 +3535,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "524030381c64215a",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2515,6 +3559,15 @@
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
           "checker": "axe-core",
           "fingerprint": "f16feb8dd1a9dca2",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2530,6 +3583,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "cf24049f75ec95fc",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2545,6 +3607,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "2dd66b0cfa92901f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2560,6 +3631,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "2dd66b0cfa92901f",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2575,6 +3655,15 @@
           "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
           "checker": "axe-core",
           "fingerprint": "48ab440cf9e669e4",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2590,6 +3679,15 @@
           "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 1.25:1 with the surrounding text. (Minimum contrast is 3:1, link text: #333333, surrounding text: #222222)\n  The link has no styling (such as underline) to distinguish it from the surrounding text",
           "checker": "axe-core",
           "fingerprint": "483fe41fe13b5611",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2605,6 +3703,15 @@
           "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
           "checker": "axe-core",
           "fingerprint": "1ecebddde24e48e7",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2620,6 +3727,15 @@
           "failureSummary": "Fix any of the following:\n  Heading order invalid",
           "checker": "axe-core",
           "fingerprint": "1c624e995f13ffb2",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2635,6 +3751,15 @@
           "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks",
           "checker": "axe-core",
           "fingerprint": "c7fdd86859ccaef4",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2650,6 +3775,15 @@
           "failureSummary": "Fix any of the following:\n  No skip link target",
           "checker": "axe-core",
           "fingerprint": "0176891dbf05d0ab",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2665,6 +3799,15 @@
           "failureSummary": "Keyboard focus moves to this element, but it is not visible on the screen.",
           "checker": "keyboard",
           "fingerprint": "ec44cfad21c87ded",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         },
         {
@@ -2680,6 +3823,15 @@
           "failureSummary": "Nothing on the screen changes when this element receives keyboard focus.",
           "checker": "keyboard",
           "fingerprint": "14af16840632b5cc",
+          "environment": {
+            "id": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "deviceScaleFactor": 1,
+            "forcedColors": "none"
+          },
           "scenario": null
         }
       ],
@@ -2692,7 +3844,7 @@
         "focusChecks": 7,
         "focusStylesTested": 7,
         "focusStylesSkipped": 0,
-        "elapsedMs": 876,
+        "elapsedMs": 888,
         "limits": {
           "timeMs": 20000,
           "stepsPerDirection": 300,

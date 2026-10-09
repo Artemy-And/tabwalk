@@ -18,7 +18,15 @@ generates `apps/site/demo/index.html`, JSON, element pictures, tab order picture
 and a roughly 25-second WebM recording. It requires no database or login.
 
 The HTML template is here; the stylesheet and progressive enhancements live in
-`apps/site/demo`. The generated report is checked in so Cloudflare Pages can
+`apps/site/demo`.
+
+The form to try at the top is the markup of `examples/keyboard-trap`, with its
+headings moved down two levels. `report.js` adds the same focus loop, which lets
+go after three rounds, so no visitor stays stuck; phones and tablets get the
+recording instead. `dashboard-tour-*.gif` are copies of the README tour
+(`docs/screenshots/report-tour-*.gif`) and `dashboard-still-*.png` their first
+frames, shown with reduced motion or when the tour is paused. Replace them when
+the tour is shot again (`../launch/readme-gif` outside the repo). The generated report is checked in so Cloudflare Pages can
 serve it as static files. Regenerate it when scanner behaviour or fixtures change.
 `report.json` records the generation time, viewport, source paths and coverage.
 
