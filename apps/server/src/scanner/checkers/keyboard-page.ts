@@ -359,6 +359,8 @@ export function installKeyboardHelpers(margin: number): void {
       if (ancestor.hasAttribute('inert')) return false;
     }
     if (el.getClientRects().length === 0) return false;
+    // the content of a closed details element still has boxes, but Tab never reaches it
+    if (!el.checkVisibility()) return false;
     return getComputedStyle(el).visibility !== 'hidden';
   };
 

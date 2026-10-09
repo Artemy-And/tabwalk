@@ -52,6 +52,16 @@ test('a finished walk records the stops and both directions', async () => {
   assert.equal(coverage.focusStylesSkipped, 0);
 });
 
+test('links in a closed details element are not unreached stops', async () => {
+  const coverage = await coverageOf(
+    '<main><button>One</button><details><summary>Question</summary><a href="/a">Answer</a></details>' +
+      '<details><summary>Last question</summary><a href="/b">Last answer</a></details></main>',
+  );
+  assert.equal(coverage.status, 'completed', coverage.reasons.join(', '));
+  assert.equal(coverage.visitedStops, 3);
+  assert.ok(coverage.backwardSteps >= 3);
+});
+
 test('a backward-only focus loop records partial coverage', async () => {
   const coverage = await coverageOf(
     '<button>One</button><button>Two</button><button id="third">Three</button><button id="last">Four</button>' +
