@@ -33,8 +33,9 @@ Git branches:
 wrangler pages deploy apps/site --project-name tabwalk-demo --branch develop
 ```
 
-The previous planned `tabwalk.dev/demo/` address is not the deployed demo host.
-Verify public assets, video, filters and JSON after each upload. Publishing this
+This copy is a mirror of the site: its canonical, Open Graph and sitemap
+addresses point at `tabwalk.dev`, where the demo goes with the next release, so
+search engines keep `tabwalk.dev` as the site. Verify public assets, video, filters and JSON after each upload. Publishing this
 snapshot does not deploy or release the dashboard/server.
 
 Printing includes the currently filtered findings and every page's keyboard

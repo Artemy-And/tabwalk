@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://tabwalk-demo.pages.dev/sitemap.xml
+Sitemap: https://tabwalk.dev/sitemap.xml
