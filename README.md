@@ -410,6 +410,8 @@ Register `https://a11y.example.com/api/auth/oidc/callback` as the redirect URI.
 People from `OIDC_ALLOWED_DOMAINS` get an account on their first sign-in; anyone
 else needs an account with the same email first.
 
+There is one organization: every account sees every site and every report.
+
 ## Accessibility of Tabwalk itself
 
 An accessibility tool has to pass its own check. Two failures that a 2026 audit
@@ -422,15 +424,6 @@ found to be common in dashboards are handled here deliberately:
   `aria-sort`, sorting never announced. `IssuesTable.tsx` handles all three.
 
 Run Tabwalk against its own dashboard before every release.
-
-## Roadmap
-
-Phase 2 adds the AI layer: plain-language reports, the `incomplete` bucket
-turned into a manual-review checklist, alt-text judged by a vision model, and
-suggested code fixes (suggested — never applied automatically).
-
-Known MVP gaps: one organization where every account sees every site, and no
-login through a form: pages behind a login need HTTP Basic, a header or a cookie.
 
 ## Community
 
