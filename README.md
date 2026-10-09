@@ -31,8 +31,8 @@ date and comments, shown separately in reports and PDF. [Details](docs/review-an
 This is not in the published v0.4.0 image; no new release was made.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/report-dark.png">
-  <img src="docs/screenshots/report-light.png" alt="A Tabwalk report for a demo shop: 17 unique problems on 81 elements, 8 critical, 4 that need a human, filters for new and fixed problems, and the findings table">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/report-tour-dark.gif">
+  <img src="docs/screenshots/report-tour-light.gif" alt="A 23-second tour of a Tabwalk report for a demo shop: 17 unique problems on 81 elements, 7 critical, 4 that need a human. The filters show the 2 problems that are new since the last scan and the 3 that got fixed. A keyboard trap in a newsletter form opens with a picture of the form and the two elements focus cycles between. Then the Tab order of the home page, where a focus ring steps through the numbered stops with each press of Tab, and the report to print or save as PDF">
 </picture>
 
 One command to install. No Redis — the job queue lives in the same Postgres.
