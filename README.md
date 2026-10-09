@@ -97,7 +97,7 @@ a new one:
 docker compose exec api node dist/reset-password.js you@example.com
 ```
 
-To pin a version instead of `latest`, set `TABWALK_VERSION=0.4.0` in `.env`.
+To pin a version instead of `latest`, set `TABWALK_VERSION=0.4.1` in `.env`.
 
 ### Try it on the demo shop
 
@@ -121,7 +121,7 @@ jobs:
   tabwalk:
     runs-on: ubuntu-latest
     steps:
-      - uses: Artemy-And/tabwalk@v0.4.0
+      - uses: Artemy-And/tabwalk@v0.4.1
         with:
           url: https://staging.example.com
           fail-on: serious
@@ -173,7 +173,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Artemy-And/tabwalk@v0.4.0
+      - uses: Artemy-And/tabwalk@v0.4.1
         with:
           url: https://staging.example.com
           fail-on: serious
