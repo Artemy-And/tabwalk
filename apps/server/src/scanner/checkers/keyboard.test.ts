@@ -138,6 +138,32 @@ test('a loop that Shift+Tab can leave needs a human', async () => {
   assert.equal(traps[0]?.kind, 'incomplete');
 });
 
+test('date fields and media controls with stops of their own are not traps', async () => {
+  const findings = await check(
+    `${links}<main><label>Day <input type="date"></label>` +
+      '<label>Starts <input type="datetime-local"></label>' +
+      '<audio controls src="data:audio/wav;base64," aria-label="Recording"></audio>' +
+      '<p><button class="late">After</button></p></main>',
+    '.late:focus{outline:none}',
+  );
+  assert.deepEqual(only(findings, 'keyboard-trap'), []);
+  // the walk went on past them to the button
+  assert.equal(only(findings, 'focus-visible')[0]?.target[0], 'button.late');
+});
+
+test('a single control that keeps focus is still a keyboard trap', async () => {
+  const findings = await check(
+    `${links}<input id="stuck" aria-label="Code"><a href="/d">After</a><script>
+      document.getElementById('stuck').addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') e.preventDefault();
+      });
+    </script>`,
+  );
+  const traps = only(findings, 'keyboard-trap');
+  assert.equal(traps.length, 1);
+  assert.equal(traps[0]?.kind, 'violation');
+});
+
 test('a loop that Escape closes is not a trap', async () => {
   const findings = await check(
     `${links}<div id="box"><input aria-label="Email"><button>Sign up</button></div><a href="/d">After</a>
