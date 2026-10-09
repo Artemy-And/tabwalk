@@ -228,6 +228,8 @@ if (baseline?.problems) {
 
 const browser = await launchBrowser(process.env.CHROMIUM_EXECUTABLE);
 const groups = new Map<string, Group>();
+// an element found again in a scenario state or another environment is still one element
+const counted = new Set<string>();
 const failedPages: { url: string; error: string }[] = [];
 let checked = 0;
 const keyboardCoverage: { url: string; coverage: KeyboardCoverage | null }[] = [];
@@ -286,7 +288,11 @@ await crawl(siteUrl, {
           elements: 0,
         };
         if (!group.pages.includes(url)) group.pages.push(url);
-        group.elements += 1;
+        const element = `${key} ${url} ${JSON.stringify(f.target)}`;
+        if (!counted.has(element)) {
+          counted.add(element);
+          group.elements += 1;
+        }
         if (f.environment) {
           group.environments ??= [];
           if (!group.environments.some((environment) => environment.id === f.environment?.id))

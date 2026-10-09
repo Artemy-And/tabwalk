@@ -809,11 +809,11 @@ test('grouped scenario contexts keep their steps and page URLs within each findi
   };
   await db.insert(schema.issues).values(
     [
-      { page: settings, kind: 'violation' as const, scenario: profile },
-      { page: settings, kind: 'violation' as const, scenario: profile },
-      { page: checkout, kind: 'violation' as const, scenario: payment },
-      { page: settings, kind: 'incomplete' as const, scenario: review },
-    ].map(({ page, kind, scenario }) => ({
+      { page: settings, kind: 'violation' as const, scenario: profile, target: ['#first'] },
+      { page: settings, kind: 'violation' as const, scenario: profile, target: ['#second'] },
+      { page: checkout, kind: 'violation' as const, scenario: payment, target: [] },
+      { page: settings, kind: 'incomplete' as const, scenario: review, target: [] },
+    ].map(({ page, kind, scenario, target }) => ({
       scanId: scan.id,
       pageId: page.id,
       fingerprint: 'shared-scenario',
@@ -822,6 +822,7 @@ test('grouped scenario contexts keep their steps and page URLs within each findi
       ruleId: 'image-alt',
       impact: 'serious',
       help: 'Problem shared-scenario',
+      target,
       html: '<img data-f="shared-scenario">',
       scenario,
     })),
@@ -856,4 +857,61 @@ test('grouped scenario contexts keep their steps and page URLs within each findi
   assert.equal(incomplete.occurrences, 2);
   assert.equal(incomplete.pagesAffected, 2);
   assert.deepEqual(incomplete.scenarios, [{ ...review, url: settings.url }]);
+});
+
+test('an element found again in a scenario state or another environment counts once', {
+  skip,
+}, async () => {
+  const site = await seedSite();
+  const { eq } = await import('drizzle-orm');
+  const { scanEnvironments } = await import('../scanner/environments.js');
+  const [desktop, mobile] = scanEnvironments(['mobile']);
+  assert.ok(desktop && mobile);
+  const scan = await seedScan(site.id, '2026-10-09T10:00:00Z', [{ fingerprint: 'repeated' }]);
+  const page = await db.query.pages.findFirst({ where: eq(schema.pages.scanId, scan.id) });
+  assert.ok(page);
+  await db
+    .update(schema.issues)
+    .set({ target: ['#logo'], environment: desktop })
+    .where(eq(schema.issues.scanId, scan.id));
+  const opened: ScenarioEvidence = {
+    name: 'Open menu',
+    path: '/',
+    steps: [{ action: 'click', selector: '#menu', status: 'completed' }],
+  };
+  await db.insert(schema.issues).values(
+    [
+      { target: ['#logo'], environment: desktop, scenario: opened },
+      { target: ['#logo'], environment: mobile, scenario: null },
+      { target: ['#banner'], environment: mobile, scenario: null },
+    ].map((row) => ({
+      scanId: scan.id,
+      pageId: page.id,
+      fingerprint: 'repeated',
+      kind: 'violation' as const,
+      checker: 'axe-core',
+      ruleId: 'image-alt',
+      impact: 'serious',
+      help: 'Problem repeated',
+      html: '<img data-f="repeated">',
+      ...row,
+    })),
+  );
+
+  const detail = (await (await get(`/api/scans/${scan.id}`)).json()) as {
+    summary: { uniqueProblems: number; elements: number };
+  };
+  assert.equal(detail.summary.uniqueProblems, 1);
+  assert.equal(detail.summary.elements, 2);
+  const groups = (await (await get(`/api/scans/${scan.id}/issues`)).json()) as {
+    occurrences: number;
+    environments: { id: string }[];
+  }[];
+  assert.equal(groups[0]?.occurrences, 2);
+  assert.deepEqual(groups[0]?.environments.map((environment) => environment.id).sort(), [
+    'desktop',
+    'mobile',
+  ]);
+  const rows = (await (await get(`/api/scans/${scan.id}/pages`)).json()) as { problems: number }[];
+  assert.equal(rows[0]?.problems, 2);
 });

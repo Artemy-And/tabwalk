@@ -139,7 +139,9 @@ const summaryColumns = {
     ))::int`,
   recommendations: sql<number>`count(distinct ${issues.fingerprint})
     filter (where ${issues.kind} = 'recommendation')::int`,
-  elements: sql<number>`count(*) filter (where ${issues.kind} = 'violation')::int`,
+  // an element found again in a scenario state or another environment is still one element
+  elements: sql<number>`count(distinct (${issues.pageId}, ${issues.fingerprint}, ${issues.target}))
+    filter (where ${issues.kind} = 'violation')::int`,
 };
 
 type Summary = { [K in keyof typeof summaryColumns]: number };
@@ -165,7 +167,7 @@ function groupedIssues(scanId: string) {
       helpUrl: issues.helpUrl,
       wcagTags: issues.wcagTags,
       standards: issues.standards,
-      occurrences: sql<number>`count(*)::int`,
+      occurrences: sql<number>`count(distinct (${issues.pageId}, ${issues.target}))::int`,
       pagesAffected: sql<number>`count(distinct ${issues.pageId})::int`,
       sampleHtml: sql<string>`min(${issues.html})`,
       sampleTarget: sql<string>`min(${issues.target}::text)`,
@@ -891,7 +893,7 @@ app.get('/api/scans/:id/pages', zValidator('param', uuidParam), async (c) => {
       scenarioRuns: pages.scenarioRuns,
       environmentRuns: pages.environmentRuns,
       problems: sql<number>`(
-        select count(*) from issues i
+        select count(distinct (i.fingerprint, i.target)) from issues i
         where i.page_id = pages.id and i.kind = 'violation' and not exists (
           select 1 from dismissals d
           where d.site_id = ${scan.siteId} and d.fingerprint = i.fingerprint

@@ -203,7 +203,8 @@ test('CLI scans named states, groups findings and writes redacted reproduction c
   const finding = report.violations.find((group) => group.ruleId === 'image-alt');
   assert.ok(finding);
   assert.deepEqual(finding.pages, [url]);
-  assert.equal(finding.elements, 4);
+  // both states reveal the same two images
+  assert.equal(finding.elements, 2);
   assert.deepEqual(
     finding.scenarios?.map((context) => [context.name, context.url]),
     [
