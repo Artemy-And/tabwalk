@@ -61,7 +61,9 @@ function Finding({ issue, scanId }: { issue: IssueGroup; scanId: string }) {
       </pre>
       {issue.sampleSummary && (
         <>
-          <p className="mt-3 text-sm font-semibold">{t.report.howToFix}</p>
+          <p className="mt-3 text-sm font-semibold">
+            {issue.checker === 'reflow' ? t.report.layoutEvidence : t.report.howToFix}
+          </p>
           <p className="mt-1 text-sm whitespace-pre-line">{issue.sampleSummary}</p>
         </>
       )}

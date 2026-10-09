@@ -49,7 +49,7 @@ inputs:
     description: 'A report from an earlier run, like a committed tabwalk-report.json. Only problems it does not have fail the job'
     default: ''
   environments:
-    description: 'Extra checks: mobile, zoom-200, forced-colors, comma-separated or one per line. Desktop always runs. Failed environments fail the job'
+    description: 'Extra checks: mobile, zoom-200, zoom-400, forced-colors, comma-separated or one per line. Desktop always runs. Failed environments fail the job'
     default: ''
   comment:
     description: 'Comment on the pull request with the results, editing the same comment on every run. Needs "permissions: pull-requests: write"'

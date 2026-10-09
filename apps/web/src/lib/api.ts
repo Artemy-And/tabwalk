@@ -302,7 +302,7 @@ export interface PageDetail {
 
 export type ChannelKind = 'slack' | 'discord' | 'ntfy' | 'webhook' | 'email';
 
-export type ExtraEnvironment = 'mobile' | 'zoom-200' | 'forced-colors';
+export type ExtraEnvironment = 'mobile' | 'zoom-200' | 'zoom-400' | 'forced-colors';
 export type EnvironmentId = 'desktop' | ExtraEnvironment;
 export interface ScanEnvironment {
   id: EnvironmentId;

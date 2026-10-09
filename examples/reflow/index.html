@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tabwalk reflow fixture</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 16px; font: 16px/1.5 system-ui, sans-serif; color: #172033; background: #fff; }
+      main { max-width: 1000px; margin: auto; }
+      h1 { font-size: 24px; }
+      #wide { width: 900px; white-space: nowrap; padding: 12px; background: #eef2ff; }
+      #clipped { width: 220px; height: 28px; overflow: hidden; border: 2px solid #172033; }
+      #clipped p { margin: 0; }
+      .fixed #wide { width: 100%; white-space: normal; overflow-wrap: anywhere; }
+      .fixed #clipped { width: min(100%, 220px); height: auto; overflow: visible; }
+    </style>
+    <script>
+      if (new URLSearchParams(location.search).has('fixed')) document.documentElement.classList.add('fixed');
+    </script>
+  </head>
+  <body>
+    <main>
+      <h1>Reading at a narrow viewport</h1>
+      <p>Compare this page with <code>?fixed</code> at 320 CSS px. Tabwalk reports potential problems for human assessment.</p>
+      <p id="wide">Order details: delivery address, delivery instructions and the complete list of items must remain readable.</p>
+      <div id="clipped"><p id="lost">Delivery instructions: use the accessible entrance on the east side and call reception when you arrive.</p></div>
+    </main>
+  </body>
+</html>

@@ -272,6 +272,7 @@ export const fr: Messages = {
       `${pages} ${plural(pages, { one: 'page', other: 'pages' })}, ${elements} ${plural(elements, { one: 'élément', other: 'éléments' })}`,
     example: 'Exemple',
     howToFix: 'Comment corriger',
+    layoutEvidence: 'Mise en page observée',
     recommendations: (n) =>
       `Ainsi que ${n} ${plural(n, { one: 'recommandation', other: 'recommandations' })} au-delà des WCAG, dans le tableau de bord.`,
     none: 'Aucun problème trouvé.',
@@ -375,6 +376,7 @@ export const fr: Messages = {
       desktop: 'Bureau',
       mobile: 'Écran étroit',
       'zoom-200': 'Mise en page à 200% émulée',
+      'zoom-400': 'Mise en page à 400% émulée',
       'forced-colors': 'Couleurs forcées',
     },
     intro:
@@ -382,6 +384,7 @@ export const fr: Messages = {
     descriptions: {
       mobile: '390 × 844 CSS px ; navigateur de bureau avec fenêtre étroite.',
       'zoom-200': '640 × 360 CSS px à une densité 2× ; simule la redistribution à 200%.',
+      'zoom-400': '320 × 180 CSS px à une densité 4× ; simule la redistribution à 400%.',
       'forced-colors': '1280 × 720 ; émulation des couleurs système forcées.',
     },
     save: 'Enregistrer les environnements',
@@ -498,6 +501,9 @@ export const fr: Messages = {
     failed: 'Échec',
   },
   rules: {
+    'reflow-horizontal-scroll': 'Le contenu peut nécessiter un défilement horizontal',
+    'reflow-clipped-content': 'Le texte ou les commandes peuvent être tronqués',
+    'reflow-check-limited': 'La vérification de redistribution ne couvre pas tout le contenu',
     'keyboard-trap': 'Le focus clavier ne doit pas rester bloqué dans une partie de la page',
     'focus-visible': 'Le focus clavier doit être visible',
     'focus-obscured':

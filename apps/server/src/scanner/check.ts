@@ -1,6 +1,7 @@
 import { type Browser, chromium, type Page } from 'playwright';
 import { axeChecker } from './checkers/axe.js';
 import { drawTabOrder, keyboardChecker, type TabOrder } from './checkers/keyboard.js';
+import { reflowChecker } from './checkers/reflow.js';
 import { USER_AGENT } from './crawl.js';
 import {
   type EnvironmentRun,
@@ -21,7 +22,7 @@ import type {
   StoredScenarioRun,
 } from './types.js';
 
-const CHECKERS: Checker[] = [axeChecker, keyboardChecker];
+const CHECKERS: Checker[] = [axeChecker, reflowChecker, keyboardChecker];
 
 export interface PageFinding extends CheckFinding {
   environment?: ScanEnvironment | null;

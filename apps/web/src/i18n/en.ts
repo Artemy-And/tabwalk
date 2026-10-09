@@ -265,6 +265,7 @@ export const en = {
       `${pages} ${plural(pages, { one: 'page', other: 'pages' })}, ${elements} ${plural(elements, { one: 'element', other: 'elements' })}`,
     example: 'Example',
     howToFix: 'How to fix',
+    layoutEvidence: 'Observed layout',
     recommendations: (n: number) =>
       `Also ${n} ${plural(n, { one: 'recommendation', other: 'recommendations' })} beyond WCAG, listed in the dashboard.`,
     none: 'No problems found.',
@@ -365,6 +366,7 @@ export const en = {
       desktop: 'Desktop',
       mobile: 'Narrow screen',
       'zoom-200': '200% layout emulation',
+      'zoom-400': '400% layout emulation',
       'forced-colors': 'Forced colors',
     },
     intro:
@@ -372,6 +374,7 @@ export const en = {
     descriptions: {
       mobile: '390 × 844 CSS px; desktop browser at a narrow width.',
       'zoom-200': '640 × 360 CSS px at 2× device scale; emulates reflow at 200%.',
+      'zoom-400': '320 × 180 CSS px at 4× device scale; emulates reflow at 400%.',
       'forced-colors': '1280 × 720; browser emulation of forced system colors.',
     },
     save: 'Save environments',
@@ -487,6 +490,9 @@ export const en = {
     failed: 'Failed',
   },
   rules: {
+    'reflow-horizontal-scroll': 'Content may require horizontal scrolling',
+    'reflow-clipped-content': 'Text or controls may be clipped',
+    'reflow-check-limited': 'Reflow checks did not cover all page content',
     'keyboard-trap': 'Keyboard focus must not get stuck in one part of the page',
     'focus-visible': 'Keyboard focus must be visible',
     'focus-obscured': 'Focused elements must not be hidden under other content',

@@ -32,7 +32,7 @@ after(async () => {
 
 test('selected profiles find responsive and forced-color-only issues in independent scenario states', async () => {
   const result = await checkPageInEnvironments(browser, url, 10_000, {
-    environments: ['mobile', 'zoom-200', 'forced-colors'],
+    environments: ['mobile', 'zoom-200', 'zoom-400', 'forced-colors'],
     scenarios: [
       {
         name: 'Open panel',
@@ -46,7 +46,7 @@ test('selected profiles find responsive and forced-color-only issues in independ
   });
   assert.deepEqual(
     result.environmentRuns.map((run) => run.environment.id),
-    ['desktop', 'mobile', 'zoom-200', 'forced-colors'],
+    ['desktop', 'mobile', 'zoom-200', 'zoom-400', 'forced-colors'],
   );
   for (const run of result.environmentRuns) {
     assert.equal(run.status, 'completed');
@@ -63,6 +63,7 @@ test('selected profiles find responsive and forced-color-only issues in independ
   assert.deepEqual([...new Set(narrow.map((f) => f.environment?.id))].sort(), [
     'mobile',
     'zoom-200',
+    'zoom-400',
   ]);
   const forced = result.findings.filter(
     (f) => f.ruleId === 'image-alt' && f.target.includes('#forced'),
@@ -72,13 +73,13 @@ test('selected profiles find responsive and forced-color-only issues in independ
   const modal = result.findings.filter(
     (f) => f.ruleId === 'button-name' && f.target.includes('#modal'),
   );
-  assert.equal(modal.length, 4);
+  assert.equal(modal.length, 5);
   assert.ok(modal.every((f) => f.scenario?.environment === f.environment?.id));
   assert.equal(browser.contexts().length, 0);
 });
 
-test('200% layout reduces the CSS viewport and forced-colors changes computed colors', async () => {
-  for (const profile of scanEnvironments(['zoom-200', 'forced-colors'])) {
+test('200%/400% layout reduces the CSS viewport and forced-colors changes computed colors', async () => {
+  for (const profile of scanEnvironments(['zoom-200', 'zoom-400', 'forced-colors'])) {
     const context = await browser.newContext(environmentOptions(profile));
     try {
       const page = await context.newPage();

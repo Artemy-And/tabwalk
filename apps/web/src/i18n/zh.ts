@@ -255,6 +255,7 @@ export const zh: Messages = {
     where: (pages, elements) => `${pages} 个页面，${elements} 个元素`,
     example: '示例',
     howToFix: '如何修复',
+    layoutEvidence: '观察到的布局',
     recommendations: (n) => `另有 ${n} 条 WCAG 之外的建议，见控制台。`,
     none: '未发现问题。',
     notDone: '本次检测尚未完成，暂无报告。',
@@ -352,6 +353,7 @@ export const zh: Messages = {
       desktop: '桌面',
       mobile: '窄屏幕',
       'zoom-200': '200%布局模拟',
+      'zoom-400': '400%布局模拟',
       'forced-colors': '强制颜色',
     },
     intro:
@@ -359,6 +361,7 @@ export const zh: Messages = {
     descriptions: {
       mobile: '390 × 844 CSS px；窄窗口桌面浏览器。',
       'zoom-200': '640 × 360 CSS px，设备比例2×；模拟200%缩放下的布局重排。',
+      'zoom-400': '320 × 180 CSS px，设备比例4×；模拟400%缩放下的布局重排。',
       'forced-colors': '1280 × 720；浏览器模拟强制系统颜色。',
     },
     save: '保存环境',
@@ -467,6 +470,9 @@ export const zh: Messages = {
     failed: '失败',
   },
   rules: {
+    'reflow-horizontal-scroll': '内容可能需要水平滚动',
+    'reflow-clipped-content': '文本或控件可能被裁切',
+    'reflow-check-limited': '布局重排检查未覆盖全部页面内容',
     'keyboard-trap': '键盘焦点不得卡在页面的某一部分',
     'focus-visible': '键盘焦点必须可见',
     'focus-obscured': '获得焦点的元素不得被其他内容遮挡',

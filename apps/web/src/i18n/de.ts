@@ -271,6 +271,7 @@ export const de: Messages = {
       `${pages} ${plural(pages, { one: 'Seite', other: 'Seiten' })}, ${elements} ${plural(elements, { one: 'Element', other: 'Elemente' })}`,
     example: 'Beispiel',
     howToFix: 'So beheben Sie es',
+    layoutEvidence: 'Beobachtetes Layout',
     recommendations: (n) =>
       `Dazu ${n} ${plural(n, { one: 'Empfehlung', other: 'Empfehlungen' })} über WCAG hinaus, aufgeführt im Dashboard.`,
     none: 'Keine Probleme gefunden.',
@@ -374,6 +375,7 @@ export const de: Messages = {
       desktop: 'Desktop',
       mobile: 'Schmaler Bildschirm',
       'zoom-200': '200%-Layout-Emulation',
+      'zoom-400': '400%-Layout-Emulation',
       'forced-colors': 'Erzwungene Farben',
     },
     intro:
@@ -381,6 +383,7 @@ export const de: Messages = {
     descriptions: {
       mobile: '390 × 844 CSS px; Desktop-Browser mit schmalem Fenster.',
       'zoom-200': '640 × 360 CSS px bei 2× Pixeldichte; simuliert Umbruch bei 200%.',
+      'zoom-400': '320 × 180 CSS px bei 4× Pixeldichte; simuliert Umbruch bei 400%.',
       'forced-colors': '1280 × 720; Browser-Emulation erzwungener Systemfarben.',
     },
     save: 'Umgebungen speichern',
@@ -498,6 +501,9 @@ export const de: Messages = {
     failed: 'Fehlgeschlagen',
   },
   rules: {
+    'reflow-horizontal-scroll': 'Inhalte erfordern möglicherweise horizontales Scrollen',
+    'reflow-clipped-content': 'Text oder Bedienelemente sind möglicherweise abgeschnitten',
+    'reflow-check-limited': 'Die Umbruchprüfung hat nicht alle Seiteninhalte erfasst',
     'keyboard-trap': 'Der Tastaturfokus darf nicht in einem Teil der Seite hängen bleiben',
     'focus-visible': 'Der Tastaturfokus muss sichtbar sein',
     'focus-obscured': 'Fokussierte Elemente dürfen nicht von anderen Inhalten verdeckt werden',

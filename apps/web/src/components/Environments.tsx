@@ -12,7 +12,7 @@ import { KeyboardCoverageDetails } from './KeyboardCoverage';
 import { ScenarioResults } from './ScenarioResults';
 import { Button, Card } from './ui';
 
-const EXTRA: ExtraEnvironment[] = ['mobile', 'zoom-200', 'forced-colors'];
+const EXTRA: ExtraEnvironment[] = ['mobile', 'zoom-200', 'zoom-400', 'forced-colors'];
 
 export function EnvironmentEditor({ site }: { site: SiteDetail }) {
   const { t } = useI18n();

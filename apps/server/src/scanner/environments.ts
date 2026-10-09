@@ -2,7 +2,7 @@ import type { BrowserContextOptions } from 'playwright';
 import { z } from 'zod';
 import type { KeyboardCoverage, StoredScenarioRun } from './types.js';
 
-export const EXTRA_ENVIRONMENTS = ['mobile', 'zoom-200', 'forced-colors'] as const;
+export const EXTRA_ENVIRONMENTS = ['mobile', 'zoom-200', 'zoom-400', 'forced-colors'] as const;
 export type ExtraEnvironment = (typeof EXTRA_ENVIRONMENTS)[number];
 export type EnvironmentId = 'desktop' | ExtraEnvironment;
 
@@ -15,7 +15,7 @@ export interface ScanEnvironment {
 
 export const environmentsSchema = z
   .array(z.enum(EXTRA_ENVIRONMENTS))
-  .max(3)
+  .max(4)
   .refine((values) => new Set(values).size === values.length, 'Choose each environment only once');
 
 const PROFILES: Record<EnvironmentId, ScanEnvironment> = {
@@ -37,6 +37,13 @@ const PROFILES: Record<EnvironmentId, ScanEnvironment> = {
     id: 'zoom-200',
     viewport: { width: 640, height: 360 },
     deviceScaleFactor: 2,
+    forcedColors: 'none',
+  },
+  // 1280 / 4 = 320 CSS px, the vertical-scrolling width in WCAG 1.4.10.
+  'zoom-400': {
+    id: 'zoom-400',
+    viewport: { width: 320, height: 180 },
+    deviceScaleFactor: 4,
     forcedColors: 'none',
   },
   'forced-colors': {

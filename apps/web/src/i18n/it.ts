@@ -269,6 +269,7 @@ export const it: Messages = {
       `${pages} ${plural(pages, { one: 'pagina', other: 'pagine' })}, ${elements} ${plural(elements, { one: 'elemento', other: 'elementi' })}`,
     example: 'Esempio',
     howToFix: 'Come correggere',
+    layoutEvidence: 'Layout osservato',
     recommendations: (n) =>
       `Inoltre ${n} ${plural(n, { one: 'raccomandazione', other: 'raccomandazioni' })} oltre le WCAG, elencate nella dashboard.`,
     none: 'Nessun problema trovato.',
@@ -374,6 +375,7 @@ export const it: Messages = {
       desktop: 'Desktop',
       mobile: 'Schermo stretto',
       'zoom-200': 'Layout al 200% emulato',
+      'zoom-400': 'Layout al 400% emulato',
       'forced-colors': 'Colori forzati',
     },
     intro:
@@ -381,6 +383,7 @@ export const it: Messages = {
     descriptions: {
       mobile: '390 × 844 CSS px; browser desktop con finestra stretta.',
       'zoom-200': '640 × 360 CSS px con densità 2×; emula il ridisposizionamento al 200%.',
+      'zoom-400': '320 × 180 CSS px con densità 4×; emula il ridisposizionamento al 400%.',
       'forced-colors': '1280 × 720; emulazione dei colori di sistema forzati.',
     },
     save: 'Salva ambienti',
@@ -496,6 +499,9 @@ export const it: Messages = {
     failed: 'Non riuscita',
   },
   rules: {
+    'reflow-horizontal-scroll': 'Il contenuto può richiedere scorrimento orizzontale',
+    'reflow-clipped-content': 'Il testo o i controlli potrebbero essere tagliati',
+    'reflow-check-limited': 'La verifica del ridisposizionamento non copre tutti i contenuti',
     'keyboard-trap': 'Il focus della tastiera non deve restare bloccato in una parte della pagina',
     'focus-visible': 'Il focus della tastiera deve essere visibile',
     'focus-obscured': 'Gli elementi con il focus non devono essere nascosti sotto altri contenuti',

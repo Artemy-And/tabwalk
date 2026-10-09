@@ -53,7 +53,7 @@ Options:
   --cookie name=value       set before the first page opens; repeat for more
   --fail-on <level>         critical | serious | moderate | minor | none, default critical
   --scenarios <path>        JSON array of named browser scenarios, with exact page paths
-  --environments <ids>      extra runs: mobile,zoom-200,forced-colors (desktop always runs)
+  --environments <ids>      extra runs: mobile,zoom-200,zoom-400,forced-colors (desktop always runs)
   --baseline <path>         a report from an earlier run: only problems it lacks fail
   --comment                 comment on the pull request the run is for (GitHub Actions)
   --report <path>           JSON report file, default tabwalk-report.json
@@ -134,7 +134,7 @@ const environmentInput = environmentsSchema.safeParse(
   ),
 );
 if (!environmentInput.success)
-  fail('--environments must list each of mobile, zoom-200, forced-colors at most once.');
+  fail('--environments must list each of mobile, zoom-200, zoom-400, forced-colors at most once.');
 const environments = environmentInput.data;
 
 // one selector per flag or per line, since a comma belongs to the selector
@@ -272,6 +272,16 @@ await crawl(siteUrl, {
           fingerprint: f.fingerprint,
           target: f.target,
           html: f.html,
+          ...(f.checker === 'reflow' && f.failureSummary
+            ? {
+                evidence: {
+                  summary: f.failureSummary,
+                  url,
+                  environment: f.environment ?? null,
+                  scenario: f.scenario?.name ?? null,
+                },
+              }
+            : {}),
           pages: [],
           elements: 0,
         };

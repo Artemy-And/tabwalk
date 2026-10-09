@@ -286,6 +286,7 @@ export const pl: Messages = {
       `${pages} ${plural(pages, { one: 'strona', few: 'strony', other: 'stron' })}, ${elements} ${plural(elements, { one: 'element', few: 'elementy', other: 'elementów' })}`,
     example: 'Przykład',
     howToFix: 'Jak naprawić',
+    layoutEvidence: 'Zaobserwowany układ',
     recommendations: (n) =>
       `Oraz ${n} ${plural(n, { one: 'zalecenie', few: 'zalecenia', other: 'zaleceń' })} poza WCAG, widoczne w panelu.`,
     none: 'Nie znaleziono problemów.',
@@ -388,6 +389,7 @@ export const pl: Messages = {
       desktop: 'Komputer',
       mobile: 'Wąski ekran',
       'zoom-200': 'Emulacja układu przy 200%',
+      'zoom-400': 'Emulacja układu przy 400%',
       'forced-colors': 'Wymuszone kolory',
     },
     intro:
@@ -395,6 +397,7 @@ export const pl: Messages = {
     descriptions: {
       mobile: '390 × 844 CSS px; przeglądarka komputerowa z wąskim oknem.',
       'zoom-200': '640 × 360 CSS px przy skali 2×; emuluje układ przy 200%.',
+      'zoom-400': '320 × 180 CSS px przy skali 4×; emuluje układ przy 400%.',
       'forced-colors': '1280 × 720; emulacja wymuszonych kolorów systemowych.',
     },
     save: 'Zapisz środowiska',
@@ -510,6 +513,9 @@ export const pl: Messages = {
     failed: 'Błąd',
   },
   rules: {
+    'reflow-horizontal-scroll': 'Treść może wymagać przewijania poziomego',
+    'reflow-clipped-content': 'Tekst lub elementy sterujące mogą być przycięte',
+    'reflow-check-limited': 'Sprawdzenie układu nie objęło całej zawartości strony',
     'keyboard-trap': 'Fokus klawiatury nie może utknąć w jednej części strony',
     'focus-visible': 'Fokus klawiatury musi być widoczny',
     'focus-obscured': 'Elementy z fokusem nie mogą być zasłonięte przez inne treści',

@@ -271,6 +271,7 @@ export const es: Messages = {
       `${pages} ${plural(pages, { one: 'página', other: 'páginas' })}, ${elements} ${plural(elements, { one: 'elemento', other: 'elementos' })}`,
     example: 'Ejemplo',
     howToFix: 'Cómo corregirlo',
+    layoutEvidence: 'Diseño observado',
     recommendations: (n) =>
       `Además, ${n} ${plural(n, { one: 'recomendación', other: 'recomendaciones' })} más allá de WCAG, en el panel.`,
     none: 'No se encontraron problemas.',
@@ -374,6 +375,7 @@ export const es: Messages = {
       desktop: 'Escritorio',
       mobile: 'Pantalla estrecha',
       'zoom-200': 'Diseño al 200% emulado',
+      'zoom-400': 'Diseño al 400% emulado',
       'forced-colors': 'Colores forzados',
     },
     intro:
@@ -381,6 +383,7 @@ export const es: Messages = {
     descriptions: {
       mobile: '390 × 844 CSS px; navegador de escritorio con ventana estrecha.',
       'zoom-200': '640 × 360 CSS px con escala 2×; emula el reajuste al 200%.',
+      'zoom-400': '320 × 180 CSS px con escala 4×; emula el reajuste al 400%.',
       'forced-colors': '1280 × 720; emulación de colores del sistema forzados.',
     },
     save: 'Guardar entornos',
@@ -497,6 +500,9 @@ export const es: Messages = {
     failed: 'Error',
   },
   rules: {
+    'reflow-horizontal-scroll': 'El contenido puede requerir desplazamiento horizontal',
+    'reflow-clipped-content': 'El texto o los controles pueden estar recortados',
+    'reflow-check-limited': 'La comprobación de reajuste no cubrió todo el contenido',
     'keyboard-trap': 'El foco del teclado no debe quedar atrapado en una parte de la página',
     'focus-visible': 'El foco del teclado debe ser visible',
     'focus-obscured': 'Los elementos con foco no deben quedar ocultos bajo otro contenido',

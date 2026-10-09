@@ -28,8 +28,9 @@ JSON. No account needed. [Source and regeneration instructions](examples/public-
 
 On `develop`, uncertain findings now support human assessment with author,
 date and comments, shown separately in reports and PDF. Optional narrow-screen,
-200% layout and forced-color checks record their environments, duration and
-coverage. [Details and emulation limits](docs/review-and-environments.md).
+200%/400% layout and forced-color checks record their environments, duration and
+coverage. Narrow profiles also identify potential horizontal overflow and clipped
+text/controls for human assessment. [Details and emulation limits](docs/review-and-environments.md).
 These features are not in the published v0.4.0 image; no new release was made.
 
 <picture>
@@ -87,6 +88,11 @@ in a fresh browser session and keeps its steps, findings and keyboard coverage.
 Failed or unreached scenarios are visible in reports and fail CI with exit code
 2. [Configuration, CLI usage and a broken/fixed dialog example](docs/scenarios.md).
 The published v0.4.0 image does not include these features yet.
+
+**Also on develop:** narrow states get geometry checks for horizontal reading
+scroll and clipped content. Results require human assessment and include the
+viewport and affected element; legitimate layout exceptions still need a person.
+[Try the broken/fixed reflow example](examples/reflow/README.md).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/tab-order-dark.png">

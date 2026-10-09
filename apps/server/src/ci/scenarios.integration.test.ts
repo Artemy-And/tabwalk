@@ -24,7 +24,15 @@ document.querySelector('#panel').hidden = false;
 
 before(async () => {
   directory = await mkdtemp(join(tmpdir(), 'tabwalk-ci-scenarios-'));
+  const reflow = await readFile(
+    new URL('../../../../examples/reflow/index.html', import.meta.url),
+    'utf8',
+  );
   server = createServer((request, response) => {
+    if (new URL(request.url ?? '/', 'http://fixture.test').pathname === '/reflow') {
+      response.writeHead(200, { 'content-type': 'text/html' }).end(reflow);
+      return;
+    }
     if (request.url !== '/') {
       response.writeHead(404);
       response.end();
@@ -55,6 +63,8 @@ async function cli(
   viaInput = false,
   environments: string[] = [],
   forwardEnvironments = false,
+  target = url,
+  failOn = 'none',
 ): Promise<CliResult> {
   const runDirectory = await mkdtemp(join(directory, 'run-'));
   const scenariosPath = join(runDirectory, 'scenarios.json');
@@ -73,13 +83,13 @@ async function cli(
     '--import',
     'tsx',
     fileURLToPath(new URL('../ci.ts', import.meta.url)),
-    url,
+    target,
     '--max-pages',
     '1',
     '--concurrency',
     '1',
     '--fail-on',
-    'none',
+    failOn,
     '--report',
     reportPath,
     ...(viaInput ? [] : ['--scenarios', scenariosPath]),
@@ -114,26 +124,51 @@ interface CliReport {
   }[];
   failed: boolean;
   violations: Group[];
+  incomplete: Group[];
   scenarioRuns: NonNullable<Outcome['scenarioRuns']>;
   unmatchedScenarios: NonNullable<Outcome['unmatchedScenarios']>;
 }
 
 test('CLI checks every selected environment and reports the actual scope via INPUT_ENVIRONMENTS', async () => {
-  const result = await cli('[]', true, ['mobile', 'zoom-200', 'forced-colors'], true);
+  const result = await cli('[]', true, ['mobile', 'zoom-200', 'zoom-400', 'forced-colors'], true);
   assert.equal(result.code, 0, result.output);
   const report = JSON.parse(await readFile(result.reportPath, 'utf8')) as CliReport;
   assert.deepEqual(
     report.environments.map((profile) => profile.id),
-    ['desktop', 'mobile', 'zoom-200', 'forced-colors'],
+    ['desktop', 'mobile', 'zoom-200', 'zoom-400', 'forced-colors'],
   );
-  assert.equal(report.environmentRuns[0]?.runs.length, 4);
+  assert.equal(report.environmentRuns[0]?.runs.length, 5);
   assert.ok(
     report.environmentRuns[0]?.runs.every((run) => run.status === 'completed' && run.elapsedMs > 0),
   );
   const summary = await readFile(result.summaryPath, 'utf8');
   assert.match(summary, /Tested environments/);
   assert.match(summary, /zoom-200 \(640×360 CSS px, scale 2/);
+  assert.match(summary, /zoom-400 \(320×180 CSS px, scale 4/);
   assert.match(summary, /forced-colors/);
+});
+
+test('CLI retains reflow measurements and manual findings do not fail automatic thresholds', async () => {
+  const broken = await cli('[]', false, ['zoom-400'], false, `${url}reflow`, 'serious');
+  assert.equal(broken.code, 0, broken.output);
+  const report = JSON.parse(await readFile(broken.reportPath, 'utf8')) as CliReport;
+  assert.equal(report.failed, false);
+  assert.equal(report.violations.length, 0);
+  assert.equal(report.incomplete.length, 2);
+  for (const finding of report.incomplete) {
+    assert.equal(finding.kind, 'incomplete');
+    assert.equal(finding.evidence?.environment?.id, 'zoom-400');
+    assert.equal(finding.evidence?.url, `${url}reflow`);
+    assert.match(finding.evidence!.summary, /320 × 180 CSS px/);
+  }
+  const summary = await readFile(broken.summaryPath, 'utf8');
+  assert.match(summary, /Example evidence/);
+  assert.match(summary, /clipping by #clipped/);
+  assert.match(summary, /requiring human assessment/);
+  const fixed = await cli('[]', false, ['zoom-400'], false, `${url}reflow?fixed`, 'serious');
+  assert.equal(fixed.code, 0, fixed.output);
+  const fixedReport = JSON.parse(await readFile(fixed.reportPath, 'utf8')) as CliReport;
+  assert.equal(fixedReport.incomplete.length, 0);
 });
 
 test('invalid environment flags fail explicitly before scanning', async () => {

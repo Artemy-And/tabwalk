@@ -118,7 +118,7 @@ test('site environments validate and scan/page evidence retains exact profile pa
   skip,
 }, async () => {
   const site = await seedSite();
-  const profileIds = ['mobile', 'zoom-200', 'forced-colors'];
+  const profileIds = ['mobile', 'zoom-200', 'zoom-400', 'forced-colors'];
   assert.equal(
     (await send('PATCH', `/api/sites/${site.id}`, { environments: profileIds })).status,
     200,
@@ -132,7 +132,7 @@ test('site environments validate and scan/page evidence retains exact profile pa
   }
   const { eq } = await import('drizzle-orm');
   const { scanEnvironments } = await import('../scanner/environments.js');
-  const profiles = scanEnvironments(['mobile']);
+  const profiles = scanEnvironments(['zoom-400']);
   const scan = await seedScan(site.id, '2026-10-08T10:00:00Z', [
     { fingerprint: 'profile-finding' },
   ]);

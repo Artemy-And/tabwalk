@@ -9,6 +9,13 @@ export type ImpactLevel = (typeof IMPACTS)[number];
 export type Threshold = ImpactLevel | 'none';
 
 export interface Group {
+  // Geometry measured for the first example; other contexts are listed separately.
+  evidence?: {
+    summary: string;
+    url: string;
+    environment: ScanEnvironment | null;
+    scenario: string | null;
+  };
   environments?: ScanEnvironment[];
   kind: PageFinding['kind'];
   ruleId: string;
@@ -177,6 +184,7 @@ function cell(text: string): string {
 }
 
 export function table(groups: Group[], limit = Number.POSITIVE_INFINITY): string {
+  const withEvidence = groups.some((g) => g.evidence);
   const withScenarios = groups.some((g) => (g.scenarios?.length ?? 0) > 0);
   const withEnvironments = groups.some((g) => (g.environments?.length ?? 0) > 0);
   const rows = groups.slice(0, limit).map((g) => {
@@ -185,11 +193,11 @@ export function table(groups: Group[], limit = Number.POSITIVE_INFINITY): string
       g.kind === 'incomplete' ? 'needs review' : g.kind === 'recommendation' ? 'advice' : g.impact;
     return `| ${label} | ${cell(g.help)} \`${cell(
       g.target.join(' '),
-    )}\` | ${rule} | ${g.pages.length} |${withScenarios ? ` ${g.scenarios?.map((scenario) => `${cell(scenario.name)} (${cell(scenario.url)})${scenario.environment ? ` [${scenario.environment}]` : ''}`).join('<br>') || 'Initial state'} |` : ''}${withEnvironments ? ` ${g.environments?.map((environment) => environment.id).join(', ') || 'not recorded'} |` : ''}`;
+    )}\` | ${rule} | ${g.pages.length} |${withScenarios ? ` ${g.scenarios?.map((scenario) => `${cell(scenario.name)} (${cell(scenario.url)})${scenario.environment ? ` [${scenario.environment}]` : ''}`).join('<br>') || 'Initial state'} |` : ''}${withEnvironments ? ` ${g.environments?.map((environment) => environment.id).join(', ') || 'not recorded'} |` : ''}${withEvidence ? ` ${g.evidence ? cell(`First example: ${g.evidence.url} [${g.evidence.environment?.id ?? 'not recorded'}], ${g.evidence.scenario ?? 'initial state'}. ${g.evidence.summary}`) : '—'} |` : ''}`;
   });
   const lines = [
-    `| Impact | Problem | Rule | Pages |${withScenarios ? ' Scenarios |' : ''}${withEnvironments ? ' Environments |' : ''}`,
-    `| --- | --- | --- | --- |${withScenarios ? ' --- |' : ''}${withEnvironments ? ' --- |' : ''}`,
+    `| Impact | Problem | Rule | Pages |${withScenarios ? ' Scenarios |' : ''}${withEnvironments ? ' Environments |' : ''}${withEvidence ? ' Example evidence |' : ''}`,
+    `| --- | --- | --- | --- |${withScenarios ? ' --- |' : ''}${withEnvironments ? ' --- |' : ''}${withEvidence ? ' --- |' : ''}`,
     ...rows,
   ];
   const rest = groups.length - rows.length;
@@ -281,7 +289,7 @@ export function markdown(o: Outcome, options: { limit?: number; link?: string } 
             ),
           )
           .join('\n') +
-        '\n\nzoom-200 emulates desktop reflow at 200%, not browser UI zoom. forced-colors uses browser media emulation.',
+        '\n\nzoom-200 and zoom-400 emulate desktop layout at 200% and 400%; they do not use browser UI zoom. forced-colors uses browser media emulation.',
     );
   const partial = o.keyboardCoverage?.filter((p) => p.coverage?.status !== 'completed') ?? [];
   if (partial.length > 0) {

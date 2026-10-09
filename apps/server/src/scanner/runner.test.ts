@@ -24,6 +24,7 @@ const PAGE = `<!doctype html><html lang="en"><head><title>Worker scenario fixtur
 <dialog id="settings" aria-label="Profile settings">
 <label for="field">Email</label><input id="field" type="email">
 <button id="unnamed" style="width:40px;height:40px"></button>
+<p id="reflow-worker" style="width:900px;white-space:nowrap">Profile settings instructions with important information extending beyond the available narrow viewport width</p>
 </dialog></main>
 <script>
   document.getElementById('open').addEventListener('click', () => {
@@ -107,7 +108,7 @@ test('the worker persists successful and failed scenario runs, unmatched states 
     .insert(schema.sites)
     .values({
       orgId,
-      environments: ['mobile'],
+      environments: ['mobile', 'zoom-400'],
       name: 'Worker fixture',
       url: siteUrl,
       schedule: 'off',
@@ -131,13 +132,13 @@ test('the worker persists successful and failed scenario runs, unmatched states 
   assert.ok(storedScan.startedAt);
   assert.ok(storedScan.finishedAt);
   assert.deepEqual(storedScan.scenarioSummary, {
-    completed: 2,
-    failed: 2,
+    completed: 3,
+    failed: 3,
     unmatched: [{ name: 'Unvisited page', path: '/missing' }],
   });
   assert.deepEqual(
     storedScan.environments?.map((environment) => environment.id),
-    ['desktop', 'mobile'],
+    ['desktop', 'mobile', 'zoom-400'],
   );
 
   const storedPages = await db.select().from(schema.pages).where(eq(schema.pages.scanId, scan.id));
@@ -150,7 +151,7 @@ test('the worker persists successful and failed scenario runs, unmatched states 
   assert.equal(page.keyboardCoverage?.status, 'completed');
   assert.equal(page.keyboardCoverage?.visitedStops, 2);
   assert.equal(page.scenarioRuns.length, 2);
-  assert.equal(page.environmentRuns.length, 2);
+  assert.equal(page.environmentRuns.length, 3);
   assert.ok(
     page.environmentRuns.every(
       (run) => run.status === 'completed' && run.elapsedMs > 0 && run.scenarioRuns.length === 2,
@@ -187,10 +188,24 @@ test('the worker persists successful and failed scenario runs, unmatched states 
   );
   assert.equal(
     unnamed.length,
-    2,
+    3,
     'only completed modal states create this finding, once in each environment',
   );
-  assert.deepEqual(unnamed.map((finding) => finding.environment?.id).sort(), ['desktop', 'mobile']);
+  assert.deepEqual(unnamed.map((finding) => finding.environment?.id).sort(), [
+    'desktop',
+    'mobile',
+    'zoom-400',
+  ]);
+  const reflow = findings.filter(
+    (finding) => finding.checker === 'reflow' && finding.target.includes('#reflow-worker'),
+  );
+  assert.equal(reflow.length, 2);
+  assert.deepEqual(reflow.map((finding) => finding.environment?.id).sort(), ['mobile', 'zoom-400']);
+  assert.ok(
+    reflow.every(
+      (finding) => finding.kind === 'incomplete' && finding.scenario?.name === 'Open profile',
+    ),
+  );
   assert.deepEqual(unnamed[0]?.scenario, {
     environment: 'desktop',
     name: 'Open profile',
